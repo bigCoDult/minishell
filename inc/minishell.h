@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 00:23:48 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/04 06:04:47 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <fcntl.h>
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <sys/stat.h>
 
 extern volatile sig_atomic_t	g_signal;
 
@@ -115,5 +116,68 @@ typedef struct s_shell
 	t_heredoc	heredoc;
 	t_env		*env;
 }	t_shell;
+
+// memory.c
+void	*shell_malloc(t_shell *shell, size_t size);
+void	shell_free(t_shell *shell, void *ptr);
+void	free_all_memory(t_shell *shell);
+
+// env.c
+t_env	*init_env(t_shell *shell, char **envp);
+void	set_env_value(t_shell *shell, const char *key, const char *value);
+
+// env_array.c
+char **get_env_array(t_shell *shell);
+
+// ft.c
+char *ft_strchr(const char *str, int c);
+int ft_strlen(const char *str);
+char	*shell_strdup(t_shell *shell, const char *str);
+
+// signal.c
+void setup_signals(void);
+
+// tokenizer.c
+int tokenize_input(t_shell *shell);
+t_token *create_token(t_shell *shell, char *value, t_token_type type);
+
+// tokenizer_redir.c
+t_token *handle_redirection(t_shell *shell, char **input);
+
+// tokenizer_utils.c
+char *handle_word(char *input, int *len);
+
+// execute.c
+int execute_commands(t_shell *shell);
+
+// execute_pipe.c
+int execute_piped_command(t_shell *shell, t_command *cmd, int is_first, int is_last);
+void setup_pipe(t_shell *shell, int pipefd[2], int is_first, int is_last);
+void wait_all_children(t_shell *shell, int cmd_count);
+
+// execute_utils.c
+int is_builtin(char *cmd_name);
+int execute_builtin(t_shell *shell, t_command *cmd);
+
+// execute_built.c
+int builtin_echo(char **args);
+int builtin_cd(t_shell *shell, char **args);
+int builtin_pwd(void);
+int builtin_export(t_shell *shell, char **args);
+int builtin_unset(t_shell *shell, char **args);
+int builtin_env(t_shell *shell);
+int builtin_exit(t_shell *shell, char **args);
+
+// execute_extern.c
+int execute_external(t_shell *shell, t_command *cmd);
+
+// execute_path.c
+char *find_command_path(t_shell *shell, const char *cmd);
+
+// parser.c
+int parse_input(t_shell *shell);
+
+// setup_redirections.c
+int setup_redirections(t_shell *shell, t_redirection *redirs);
 
 #endif
