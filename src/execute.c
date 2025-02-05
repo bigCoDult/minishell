@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 05:35:34 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/05 02:12:17 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,57 +49,44 @@ static int execute_simple_command(t_shell *shell, t_command *cmd)
     return (1);
 }
 
-int execute_commands(t_shell *shell)
+int execute_ast(t_shell *shell, t_ast_node *node)
 {
-    t_command *cmd;
-    t_command *current;
-    int cmd_count;
-    int i;
+    printf("DEBUG: Executing AST node\n");
     
-    printf("DEBUG: Starting command execution\n");
-    
-    cmd = shell->commands;
-    if (!cmd)
+    if (!node)
     {
-        printf("DEBUG: No commands to execute\n");
+        printf("DEBUG: No node to execute\n");
         return (0);
     }
 
-    printf("DEBUG: Executing command: %s\n", cmd->name);
-    
-    // 파이프가 없는 단일 명령어인 경우
-    if (!cmd->pipe_next)
+    // 노드 타입에 따른 실행
+    if (node->type == AST_COMMAND)
     {
-        printf("DEBUG: Executing single command\n");
-        return (execute_simple_command(shell, cmd));
+        printf("DEBUG: Executing command node: %s\n", node->cmd->name);
+        return (execute_simple_command(shell, node->cmd));
+    }
+    else if (node->type == AST_PIPE)
+    {
+        printf("DEBUG: Executing pipe node\n");
+        return (execute_pipe(shell, node));
     }
 
-    // 파이프가 있는 경우
-    printf("DEBUG: Executing piped commands\n");
-    current = cmd;
-    cmd_count = 0;
-    while (current)
-    {
-        cmd_count++;
-        current = current->pipe_next;
-    }
+    printf("DEBUG: Unknown node type\n");
+    return (1);
+}
+
+// 메인 실행 함수 수정
+int execute_commands(t_shell *shell)
+{
+    printf("DEBUG: Starting command execution\n");
     
-    current = cmd;
-    i = 0;
-    while (current)
+    if (!shell->ast_root)
     {
-        printf("DEBUG: Executing command %d: %s\n", i + 1, current->name);
-        if (execute_piped_command(shell, current, i == 0, 
-            i == cmd_count - 1) != 0)
-        {
-            printf("DEBUG: Command execution failed\n");
-            return (1);
-        }
-        current = current->pipe_next;
-        i++;
+        printf("DEBUG: No AST root to execute\n");
+        return (0);
     }
-    
-    wait_all_children(shell, cmd_count);
-    printf("DEBUG: Command execution completed\n");
-    return (0);
+
+    int result = execute_ast(shell, shell->ast_root);
+    printf("DEBUG: Command execution completed with status: %d\n", result);
+    return (result);
 }
