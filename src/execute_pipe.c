@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 02:19:14 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/05 12:00:38 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@ void setup_pipe(t_shell *shell, int pipefd[2], int is_first, int is_last)
 {
     if (!is_first)  // 첫 번째 명령어가 아니면
     {
-        dup2(shell->pipe.read_fd, STDIN_FILENO);  // 이전 파이프의 읽기를 표준 입력으로
-        close(shell->pipe.read_fd);
+        dup2(shell->pipe_info.prev_pipe, STDIN_FILENO);  // 이전 파이프의 읽기를 표준 입력으로
+        close(shell->pipe_info.prev_pipe);
     }
     
     if (!is_last)  // 마지막 명령어가 아니면
@@ -29,37 +29,49 @@ void setup_pipe(t_shell *shell, int pipefd[2], int is_first, int is_last)
     close(pipefd[1]);
 }
 
-int execute_piped_command(t_shell *shell, t_command *cmd, int is_first, int is_last)
+int execute_piped_command(t_shell *shell, t_command *cmd)
 {
     pid_t pid;
-    int pipefd[2];
-    
-    if (!is_last && pipe(pipefd) < 0)
-        return (1);
     
     pid = fork();
     if (pid == 0)
     {
-        // 자식 프로세스
-        setup_pipe(shell, pipefd, is_first, is_last);
-        execvp(cmd->name, cmd->args);
-        exit(127);  // 명령어를 찾을 수 없음
-    }
-    else if (pid < 0)
-    {
-        return (1);
+        // 이전 파이프에서 입력 받기
+        if (shell->pipe_info.prev_pipe != -1)
+        {
+            dup2(shell->pipe_info.prev_pipe, STDIN_FILENO);
+            close(shell->pipe_info.prev_pipe);
+        }
+        
+        // 다음 명령어로 출력 전달
+        if (!shell->pipe_info.is_last)
+        {
+            dup2(shell->pipe_info.pipefd[1], STDOUT_FILENO);
+        }
+        
+        // 파이프 fd 정리
+        close(shell->pipe_info.pipefd[0]);
+        close(shell->pipe_info.pipefd[1]);
+
+        // 명령어 실행
+        char *executable_path = find_command_path(shell, cmd->args[0]);
+        if (!executable_path)
+            exit(127);
+
+        char **env_array = get_env_array(shell);
+        if (!env_array)
+            exit(1);
+
+        execve(executable_path, cmd->args, env_array);
+        exit(127);
     }
     
-    // 부모 프로세스
-    if (!is_first)
-        close(shell->pipe.read_fd);
-    if (!is_last)
-    {
-        close(pipefd[1]);
-        shell->pipe.read_fd = pipefd[0];  // 다음 명령어를 위해 읽기 fd 저장
-    }
+    // 부모 프로세스에서 파이프 fd 정리
+    if (shell->pipe_info.prev_pipe != -1)
+        close(shell->pipe_info.prev_pipe);
+    close(shell->pipe_info.pipefd[1]);
     
-    return (0);
+    return pid;
 }
 
 int execute_pipe(t_shell *shell, t_ast_node *node)
@@ -103,7 +115,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
             cmd = current->cmd;
         }
 
-        if (execute_piped_command(shell, cmd, i == 0, i == cmd_count - 1) != 0)
+        if (execute_piped_command(shell, cmd) != 0)
         {
             printf("DEBUG: Pipe command execution failed\n");
             return (1);

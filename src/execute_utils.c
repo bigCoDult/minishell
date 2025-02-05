@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   execute_built.c                                    :+:      :+:    :+:   */
+/*   execute_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:37:56 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 04:38:09 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/05 12:11:36 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,19 +27,19 @@ int is_builtin(char *cmd_name)
 // 빌트인 명령어 실행
 int execute_builtin(t_shell *shell, t_command *cmd)
 {
-    if (!strcmp(cmd->name, "echo"))
+    if (!strcmp(cmd->args[0], "echo"))
         return (builtin_echo(cmd->args));
-    else if (!strcmp(cmd->name, "cd"))
+    else if (!strcmp(cmd->args[0], "cd"))
         return (builtin_cd(shell, cmd->args));
-    else if (!strcmp(cmd->name, "pwd"))
+    else if (!strcmp(cmd->args[0], "pwd"))
         return (builtin_pwd());
-    else if (!strcmp(cmd->name, "export"))
+    else if (!strcmp(cmd->args[0], "export"))
         return (builtin_export(shell, cmd->args));
-    else if (!strcmp(cmd->name, "unset"))
+    else if (!strcmp(cmd->args[0], "unset"))
         return (builtin_unset(shell, cmd->args));
-    else if (!strcmp(cmd->name, "env"))
+    else if (!strcmp(cmd->args[0], "env"))
         return (builtin_env(shell));
-    else if (!strcmp(cmd->name, "exit"))
+    else if (!strcmp(cmd->args[0], "exit"))
         return (builtin_exit(shell, cmd->args));
     return (1);
 }

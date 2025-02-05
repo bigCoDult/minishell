@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 02:19:19 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/05 13:24:43 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <sys/stat.h>
+# include <errno.h>
 
 extern volatile sig_atomic_t	g_signal;
 
@@ -48,6 +49,14 @@ typedef enum s_token_type
 	TOKEN_EOF
 }	t_token_type;
 
+// 파이프 실행 정보를 담는 구조체
+typedef struct s_pipe_info
+{
+    int pipefd[2];     // 현재 파이프의 파일 디스크립터
+    int prev_pipe;     // 이전 파이프의 읽기 fd
+    int is_last;       // 마지막 명령어 여부
+} t_pipe_info;
+
 typedef struct s_token
 {
 	t_token_type	type;
@@ -58,10 +67,10 @@ typedef struct s_token
 
 typedef struct s_command
 {
-	char					*name;
+	// char					*name;
 	char					**args;
 	struct s_redirection	*redirs;
-	struct s_command		*pipe_next;
+	// struct s_command		*pipe_next;
 }	t_command;
 
 // AST 노드 구조체
@@ -85,6 +94,7 @@ typedef struct s_redirection
 {
 	t_redirection_type		type;
 	char					*filename;
+	int						fd;
 	struct s_redirection	*next;
 }	t_redirection;
 
@@ -101,17 +111,17 @@ typedef struct s_env
 	struct s_env	*next;
 }	t_env;
 
-typedef struct s_pipe
-{
-	int	read_fd;
-	int	write_fd;
-}	t_pipe;
+// typedef struct s_pipe
+// {
+// 	int	read_fd;
+// 	int	write_fd;
+// }	t_pipe;
 
-typedef struct s_heredoc
-{
-	char	*delimiter;
-	int		temp_fd;
-}	t_heredoc;
+// typedef struct s_heredoc
+// {
+// 	char	*delimiter;
+// 	int		temp_fd;
+// }	t_heredoc;
 
 typedef struct s_parser
 {
@@ -123,14 +133,14 @@ typedef struct s_parser
 typedef struct s_shell
 {
 	t_token		*tokens;
-	t_command	*commands;
+	// t_command	*commands;
 	t_ast_node	*ast_root;
 	t_status	status;
 	t_memory	*memory;
 	char		*input_line;
 	t_parser	parser;
-	t_pipe		pipe;
-	t_heredoc	heredoc;
+	t_pipe_info	pipe_info;
+	// t_heredoc	heredoc;
 	t_env		*env;
 }	t_shell;
 
@@ -138,6 +148,7 @@ typedef struct s_shell
 void	*shell_malloc(t_shell *shell, size_t size);
 void	shell_free(t_shell *shell, void *ptr);
 void	free_all_memory(t_shell *shell);
+void	free_command_memory(t_shell *shell);
 
 // env.c
 t_env	*init_env(t_shell *shell, char **envp);
@@ -146,10 +157,12 @@ void	set_env_value(t_shell *shell, const char *key, const char *value);
 // env_array.c
 char **get_env_array(t_shell *shell);
 
+
 // ft.c
 char *ft_strchr(const char *str, int c);
 int ft_strlen(const char *str);
 char	*shell_strdup(t_shell *shell, const char *str);
+char *ft_strdup(const char *str);
 
 // signal.c
 void setup_signals(void);
@@ -167,10 +180,11 @@ char *handle_word(char *input, int *len);
 // execute.c
 int execute_commands(t_shell *shell);
 int execute_ast(t_shell *shell, t_ast_node *node);
+int execute_simple_command(t_shell *shell, t_command *cmd);
 
 // execute_pipe.c
 int execute_pipe(t_shell *shell, t_ast_node *node);
-int execute_piped_command(t_shell *shell, t_command *cmd, int is_first, int is_last);
+int execute_piped_command(t_shell *shell, t_command *cmd);
 void setup_pipe(t_shell *shell, int pipefd[2], int is_first, int is_last);
 void wait_all_children(t_shell *shell, int cmd_count);
 
@@ -192,6 +206,7 @@ int execute_external(t_shell *shell, t_command *cmd);
 
 // execute_path.c
 char *find_command_path(t_shell *shell, const char *cmd);
+char *find_executable(t_shell *shell, const char *cmd);
 
 // parser.c
 int parse_input(t_shell *shell);

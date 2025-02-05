@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 05:13:37 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/05 12:06:58 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int execute_external(t_shell *shell, t_command *cmd)
     int status;
     char *path;
 
-    printf("DEBUG: execute_external start with cmd: %s\n", cmd->name);
+    printf("DEBUG: execute_external start with cmd: %s\n", cmd->args[0]);
     
     pid = fork();
     if (pid == 0)
@@ -34,10 +34,10 @@ int execute_external(t_shell *shell, t_command *cmd)
             
         // PATH에서 명령어 찾기
         printf("DEBUG: Searching for command in PATH\n");
-        path = find_command_path(shell, cmd->name);
+        path = find_command_path(shell, cmd->args[0]);
         if (!path)
         {
-            printf("minishell: %s: command not found\n", cmd->name);
+            printf("minishell: %s: command not found\n", cmd->args[0]);
             exit(127);
         }
         
