@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 05:16:25 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/05 11:57:32 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ static void	init_shell(t_shell *shell, char **envp)
 	printf("DEBUG: Initializing shell\n");
 	shell->memory = NULL;
 	shell->tokens = NULL;
-	shell->commands = NULL;
 	shell->status.exit_code = 0;
 	shell->env = init_env(shell, envp);
 	printf("DEBUG: Shell initialization completed\n");

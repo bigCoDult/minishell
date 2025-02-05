@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:12 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 02:24:01 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/05 13:35:28 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,49 +19,75 @@ t_command *create_command(t_shell *shell, t_token **tokens)
     int arg_count;
     t_token *curr;
 
-    printf("DEBUG: Creating command from tokens\n");
+    printf("DEBUG: [create_command] Creating command from tokens\n");
     cmd = shell_malloc(shell, sizeof(t_command));
     if (!cmd)
     {
-        printf("DEBUG: Failed to allocate command\n");
+        printf("DEBUG: [create_command] Failed to allocate command\n");
         return (NULL);
     }
 
     // 초기화
-    cmd->name = NULL;
+    printf("DEBUG: [create_command] Initializing command structure\n");
     cmd->args = NULL;
     cmd->redirs = NULL;
-    cmd->pipe_next = NULL;
 
     // 명령어 이름과 인자 개수 세기
     curr = *tokens;
     arg_count = 0;
+    printf("DEBUG: [create_command] Counting arguments\n");
     while (curr && curr->type == TOKEN_WORD)
     {
-        printf("DEBUG: Processing token: %s\n", curr->value);
-        if (arg_count == 0)
-        {
-            cmd->name = shell_strdup(shell, curr->value);
-            printf("DEBUG: Command name set to: %s\n", cmd->name);
-        }
+        printf("DEBUG: [create_command] Processing token %d: %s\n",
+               arg_count, curr->value);
+        // if (arg_count == 0)
+        // {
+        //     cmd->args[0] = shell_strdup(shell, curr->value);
+        //     printf("DEBUG: [create_command] Command name set to: %s\n", cmd->args[0]);
+        // }
         arg_count++;
         curr = curr->next;
     }
-    printf("DEBUG: Found %d arguments\n", arg_count);
+    printf("DEBUG: [create_command] Found %d arguments\n", arg_count);
 
     // 인자 배열 생성
     if (arg_count > 0)
     {
+        printf("DEBUG: [create_command] Allocating args array\n");
         cmd->args = create_args_array(shell, *tokens, arg_count);
         if (!cmd->args)
         {
-            printf("DEBUG: Failed to create args array\n");
+            printf("DEBUG: [create_command] Failed to create args array\n");
             return (NULL);
         }
-        printf("DEBUG: Args array created successfully\n");
-        *tokens = curr;  // 토큰 포인터 업데이트
-    }
+         // 인자 복사
+        curr = *tokens;
+        int i = 0;
+        while (i < arg_count)
+        {
+            printf("DEBUG: [create_command] Copying argument %d: %s\n", 
+                   i, curr->value);
+            cmd->args[i] = shell_strdup(shell, curr->value);
+            if (!cmd->args[i])
+            {
+                printf("DEBUG: [create_command] Failed to copy argument %d\n", i);
+                return (NULL);
+            }
+            curr = curr->next;
+            i++;
+        }
+        cmd->args[arg_count] = NULL;
+        printf("DEBUG: [create_command] Arguments copied successfully\n");
 
+        // 토큰 포인터 업데이트
+        *tokens = curr;
+    }
+    else
+    {
+        printf("DEBUG: [create_command] No arguments found\n");
+        return (NULL);
+    }
+    printf("DEBUG: [create_command] Command creation completed successfully\n");
     return (cmd);
 }
 
@@ -157,78 +183,45 @@ char **create_args_array(t_shell *shell, t_token *start, int arg_count)
 //     return (cmd);
 // }
 
-// 기존 토큰 리스트 초기화
-static void clear_tokens(t_shell *shell)
-{
-    t_token *current;
-    t_token *next;
+// // 기존 토큰 리스트 초기화
+// static void clear_tokens(t_shell *shell)
+// {
+//     t_token *current;
+//     t_token *next;
 
-    printf("DEBUG: Clearing previous tokens\n");
-    current = shell->tokens;
-    while (current)
-    {
-        next = current->next;
-        shell_free(shell, current->value);
-        shell_free(shell, current);
-        current = next;
-    }
-    shell->tokens = NULL;
-}
+//     printf("DEBUG: Clearing previous tokens\n");
+//     current = shell->tokens;
+//     while (current)
+//     {
+//         next = current->next;
+//         shell_free(shell, current->value);
+//         shell_free(shell, current);
+//         current = next;
+//     }
+//     shell->tokens = NULL;
+// }
 
-// 기존 명령어 구조 초기화
-static void clear_commands(t_shell *shell)
-{
-    t_command *current;
-    t_command *next;
+// // 기존 명령어 구조 초기화
+// static void clear_commands(t_shell *shell)
+// {
+//     printf("DEBUG: Clearing previous commands\n");
+//     if (shell->ast_root)
+//     {
+//         free_all_memory(shell);
+//         shell->ast_root = NULL;
+//     }
+// }
 
-    printf("DEBUG: Clearing previous commands\n");
-    current = shell->commands;
-    while (current)
-    {
-        next = current->pipe_next;
-        if (current->args)
-        {
-            for (int i = 0; current->args[i]; i++)
-                shell_free(shell, current->args[i]);
-            shell_free(shell, current->args);
-        }
-        shell_free(shell, current->name);
-        // TODO: free redirs if needed
-        shell_free(shell, current);
-        current = next;
-    }
-    shell->commands = NULL;
-}
+// // AST 초기화 함수 추가
+// static void clear_ast(t_shell *shell, t_ast_node *node)
+// {
+//     if (!node)
+//         return;
 
-// AST 초기화 함수 추가
-static void clear_ast(t_shell *shell, t_ast_node *node)
-{
-    if (!node)
-        return;
-
-    printf("DEBUG: Clearing AST node\n");
-    if (node->type == AST_PIPE)
-    {
-        clear_ast(shell, node->left);
-        clear_ast(shell, node->right);
-    }
-    else if (node->type == AST_COMMAND)
-    {
-        if (node->cmd)
-        {
-            if (node->cmd->args)
-            {
-                for (int i = 0; node->cmd->args[i]; i++)
-                    shell_free(shell, node->cmd->args[i]);
-                shell_free(shell, node->cmd->args);
-            }
-            shell_free(shell, node->cmd->name);
-            // TODO: free redirs if needed
-            shell_free(shell, node->cmd);
-        }
-    }
-    shell_free(shell, node);
-}
+//     printf("DEBUG: Clearing AST node\n");
+//     free_all_memory(shell);
+//     shell->ast_root = NULL;
+// }
 
 // 메인 파싱 함수
 int parse_input(t_shell *shell)
@@ -238,11 +231,14 @@ int parse_input(t_shell *shell)
     printf("\nDEBUG: === Starting input parsing ===\n");
 
     // 이전 데이터 초기화
-    clear_tokens(shell);
-    clear_commands(shell);
+    if (shell->tokens)
+    {
+        free_command_memory(shell);
+        shell->tokens = NULL;
+    }
     if (shell->ast_root)
     {
-        clear_ast(shell, shell->ast_root);
+        free_command_memory(shell);
         shell->ast_root = NULL;
     }
     
