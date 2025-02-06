@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 13:24:43 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/06 10:31:38 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,7 @@ void	free_command_memory(t_shell *shell);
 // env.c
 t_env	*init_env(t_shell *shell, char **envp);
 void	set_env_value(t_shell *shell, const char *key, const char *value);
+int	parse_env_arg(t_shell *shell, char *arg, char **key, char **value);
 
 // env_array.c
 char **get_env_array(t_shell *shell);

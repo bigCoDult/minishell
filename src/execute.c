@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 13:31:56 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/06 10:37:31 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,14 @@ int execute_simple_command(t_shell *shell, t_command *cmd)
     printf("DEBUG: [execute_simple_command] Starting execution\n");
     printf("DEBUG: [execute_simple_command] Command args[0]: %s\n", cmd->args[0]);
     
-    // 실행 파일 경로 찾기
+    // 먼저 builtin 명령어인지 확인
+    if (is_builtin(cmd->args[0]))
+    {
+        printf("DEBUG: [execute_simple_command] Executing builtin command\n");
+        return (execute_builtin(shell, cmd));
+    }
+
+    // 이후 일반 명령어 실행 로직
     printf("DEBUG: [execute_simple_command] Finding executable path\n");
     executable_path = find_executable(shell, cmd->args[0]);
     if (!executable_path)

@@ -6,11 +6,39 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:33:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 13:25:06 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/06 11:01:16 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+// 환경 변수 키=값 형식 파싱
+int parse_env_arg(t_shell *shell, char *arg, char **key, char **value)
+{
+    char *equals;
+
+    printf("DEBUG: [parse_env_arg] Parsing: %s\n", arg);
+    equals = strchr(arg, '=');
+    
+    if (!equals)
+    {
+        *key = shell_strdup(shell, arg);
+        *value = NULL;
+        return (0);
+    }
+
+    // equals가 있는 경우 (key=value 형식)
+    *equals = '\0';  // 임시로 문자열 분리
+    *key = shell_strdup(shell, arg);
+    *value = shell_strdup(shell, equals + 1);
+    *equals = '=';   // 원래 문자열 복구
+
+    printf("DEBUG: [parse_env_arg] Parsed key: %s, value: %s\n", *key, *value ? *value : "(null)");
+
+    if (!*key || (*value && !**value))  // key가 비어있거나, value가 있는데 빈 문자열인 경우
+        return (1);
+    return (0);
+}
 
 // 환경 변수 값 설정
 void set_env_value(t_shell *shell, const char *key, const char *value)
@@ -18,42 +46,64 @@ void set_env_value(t_shell *shell, const char *key, const char *value)
     t_env *current;
     t_env *new_node;
 
-    // 기존 환경 변수 찾기
+    printf("DEBUG: [set_env_value] Attempting to set %s=%s\n", 
+           key, value ? value : "(null)");
+
+    if (!key || !*key)
+        return;
+
+    // 기존 환경변수 찾기
     current = shell->env;
     while (current)
     {
-        if (strcmp(current->key, key) == 0)
+        if (current->key && strcmp(current->key, key) == 0)
         {
-            // 키가 존재하면 값만 업데이트
-            shell_free(shell, current->value);
-            current->value = shell_strdup(shell, value);
+            printf("DEBUG: [set_env_value] Found existing key: %s\n", key);
+            // 기존 값 해제
+            if (current->value)
+            {
+                free(current->value);
+                current->value = NULL;
+            }
+            // 새 값 설정
+            if (value)
+            {
+                current->value = ft_strdup(value);
+                printf("DEBUG: [set_env_value] Updated value: %s\n", current->value);
+            }
             return;
         }
         current = current->next;
     }
 
-    // 키가 없으면 새 노드 생성
-    new_node = shell_malloc(shell, sizeof(t_env));
+    // 새 환경변수 노드 생성
+    printf("DEBUG: [set_env_value] Creating new env variable\n");
+    new_node = malloc(sizeof(t_env));
     if (!new_node)
+    {
+        printf("DEBUG: [set_env_value] Failed to allocate new node\n");
         return;
+    }
 
     // 새 노드 초기화
-    new_node->key = shell_strdup(shell, key);
-    new_node->value = shell_strdup(shell, value);
+    new_node->key = ft_strdup(key);
+    new_node->value = value ? ft_strdup(value) : NULL;
     new_node->next = NULL;
 
-    // 리스트에 새 노드 추가
-    if (!shell->env)
+    if (!new_node->key)
     {
-        shell->env = new_node;
+        printf("DEBUG: [set_env_value] Failed to allocate key\n");
+        free(new_node);
+        return;
     }
-    else
-    {
-        current = shell->env;
-        while (current->next)
-            current = current->next;
-        current->next = new_node;
-    }
+
+    // 리스트에 추가
+    printf("DEBUG: [set_env_value] Adding to env list\n");
+    new_node->next = shell->env;
+    shell->env = new_node;
+
+    printf("DEBUG: [set_env_value] Successfully added %s=%s\n", 
+           new_node->key, new_node->value ? new_node->value : "(null)");
 }
 
 static t_env *create_env_node(t_shell *shell, char *key, char *value)
