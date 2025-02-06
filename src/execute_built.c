@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:42:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 04:48:45 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/06 10:51:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ int builtin_pwd(void)
 // export 명령어: 환경변수 설정
 int builtin_export(t_shell *shell, char **args)
 {
-    char *equal_sign;
+    // char *equal_sign;
     char *key;
     char *value;
     int i;
@@ -91,15 +91,16 @@ int builtin_export(t_shell *shell, char **args)
     i = 1;
     while (args[i])
     {
-        equal_sign = ft_strchr(args[i], '=');
-        if (equal_sign)
+        printf("DEBUG: [builtin_export] Processing arg: %s\n", args[i]);
+        if (parse_env_arg(shell, args[i], &key, &value))
         {
-            *equal_sign = '\0';
-            key = args[i];
-            value = equal_sign + 1;
-            set_env_value(shell, key, value);
-            *equal_sign = '=';
+            printf("export: '%s': not a valid identifier\n", args[i]);
+            return (1);
         }
+        set_env_value(shell, key, value);
+        shell_free(shell, key);
+        if (value)
+            shell_free(shell, value);
         i++;
     }
     return (0);
@@ -143,12 +144,20 @@ int builtin_env(t_shell *shell)
 {
     t_env *current;
 
+    printf("DEBUG: [builtin_env] Starting to print environment\n");
+
     current = shell->env;
     while (current)
     {
-        printf("%s=%s\n", current->key, current->value);
+        if (current->value)  // value가 있는 환경변수만 출력
+        {
+            printf("DEBUG: [builtin_env] Printing: %s=%s\n", 
+                   current->key, current->value);
+            printf("%s=%s\n", current->key, current->value);
+        }
         current = current->next;
     }
+
     return (0);
 }
 
