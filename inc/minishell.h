@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/08 11:04:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/08 14:30:35 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,5 +241,9 @@ int setup_redirections(t_shell *shell, t_redirection *redirs);
 // redir_utils.c
 void add_redirection(t_redirection **redirs, t_redirection *new_redir);
 t_redirection *create_redirection(t_shell *shell, t_token *token);
+
+// debug_print.c
+void debug_print(int action_combine_bit, int str_type, const char *str, ...);
+
 
 #endif
