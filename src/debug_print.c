@@ -18,27 +18,33 @@ static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 
 
 // 이 함수의 목적은
-//	<debug_printf(숫자> 를 ctrl+shift+f로 검색하여 "일괄 변경"하는 것으로
+//	<debug_printf(n> 를 ctrl+shift+f로 검색하여 "일괄 변경"하는 것으로
 //	전체 프로세스에서 어떤 디버깅 문자열의 출력될지를 바꾸는 바꾸는 것입니다
 
 // 사용법
 // 	action_combine_bit는 2의 0승, 1승, 2승, 3승, 4승의 합이며 각 비트는 출력할 문자열을 결정합니다.
 // 	action_combine_bit가 3이면 2의 0승 + 1승이므로 str타입과 env타입인 문자열을 출력합니다.
 
-// str_type 1 = 단순 문자열
-	// action_combine_bit 1
-// str_type 2 = 환경변수
-	// action_combine_bit 2
-// str_type 3 = 토큰
-	// action_combine_bit 4
-// str_type 4 = AST 문자열
-	// action_combine_bit 8
-
 // 아래의 경우, 타입 token과 ast에 해당하는 문자열만 출력합니다.
 // debug_printf(12, 3, "token is %s, token->value);
 // debug_printf(12, 4, "ast is %s, ast->value);
 
-//	모든 디버깅 문자열을 출력하려면 action_combine_bit에 15를 넣으면 됩니다.
+//	모든 디버깅 문자열을 출력하려면 action_combine_bit에 31를 넣으면 됩니다.
+
+// str_type 1 = 단순 문자열
+// action_combine_bit 1
+
+// str_type 2 = 환경변수 관련
+// action_combine_bit 2
+
+// str_type 3 = 토큰 관련
+// action_combine_bit 4
+
+// str_type 4 = AST 관련
+// action_combine_bit 8
+
+// str_type 5 = 위의 타입에 해당하지 않으며, 다른 구체적인 타입을 필요로함, 추후 재정의 할것
+// action_combine_bit 16
 
 
 void debug_print(int action_combine_bit, int str_type, const char *str, ...)
