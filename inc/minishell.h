@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/06 10:31:38 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/08 11:04:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ typedef struct s_ast_node
 
 typedef enum s_redirection_type
 {
+	REDIR_NONE,
 	REDIR_IN,
 	REDIR_OUT,
 	REDIR_APPEND,
@@ -123,6 +124,13 @@ typedef struct s_env
 // 	int		temp_fd;
 // }	t_heredoc;
 
+// 히어독 관리를 위한 구조체
+typedef struct s_heredoc {
+    int original_stdin;     // 원본 표준 입력 파일 디스크립터
+    char *delimiter;        // 현재 히어독의 구분자
+    int pipe_fd[2];        // 히어독 파이프
+} t_heredoc;
+
 typedef struct s_parser
 {
 	char		*input;
@@ -140,7 +148,7 @@ typedef struct s_shell
 	char		*input_line;
 	t_parser	parser;
 	t_pipe_info	pipe_info;
-	// t_heredoc	heredoc;
+	t_heredoc	heredoc;
 	t_env		*env;
 }	t_shell;
 
@@ -177,6 +185,7 @@ t_token *handle_redirection(t_shell *shell, char **input);
 
 // tokenizer_utils.c
 char *handle_word(char *input, int *len);
+void add_token(t_shell *shell, t_token *token);
 
 // execute.c
 int execute_commands(t_shell *shell);
@@ -209,6 +218,9 @@ int execute_external(t_shell *shell, t_command *cmd);
 char *find_command_path(t_shell *shell, const char *cmd);
 char *find_executable(t_shell *shell, const char *cmd);
 
+// execute_here.c
+int handle_heredoc(t_shell *shell, char *delimiter);
+
 // parser.c
 int parse_input(t_shell *shell);
 char **create_args_array(t_shell *shell, t_token *start, int arg_count);
@@ -225,5 +237,9 @@ t_ast_node *parse_simple_command(t_shell *shell, t_token **tokens);
 
 // setup_redirections.c
 int setup_redirections(t_shell *shell, t_redirection *redirs);
+
+// redir_utils.c
+void add_redirection(t_redirection **redirs, t_redirection *new_redir);
+t_redirection *create_redirection(t_shell *shell, t_token *token);
 
 #endif

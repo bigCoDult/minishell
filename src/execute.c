@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/06 10:37:31 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/08 10:57:11 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,87 +67,50 @@ void wait_all_children(t_shell *shell, int cmd_count)
 
 int execute_simple_command(t_shell *shell, t_command *cmd)
 {
-    pid_t pid;
-    int status;
-    char *executable_path;
-    char **env_array;
+    int ret;
 
     printf("DEBUG: [execute_simple_command] Starting execution\n");
-    printf("DEBUG: [execute_simple_command] Command args[0]: %s\n", cmd->args[0]);
     
-    // 먼저 builtin 명령어인지 확인
+    // 리다이렉션 처리
+    t_redirection *redir = cmd->redirs;
+    while (redir)
+    {
+        printf("DEBUG: [execute_simple_command] Processing redirection type: %d\n", redir->type);
+        if (redir->type == REDIR_HEREDOC)
+        {
+            printf("DEBUG: [execute_simple_command] Setting up heredoc\n");
+            if (handle_heredoc(shell, redir->filename) != 0)
+            {
+                printf("DEBUG: [execute_simple_command] Heredoc setup failed\n");
+                return (1);
+            }
+        }
+        redir = redir->next;
+    }
+
+    // 명령어 실행
+    printf("DEBUG: [execute_simple_command] Command args[0]: %s\n", cmd->args[0]);
     if (is_builtin(cmd->args[0]))
     {
         printf("DEBUG: [execute_simple_command] Executing builtin command\n");
-        return (execute_builtin(shell, cmd));
+        ret = execute_builtin(shell, cmd);
+    }
+    else
+    {
+        printf("DEBUG: [execute_simple_command] Executing external command\n");
+        ret = execute_external(shell, cmd);
     }
 
-    // 이후 일반 명령어 실행 로직
-    printf("DEBUG: [execute_simple_command] Finding executable path\n");
-    executable_path = find_executable(shell, cmd->args[0]);
-    if (!executable_path)
+    // 표준 입력 복원 (히어독이 사용된 경우)
+    if (shell->heredoc.original_stdin != -1)
     {
-        printf("DEBUG: [execute_simple_command] Executable not found\n");
-        printf("%s: command not found\n", cmd->args[0]);
-        return (127);
+        printf("DEBUG: [execute_simple_command] Restoring original stdin\n");
+        dup2(shell->heredoc.original_stdin, STDIN_FILENO);
+        close(shell->heredoc.original_stdin);
+        shell->heredoc.original_stdin = -1;
     }
 
-    printf("DEBUG: [execute_simple_command] Creating environment array\n");
-    env_array = get_env_array(shell);
-    if (!env_array)
-    {
-        printf("DEBUG: [execute_simple_command] Failed to create env array\n");
-        shell_free(shell, executable_path);
-        return (1);
-    }
-
-    printf("DEBUG: [execute_simple_command] Forking process\n");
-    pid = fork();
-    if (pid == 0)
-    {
-        printf("DEBUG: [execute_simple_command] Child process started\n");
-        printf("DEBUG: [execute_simple_command] Executing: %s\n", executable_path);
-        if (execve(executable_path, cmd->args, env_array) == -1)
-        {
-            printf("DEBUG: [execute_simple_command] execve failed: %s\n", strerror(errno));
-            exit(127);
-        }
-    }
-    else if (pid < 0)
-    {
-        printf("DEBUG: [execute_simple_command] Fork failed\n");
-        shell_free(shell, executable_path);
-        int i = 0;
-        while (env_array[i])
-        {
-            shell_free(shell, env_array[i]);
-            i++;
-        }
-        shell_free(shell, env_array);
-        return (1);
-    }
-    
-    printf("DEBUG: [execute_simple_command] Parent waiting for child\n");
-    waitpid(pid, &status, 0);
-    
-    printf("DEBUG: [execute_simple_command] Cleaning up resources\n");
-    shell_free(shell, executable_path);
-    int i = 0;
-    while (env_array[i])
-    {
-        shell_free(shell, env_array[i]);
-        i++;
-    }
-    shell_free(shell, env_array);
-
-    if (WIFEXITED(status))
-    {
-        int exit_status = WEXITSTATUS(status);
-        printf("DEBUG: [execute_simple_command] Command exited with status: %d\n", exit_status);
-        return exit_status;
-    }
-    
-    return (1);
+    return ret;
 }
 
 int execute_ast(t_shell *shell, t_ast_node *node)
