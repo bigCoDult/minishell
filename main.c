@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 11:57:32 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/08 11:04:59 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,10 @@ static void	init_shell(t_shell *shell, char **envp)
 	shell->tokens = NULL;
 	shell->status.exit_code = 0;
 	shell->env = init_env(shell, envp);
+	shell->heredoc.original_stdin = -1;
+	shell->heredoc.delimiter = NULL;
+	shell->heredoc.pipe_fd[0] = -1;
+	shell->heredoc.pipe_fd[1] = -1;
 	printf("DEBUG: Shell initialization completed\n");
 }
 

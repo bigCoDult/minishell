@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 05:10:31 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/07 13:30:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,8 @@ int setup_redirections(t_shell *shell, t_redirection *redirs)
     {
         switch (current->type)
         {
+            case REDIR_NONE:
+                break;
             case REDIR_IN:
                 if (setup_input_redirect(current) != 0)
                     return (1);
@@ -123,4 +125,50 @@ int setup_redirections(t_shell *shell, t_redirection *redirs)
         current = current->next;
     }
     return (0);
+}
+
+// 리다이렉션 생성 함수 추가
+t_redirection *create_redirection(t_shell *shell, t_token *token)
+{
+    t_redirection *redir;
+
+    redir = shell_malloc(shell, sizeof(t_redirection));
+    if (!redir)
+        return (NULL);
+
+    if (strcmp(token->value, "<<") == 0)
+        redir->type = REDIR_HEREDOC;
+    else if (strcmp(token->value, "<") == 0)
+        redir->type = REDIR_IN;
+    else if (strcmp(token->value, ">") == 0)
+        redir->type = REDIR_OUT;
+    else if (strcmp(token->value, ">>") == 0)
+        redir->type = REDIR_APPEND;
+
+    redir->filename = shell_strdup(shell, token->next->value);
+    if (!redir->filename)
+    {
+        shell_free(shell, redir);
+        return (NULL);
+    }
+
+    redir->next = NULL;
+    return redir;
+}
+
+// 리다이렉션 리스트에 추가
+void add_redirection(t_redirection **redirs, t_redirection *new_redir)
+{
+    t_redirection *current;
+
+    if (!*redirs)
+    {
+        *redirs = new_redir;
+        return;
+    }
+
+    current = *redirs;
+    while (current->next)
+        current = current->next;
+    current->next = new_redir;
 }
