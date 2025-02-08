@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/06 10:31:38 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/08 14:30:35 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,5 +225,9 @@ t_ast_node *parse_simple_command(t_shell *shell, t_token **tokens);
 
 // setup_redirections.c
 int setup_redirections(t_shell *shell, t_redirection *redirs);
+
+// debug_print.c
+void debug_print(int action_combine_bit, int str_type, const char *str, ...);
+
 
 #endif
