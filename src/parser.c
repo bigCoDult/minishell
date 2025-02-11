@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:12 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/08 11:16:41 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/11 15:52:47 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,29 +138,29 @@ char **create_args_array(t_shell *shell, t_token *start, int arg_count)
     char **args;
     int i;
 
-    printf("DEBUG: [create_args_array] Creating args array with count: %d\n", arg_count);
+    debug_print(2047, 3, "DEBUG: [create_args_array] Creating args array with count: %d\n", arg_count);
     args = shell_malloc(shell, sizeof(char *) * (arg_count + 1));
     if (!args)
     {
-        printf("DEBUG: [create_args_array] Failed to allocate args array\n");
+        debug_print(2047, 3, "DEBUG: [create_args_array] Failed to allocate args array\n");
         return (NULL);
     }
 
     i = 0;
     while (start && start->type == TOKEN_WORD && i < arg_count)
     {
-        printf("DEBUG: [create_args_array] Adding arg[%d]: %s\n", i, start->value);
+        debug_print(2047, 3, "DEBUG: [create_args_array] Adding arg[%d]: %s\n", i, start->value);
         args[i] = shell_strdup(shell, start->value);
         if (!args[i])
         {
-            printf("DEBUG: [create_args_array] Failed to duplicate argument\n");
+            debug_print(2047, 3, "DEBUG: [create_args_array] Failed to duplicate argument\n");
             return (NULL);
         }
         start = start->next;
         i++;
     }
     args[i] = NULL;
-    printf("DEBUG: [create_args_array] Args array created successfully\n");
+    debug_print(2047, 3, "DEBUG: [create_args_array] Args array created successfully\n");
     return (args);
 }
 
@@ -285,17 +285,17 @@ int parse_input(t_shell *shell)
     
     if (tokenize_input(shell) != 0)
     {
-        printf("DEBUG: [parse_input] Tokenization failed\n");
+        debug_print(2047, 3, "DEBUG: [parse_input] Tokenization failed\n");
         return (1);
     }
-    printf("DEBUG: [parse_input] Tokenization completed\n");
+    debug_print(2047, 3, "DEBUG: [parse_input] Tokenization completed\n");
 
     // 토큰 목록 출력
-    printf("\nDEBUG: [parse_input] Token list:\n");
+    debug_print(2047, 3, "\nDEBUG: [parse_input] Token list:\n");
     curr_token = shell->tokens;
     while (curr_token)
     {
-        printf("DEBUG: [parse_input] Token type: %d, value: %s\n", 
+        debug_print(2047, 3, "DEBUG: [parse_input] Token type: %d, value: %s\n",
                curr_token->type, curr_token->value);
         curr_token = curr_token->next;
     }
@@ -305,11 +305,11 @@ int parse_input(t_shell *shell)
     
     if (!shell->ast_root)
     {
-        printf("DEBUG: [parse_input] Pipeline parsing failed\n");
+        debug_print(2047, 3, "DEBUG: [parse_input] Pipeline parsing failed\n");
         return (1);
     }
 
-    printf("DEBUG: [parse_input] Parsing completed successfully\n");
-    printf("DEBUG: [parse_input] === Parsing finished ===\n\n");
+    debug_print(2047, 3, "DEBUG: [parse_input] Parsing completed successfully\n");
+    debug_print(2047, 3, "DEBUG: [parse_input] === Parsing finished ===\n\n");
     return (0);
 }

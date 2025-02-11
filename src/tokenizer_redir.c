@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_redir.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:15:26 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/08 10:42:23 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/11 15:53:58 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,17 @@ static t_token *create_redir_token(t_shell *shell, const char *value, t_token_ty
 {
     t_token *token;
 
-    printf("DEBUG: Creating redirection token: %s\n", value);
+    debug_print(2047, 3, "DEBUG: Creating redirection token: %s\n", value);
     token = shell_malloc(shell, sizeof(t_token));
     if (!token)
     {
-        printf("DEBUG: Failed to allocate redirection token\n");
+        debug_print(2047, 3, "DEBUG: Failed to allocate redirection token\n");
         return (NULL);
     }
     token->value = shell_strdup(shell, value);
     if (!token->value)
     {
-        printf("DEBUG: Failed to duplicate token value\n");
+        debug_print(2047, 3, "DEBUG: Failed to duplicate token value\n");
         shell_free(shell, token);
         return (NULL);
     }
@@ -45,7 +45,7 @@ t_token *handle_redirection(t_shell *shell, char **input)
     char *word;
     int word_len;
 
-    printf("DEBUG: [handle_redirection] Processing redirection\n");
+    debug_print(2047, 10, "DEBUG: [handle_redirection] Processing redirection\n");
     
     if (**input == '<' && *(*input + 1) == '<')
     {
@@ -96,9 +96,9 @@ t_token *handle_redirection(t_shell *shell, char **input)
     }
     if (!token)
     {
-        printf("DEBUG: Failed to create redirection token\n");
+        debug_print(2047, 10, "DEBUG: Failed to create redirection token\n");
         return (NULL);
     }
-    printf("=== REDIRECTION HANDLED ===\n\n");
+    debug_print(2047, 10, "DEBUG: === REDIRECTION HANDLED ===\n\n");
     return (token);
 }
