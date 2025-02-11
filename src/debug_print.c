@@ -16,7 +16,7 @@ static int	ft_printfstr_fd(char *s, int fd);
 static int	ft_printfll_fd(long long int n, int fd);
 static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 
-//	모두출력 = 1023
+//	모두출력 = 2047
 
 // 이 함수의 목적은
 //	<debug_printf(n> 를 ctrl+shift+f로 검색하여 "일괄 변경"하는 것으로
@@ -60,6 +60,9 @@ static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 
 // str_type 10 = 리다이렉션
 // action_combine_bit 512
+
+// str_type 11 = memory
+// action_combine_bit 1024
 
 
 void debug_print(int action_combine_bit, int str_type, const char *str, ...)
