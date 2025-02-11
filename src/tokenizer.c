@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:07:22 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/08 10:41:57 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/11 15:54:23 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,23 +17,23 @@ t_token *create_token(t_shell *shell, char *value, t_token_type type)
 {
     t_token *token;
 
-    printf("DEBUG: Creating token with value: %s, type: %d\n", value, type);
+    debug_print(2047, 3, "DEBUG: Creating token with value: %s, type: %d\n", value, type);
     token = shell_malloc(shell, sizeof(t_token));
     if (!token)
     {
-        printf("DEBUG: Failed to allocate token\n");
+        debug_print(2047, 3, "DEBUG: Failed to allocate token\n");
         return (NULL);
     }
     token->value = shell_strdup(shell, value);
     if (!token->value)
     {
-        printf("DEBUG: Failed to duplicate token value\n");
+        debug_print(2047, 3, "DEBUG: Failed to duplicate token value\n");
         return (NULL);
     }
     token->type = type;
     token->next = NULL;
     token->prev = NULL;
-    printf("DEBUG: Token created successfully\n");
+    debug_print(2047, 3, "DEBUG: Token created successfully\n");
     return (token);
 }
 
@@ -79,7 +79,7 @@ int tokenize_input(t_shell *shell)
     char *word;
     int word_len;
 
-    printf("DEBUG: [tokenize_input] Starting tokenization\n");
+    debug_print(2047, 3, "DEBUG: [tokenize_input] Starting tokenization\n");
     input = shell->input_line;
     
     while (*input)
