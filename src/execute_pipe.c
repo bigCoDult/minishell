@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 01:31:36 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/12 12:54:16 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     pid_t pid1, pid2;
     int status1, status2;
 
-    debug_print(1, 1, "\n=== EXECUTE PIPE ===\n");
+    debug_print(2047, 8, "\n=== EXECUTE PIPE ===\n");
     
     if (!node || !node->left || !node->right)
         return (1);

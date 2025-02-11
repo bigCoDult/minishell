@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_here.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 01:44:38 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/12 12:53:55 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int handle_heredoc(t_shell *shell, char *delimiter)
     debug_print(1, 1, "Original stdin FD: %d\n", original_stdin);
     if (original_stdin == -1)
     {
-        printf("DEBUG: [handle_heredoc] Failed to backup stdin\n");
+        debug_print(2047, 9, "DEBUG: [handle_heredoc] Failed to backup stdin\n");
         return (-1);
     }
 
@@ -44,14 +44,14 @@ int handle_heredoc(t_shell *shell, char *delimiter)
         line = readline("> ");
         if (!line)
         {
-            printf("DEBUG: [handle_heredoc] EOF encountered\n");
+            debug_print(2047, 9, "DEBUG: [handle_heredoc] EOF encountered\n");
             break;
         }
 
-        printf("DEBUG: [handle_heredoc] Read line: %s\n", line);
+        debug_print(2047, 9, "DEBUG: [handle_heredoc] Read line: %s\n", line);
         if (strcmp(line, delimiter) == 0)
         {
-            printf("DEBUG: [handle_heredoc] Delimiter found, ending input\n");
+            debug_print(2047, 9, "DEBUG: [handle_heredoc] Delimiter found, ending input\n");
             free(line);
             break;
         }
@@ -61,14 +61,14 @@ int handle_heredoc(t_shell *shell, char *delimiter)
         free(line);
     }
 
-    printf("DEBUG: [handle_heredoc] Closing write end\n");
+    debug_print(2047, 9, "DEBUG: [handle_heredoc] Closing write end\n");
     close(pipe_fd[1]);
     
     debug_print(1, 1, "Current stdin FD before dup2: %d\n", STDIN_FILENO);
     // 표준 입력을 파이프의 읽기 끝으로 변경
     if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
     {
-        printf("DEBUG: [handle_heredoc] dup2 failed\n");
+        debug_print(2047, 9, "DEBUG: [handle_heredoc] dup2 failed\n");
         close(pipe_fd[0]);
         close(original_stdin);
         return (-1);

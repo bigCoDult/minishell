@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_array.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 05:07:15 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 11:11:14 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/11 15:37:14 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ char **get_env_array(t_shell *shell)
     t_env *current;
     int count;
 
-    printf("DEBUG: Creating environment array\n");
+    debug_print(2047, 2, "DEBUG: Creating environment array\n");
     
     // 환경 변수 개수 세기
     count = 0;
