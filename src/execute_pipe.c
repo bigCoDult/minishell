@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/11 10:58:46 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/11 11:45:24 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
 {
     int pipefd[2];
     pid_t pid1, pid2;
-    int status;
+    int status1, status2;
 
     debug_print(1, 1, "\n=== EXECUTE PIPE ===\n");
     
@@ -158,29 +158,44 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     if (pipe(pipefd) == -1)
         return (1);
 
-    // 첫 번째 명령어 실행
+    // 첫 번째 명령어 실행 (왼쪽 노드)
     pid1 = fork();
     if (pid1 == 0)
     {
         close(pipefd[0]);
-        dup2(pipefd[1], STDOUT_FILENO);
+        if (dup2(pipefd[1], STDOUT_FILENO) == -1)
+            exit(1);
         close(pipefd[1]);
         
-        if (node->left->type == AST_COMMAND)
+        if (node->left->type == AST_PIPE)
+            exit(execute_pipe(shell, node->left));
+        else if (node->left->type == AST_COMMAND)
+        {
+            debug_print(1, 1, "Executing left command: %s\n", node->left->cmd->args[0]);
             exit(execute_simple_command(shell, node->left->cmd));
+        }
         exit(1);
     }
 
-    // 두 번째 명령어 실행
+    // 두 번째 명령어 실행 (오른쪽 노드)
     pid2 = fork();
     if (pid2 == 0)
     {
         close(pipefd[1]);
-        dup2(pipefd[0], STDIN_FILENO);
+        if (dup2(pipefd[0], STDIN_FILENO) == -1)
+            exit(1);
         close(pipefd[0]);
         
-        if (node->right->type == AST_COMMAND)
+        if (node->right->type == AST_PIPE)
+        {
+            debug_print(1, 1, "Executing right pipe\n");
+            exit(execute_pipe(shell, node->right));
+        }
+        else if (node->right->type == AST_COMMAND)
+        {
+            debug_print(1, 1, "Executing right command: %s\n", node->right->cmd->args[0]);
             exit(execute_simple_command(shell, node->right->cmd));
+        }
         exit(1);
     }
 
@@ -188,8 +203,13 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     close(pipefd[0]);
     close(pipefd[1]);
     
-    waitpid(pid1, &status, 0);
-    waitpid(pid2, &status, 0);
+    // 자식 프로세스들의 종료를 기다림
+    waitpid(pid1, &status1, 0);
+    waitpid(pid2, &status2, 0);
     
-    return (WEXITSTATUS(status));
+    debug_print(1, 1, "Left command status: %d\n", WEXITSTATUS(status1));
+    debug_print(1, 1, "Right command status: %d\n", WEXITSTATUS(status2));
+    
+    // 마지막 명령어의 종료 상태를 반환
+    return (WEXITSTATUS(status2));
 }
