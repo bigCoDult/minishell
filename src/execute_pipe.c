@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/10 12:04:28 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/11 15:37:14 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,24 +80,24 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     pid_t pid1, pid2;
     int status;
 
-    debug_print(1, 1, "\n=== EXECUTE PIPE ===\n");
+    debug_print(2047, 8, "\n=== EXECUTE PIPE ===\n");
     
     // 노드 유효성 검사 추가
     if (!node || !node->left || !node->right)
     {
-        debug_print(1, 1, "Invalid pipe node structure\n");
+        debug_print(2047, 8, "Invalid pipe node structure\n");
         return (1);
     }
 
     // 명령어 노드 검증 후 디버그 출력
     if (node->left->type == AST_COMMAND && node->left->cmd && node->left->cmd->args)
-        debug_print(1, 1, "Left command: %s\n", node->left->cmd->args[0]);
+        debug_print(2047, 8, "Left command: %s\n", node->left->cmd->args[0]);
     if (node->right->type == AST_COMMAND && node->right->cmd && node->right->cmd->args)
-        debug_print(1, 1, "Right command: %s\n", node->right->cmd->args[0]);
+        debug_print(2047, 8, "Right command: %s\n", node->right->cmd->args[0]);
     
     if (pipe(pipefd) == -1)
     {
-        debug_print(1, 1, "Pipe creation failed\n");
+        debug_print(2047, 8, "Pipe creation failed\n");
         return (1);
     }
 
@@ -105,7 +105,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     pid1 = fork();
     if (pid1 == -1)
     {
-        debug_print(1, 1, "Fork failed for first command\n");
+        debug_print(2047, 8, "Fork failed for first command\n");
         close(pipefd[0]);
         close(pipefd[1]);
         return (1);
@@ -114,11 +114,11 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     if (pid1 == 0)
     {
         // 자식 프로세스 1
-        debug_print(1, 1, "Child 1: Starting execution\n");
+        debug_print(2047, 8, "Child 1: Starting execution\n");
         close(pipefd[0]);  // 읽기 끝 닫기
         if (dup2(pipefd[1], STDOUT_FILENO) == -1)
         {
-            debug_print(1, 1, "Child 1: dup2 failed\n");
+            debug_print(2047, 8, "Child 1: dup2 failed\n");
             exit(1);
         }
         close(pipefd[1]);
@@ -126,17 +126,17 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
         // 왼쪽 노드가 파이프인 경우 재귀적으로 실행
         if (node->left->type == AST_PIPE)
         {
-            debug_print(1, 1, "Child 1: Found nested pipe, executing recursively\n");
+            debug_print(2047, 8, "Child 1: Found nested pipe, executing recursively\n");
             exit(execute_pipe(shell, node->left));
         }
         else if (node->left->type == AST_COMMAND && node->left->cmd)
         {
-            debug_print(1, 1, "Child 1: Executing simple command\n");
+            debug_print(2047, 8, "Child 1: Executing simple command\n");
             exit(execute_simple_command(shell, node->left->cmd));
         }
         else
         {
-            debug_print(1, 1, "Child 1: Invalid command node\n");
+            debug_print(2047, 8, "Child 1: Invalid command node\n");
             exit(1);
         }
     }
@@ -145,7 +145,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     pid2 = fork();
     if (pid2 == -1)
     {
-        debug_print(1, 1, "Fork failed for second command\n");
+        debug_print(2047, 8, "Fork failed for second command\n");
         close(pipefd[0]);
         close(pipefd[1]);
         return (1);
@@ -154,11 +154,11 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     if (pid2 == 0)
     {
         // 자식 프로세스 2
-        debug_print(1, 1, "Child 2: Starting execution\n");
+        debug_print(2047, 8, "Child 2: Starting execution\n");
         close(pipefd[1]);  // 쓰기 끝 닫기
         if (dup2(pipefd[0], STDIN_FILENO) == -1)
         {
-            debug_print(1, 1, "Child 2: dup2 failed\n");
+            debug_print(2047, 8, "Child 2: dup2 failed\n");
             exit(1);
         }
         close(pipefd[0]);
@@ -166,33 +166,33 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
         // 오른쪽 노드가 파이프인 경우 재귀적으로 실행
         if (node->right->type == AST_PIPE)
         {
-            debug_print(1, 1, "Child 2: Found nested pipe, executing recursively\n");
+            debug_print(2047, 8, "Child 2: Found nested pipe, executing recursively\n");
             exit(execute_pipe(shell, node->right));
         }
         else if (node->right->type == AST_COMMAND && node->right->cmd)
         {
-            debug_print(1, 1, "Child 2: Executing simple command\n");
+            debug_print(2047, 8, "Child 2: Executing simple command\n");
             exit(execute_simple_command(shell, node->right->cmd));
         }
         else
         {
-            debug_print(1, 1, "Child 2: Invalid command node\n");
+            debug_print(2047, 8, "Child 2: Invalid command node\n");
             exit(1);
         }
     }
 
     // 부모 프로세스
-    debug_print(1, 1, "Parent: Closing pipe ends\n");
+    debug_print(2047, 8, "Parent: Closing pipe ends\n");
     close(pipefd[0]);
     close(pipefd[1]);
 
     // 자식 프로세스들의 종료를 기다림
-    debug_print(1, 1, "Parent: Waiting for children\n");
+    debug_print(2047, 8, "Parent: Waiting for children\n");
     waitpid(pid1, &status, 0);
-    debug_print(1, 1, "Parent: First child exited with status: %d\n", WEXITSTATUS(status));
+    debug_print(2047, 8, "Parent: First child exited with status: %d\n", WEXITSTATUS(status));
     waitpid(pid2, &status, 0);
-    debug_print(1, 1, "Parent: Second child exited with status: %d\n", WEXITSTATUS(status));
+    debug_print(2047, 8, "Parent: Second child exited with status: %d\n", WEXITSTATUS(status));
 
-    debug_print(1, 1, "=== PIPE EXECUTION COMPLETED ===\n\n");
+    debug_print(2047, 8, "=== PIPE EXECUTION COMPLETED ===\n\n");
     return (WEXITSTATUS(status));
 }

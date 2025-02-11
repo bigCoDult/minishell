@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   memory.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 13:08:52 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/11 15:54:42 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void free_all_memory(t_shell *shell)
     t_memory *next;
     t_memory *prev;
 
-    printf("DEBUG: [free_all_memory] Starting to free all memory\n");
+    debug_print(2047, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
 
     current = shell->memory;
     prev = NULL;
