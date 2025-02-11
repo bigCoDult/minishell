@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:07:22 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 06:05:32 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/08 10:41:57 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,89 +38,82 @@ t_token *create_token(t_shell *shell, char *value, t_token_type type)
 }
 
 // 토큰 리스트에 새 토큰 추가
-static void add_token(t_shell *shell, t_token *new_token)
+void add_token(t_shell *shell, t_token *token)
 {
     t_token *current;
 
-    printf("DEBUG: Adding token to list\n");
+    printf("\n=== ADD TOKEN ===\n");
+    printf("Adding token: type=%d, value='%s'\n", token->type, token->value);
+    
     if (!shell->tokens)
     {
-        shell->tokens = new_token;
-        printf("DEBUG: Added as first token\n");
-        return;
+        printf("First token in list\n");
+        shell->tokens = token;
     }
+    else
+    {
+        current = shell->tokens;
+        while (current->next)
+            current = current->next;
+        printf("Adding after token: type=%d, value='%s'\n", 
+               current->type, current->value);
+        current->next = token;
+        token->prev = current;
+    }
+    
+    // 현재 토큰 리스트 출력
+    printf("Current token list:\n");
     current = shell->tokens;
-    while (current->next)
+    while (current)
+    {
+        printf("- type=%d, value='%s'\n", current->type, current->value);
         current = current->next;
-    current->next = new_token;
-    new_token->prev = current;
-    printf("DEBUG: Token added to list\n");
+    }
+    printf("=== TOKEN ADDED ===\n\n");
 }
 
 int tokenize_input(t_shell *shell)
 {
     char *input;
     t_token *token;
-    int word_len;
     char *word;
-    
-    printf("DEBUG: Starting tokenization\n");
-    input = shell->input_line;
-    if (!input)
-    {
-        printf("DEBUG: No input line\n");
-        return (1);
-    }
+    int word_len;
 
-    printf("DEBUG: Processing input: %s\n", input);
+    printf("DEBUG: [tokenize_input] Starting tokenization\n");
+    input = shell->input_line;
+    
     while (*input)
     {
-        // 공백 건너뛰기
         while (*input && *input == ' ')
             input++;
         if (!*input)
             break;
 
-        printf("DEBUG: Processing character: %c\n", *input);
-        // 파이프 체크
         if (*input == '|')
         {
-            printf("DEBUG: Found pipe token\n");
             token = create_token(shell, "|", TOKEN_PIPE);
+            add_token(shell, token);
             input++;
         }
-        // 리다이렉션 체크
         else if (*input == '<' || *input == '>')
         {
-            printf("DEBUG: Found redirection\n");
             token = handle_redirection(shell, &input);
+            if (!token)
+                return (1);
+            // handle_redirection 내부에서 토큰 추가 처리
+        }
+        else
+        {
+            word = handle_word(input, &word_len);
+            if (!word)
+                return (1);
+            token = create_token(shell, word, TOKEN_WORD);
+            free(word);
+            input += word_len;
             if (!token)
                 return (1);
             add_token(shell, token);
         }
-        // 일반 단어
-        else
-        {
-            printf("DEBUG: Processing word token\n");
-            word = handle_word(input, &word_len);
-            if (!word)
-            {
-                printf("DEBUG: Failed to handle word\n");
-                return (1);
-            }
-            token = create_token(shell, word, TOKEN_WORD);
-            free(word);
-            input += word_len;
-        }
-        
-        if (!token)
-        {
-            printf("DEBUG: Failed to create token\n");
-            return (1);
-        }
-        add_token(shell, token);
     }
-
-    printf("DEBUG: Tokenization completed successfully\n");
     return (0);
 }

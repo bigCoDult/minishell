@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/11 13:57:54 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/11 14:16:01 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,11 @@ static void	init_shell(t_shell *shell, char **envp)
 	shell->tokens = NULL;
 	shell->status.exit_code = 0;
 	shell->env = init_env(shell, envp);
-	debug_print(1023, 7, "DEBUG: Shell initialization completed\n");
+	shell->heredoc.original_stdin = -1;
+	shell->heredoc.delimiter = NULL;
+	shell->heredoc.pipe_fd[0] = -1;
+	shell->heredoc.pipe_fd[1] = -1;
+	printf("DEBUG: Shell initialization completed\n");
 }
 
 static void	minishell_loop(t_shell *shell)

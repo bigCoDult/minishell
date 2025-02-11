@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:15:26 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 05:57:35 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/08 10:42:23 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,43 +45,42 @@ t_token *handle_redirection(t_shell *shell, char **input)
     char *word;
     int word_len;
 
-    printf("DEBUG: Handling redirection\n");
+    printf("DEBUG: [handle_redirection] Processing redirection\n");
+    
     if (**input == '<' && *(*input + 1) == '<')
     {
-        // heredoc 토큰 생성
         token = create_redir_token(shell, "<<", TOKEN_REDIR);
-        if (!token)
-            return (NULL);
-        
         *input += 2;
+        
         // 공백 건너뛰기
         while (**input && **input == ' ')
             (*input)++;
-        
-        // 구분자를 별도의 토큰으로 생성
+            
+        // delimiter 단어 처리
         word = handle_word(*input, &word_len);
         if (!word)
         {
-            printf("DEBUG: Failed to get heredoc delimiter\n");
-            shell_free(shell, token->value);
+            printf("Failed to get delimiter word\n");
             shell_free(shell, token);
             return (NULL);
         }
         
+        printf("Creating delimiter token: '%s'\n", word);
         delimiter_token = create_token(shell, word, TOKEN_WORD);
         free(word);
+        
         if (!delimiter_token)
         {
-            shell_free(shell, token->value);
+            printf("Failed to create delimiter token\n");
             shell_free(shell, token);
             return (NULL);
         }
         
-        // 토큰들을 연결
-        token->next = delimiter_token;
-        delimiter_token->prev = token;
-        
         *input += word_len;
+        
+        // 토큰들을 리스트에 추가
+        add_token(shell, token);
+        add_token(shell, delimiter_token);
         return (token);
     }
     else if (**input == '>' && *(*input + 1) == '>')
@@ -95,5 +94,11 @@ t_token *handle_redirection(t_shell *shell, char **input)
         token = create_redir_token(shell, redir, TOKEN_REDIR);
         (*input)++;
     }
+    if (!token)
+    {
+        printf("DEBUG: Failed to create redirection token\n");
+        return (NULL);
+    }
+    printf("=== REDIRECTION HANDLED ===\n\n");
     return (token);
 }

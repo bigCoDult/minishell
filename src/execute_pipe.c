@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 12:00:38 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/10 12:04:28 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,59 +76,123 @@ int execute_piped_command(t_shell *shell, t_command *cmd)
 
 int execute_pipe(t_shell *shell, t_ast_node *node)
 {
-    printf("DEBUG: Starting pipe execution\n");
+    int pipefd[2];
+    pid_t pid1, pid2;
+    int status;
+
+    debug_print(1, 1, "\n=== EXECUTE PIPE ===\n");
     
-    if (!node->left || !node->right)
+    // 노드 유효성 검사 추가
+    if (!node || !node->left || !node->right)
     {
-        printf("DEBUG: Invalid pipe node (missing left or right)\n");
+        debug_print(1, 1, "Invalid pipe node structure\n");
         return (1);
     }
 
-    int cmd_count = 0;
-    t_ast_node *current = node;
+    // 명령어 노드 검증 후 디버그 출력
+    if (node->left->type == AST_COMMAND && node->left->cmd && node->left->cmd->args)
+        debug_print(1, 1, "Left command: %s\n", node->left->cmd->args[0]);
+    if (node->right->type == AST_COMMAND && node->right->cmd && node->right->cmd->args)
+        debug_print(1, 1, "Right command: %s\n", node->right->cmd->args[0]);
     
-    // 파이프라인의 명령어 개수 세기
-    while (current && current->type == AST_PIPE)
+    if (pipe(pipefd) == -1)
     {
-        cmd_count++;
-        current = current->right;
+        debug_print(1, 1, "Pipe creation failed\n");
+        return (1);
     }
-    if (current)  // 마지막 명령어
-        cmd_count++;
-    
-    printf("DEBUG: Found %d commands in pipeline\n", cmd_count);
 
-    // 파이프라인 실행
-    current = node;
-    int i = 0;
-    while (current)
+    // 첫 번째 명령어 실행
+    pid1 = fork();
+    if (pid1 == -1)
     {
-        t_command *cmd;
-        if (current->type == AST_PIPE)
+        debug_print(1, 1, "Fork failed for first command\n");
+        close(pipefd[0]);
+        close(pipefd[1]);
+        return (1);
+    }
+    
+    if (pid1 == 0)
+    {
+        // 자식 프로세스 1
+        debug_print(1, 1, "Child 1: Starting execution\n");
+        close(pipefd[0]);  // 읽기 끝 닫기
+        if (dup2(pipefd[1], STDOUT_FILENO) == -1)
         {
-            printf("DEBUG: Executing command %d in pipe\n", i + 1);
-            cmd = current->left->cmd;
+            debug_print(1, 1, "Child 1: dup2 failed\n");
+            exit(1);
+        }
+        close(pipefd[1]);
+        
+        // 왼쪽 노드가 파이프인 경우 재귀적으로 실행
+        if (node->left->type == AST_PIPE)
+        {
+            debug_print(1, 1, "Child 1: Found nested pipe, executing recursively\n");
+            exit(execute_pipe(shell, node->left));
+        }
+        else if (node->left->type == AST_COMMAND && node->left->cmd)
+        {
+            debug_print(1, 1, "Child 1: Executing simple command\n");
+            exit(execute_simple_command(shell, node->left->cmd));
         }
         else
         {
-            printf("DEBUG: Executing final command in pipe\n");
-            cmd = current->cmd;
+            debug_print(1, 1, "Child 1: Invalid command node\n");
+            exit(1);
         }
-
-        if (execute_piped_command(shell, cmd) != 0)
-        {
-            printf("DEBUG: Pipe command execution failed\n");
-            return (1);
-        }
-
-        if (current->type == AST_PIPE)
-            current = current->right;
-        else
-            current = NULL;
-        i++;
     }
 
-    wait_all_children(shell, cmd_count);
-    printf("DEBUG: Pipe execution completed\n");
-    return (0);
+    // 두 번째 명령어 실행
+    pid2 = fork();
+    if (pid2 == -1)
+    {
+        debug_print(1, 1, "Fork failed for second command\n");
+        close(pipefd[0]);
+        close(pipefd[1]);
+        return (1);
+    }
+
+    if (pid2 == 0)
+    {
+        // 자식 프로세스 2
+        debug_print(1, 1, "Child 2: Starting execution\n");
+        close(pipefd[1]);  // 쓰기 끝 닫기
+        if (dup2(pipefd[0], STDIN_FILENO) == -1)
+        {
+            debug_print(1, 1, "Child 2: dup2 failed\n");
+            exit(1);
+        }
+        close(pipefd[0]);
+        
+        // 오른쪽 노드가 파이프인 경우 재귀적으로 실행
+        if (node->right->type == AST_PIPE)
+        {
+            debug_print(1, 1, "Child 2: Found nested pipe, executing recursively\n");
+            exit(execute_pipe(shell, node->right));
+        }
+        else if (node->right->type == AST_COMMAND && node->right->cmd)
+        {
+            debug_print(1, 1, "Child 2: Executing simple command\n");
+            exit(execute_simple_command(shell, node->right->cmd));
+        }
+        else
+        {
+            debug_print(1, 1, "Child 2: Invalid command node\n");
+            exit(1);
+        }
+    }
+
+    // 부모 프로세스
+    debug_print(1, 1, "Parent: Closing pipe ends\n");
+    close(pipefd[0]);
+    close(pipefd[1]);
+
+    // 자식 프로세스들의 종료를 기다림
+    debug_print(1, 1, "Parent: Waiting for children\n");
+    waitpid(pid1, &status, 0);
+    debug_print(1, 1, "Parent: First child exited with status: %d\n", WEXITSTATUS(status));
+    waitpid(pid2, &status, 0);
+    debug_print(1, 1, "Parent: Second child exited with status: %d\n", WEXITSTATUS(status));
+
+    debug_print(1, 1, "=== PIPE EXECUTION COMPLETED ===\n\n");
+    return (WEXITSTATUS(status));
 }

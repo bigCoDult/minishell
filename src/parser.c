@@ -6,89 +6,130 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:12 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 13:35:28 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/08 11:16:41 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+// // 토큰 타입을 리다이렉션 타입으로 변환하는 함수 추가
+// static t_redirection_type get_redirection_type(const char *token_value)
+// {
+//     printf("DEBUG: [get_redirection_type] Token value: %s\n", token_value);
+//     if (!token_value)
+//         return (REDIR_NONE);
+//     if (strcmp(token_value, "<") == 0)
+//         return (REDIR_IN);
+//     else if (strcmp(token_value, ">") == 0)
+//         return (REDIR_OUT);
+//     else if (strcmp(token_value, ">>") == 0)
+//         return (REDIR_APPEND);
+//     else if (strcmp(token_value, "<<") == 0)
+//         return (REDIR_HEREDOC);
+//     return (REDIR_NONE);  // 기본값 또는 에러 케이스
+// }
+
 // 명령어 노드 생성
 t_command *create_command(t_shell *shell, t_token **tokens)
 {
     t_command *cmd;
-    int arg_count;
     t_token *curr;
+    int arg_count;
 
-    printf("DEBUG: [create_command] Creating command from tokens\n");
+    printf("\n=== CREATE COMMAND ===\n");
     cmd = shell_malloc(shell, sizeof(t_command));
     if (!cmd)
-    {
-        printf("DEBUG: [create_command] Failed to allocate command\n");
         return (NULL);
-    }
 
-    // 초기화
-    printf("DEBUG: [create_command] Initializing command structure\n");
     cmd->args = NULL;
     cmd->redirs = NULL;
 
-    // 명령어 이름과 인자 개수 세기
+    // 1단계: 먼저 명령어와 인자 개수를 세기
     curr = *tokens;
     arg_count = 0;
-    printf("DEBUG: [create_command] Counting arguments\n");
-    while (curr && curr->type == TOKEN_WORD)
+    while (curr && (curr->type == TOKEN_WORD || curr->type == TOKEN_REDIR))
     {
-        printf("DEBUG: [create_command] Processing token %d: %s\n",
-               arg_count, curr->value);
-        // if (arg_count == 0)
-        // {
-        //     cmd->args[0] = shell_strdup(shell, curr->value);
-        //     printf("DEBUG: [create_command] Command name set to: %s\n", cmd->args[0]);
-        // }
-        arg_count++;
-        curr = curr->next;
+        if (curr->type == TOKEN_WORD)
+            arg_count++;
+        else if (curr->type == TOKEN_REDIR)
+            curr = curr->next;  // 리다이렉션의 타겟 토큰 건너뛰기
+        if (curr)
+            curr = curr->next;
     }
-    printf("DEBUG: [create_command] Found %d arguments\n", arg_count);
 
-    // 인자 배열 생성
+    // 인자 배열 할당 및 초기화
     if (arg_count > 0)
     {
-        printf("DEBUG: [create_command] Allocating args array\n");
-        cmd->args = create_args_array(shell, *tokens, arg_count);
+        cmd->args = shell_malloc(shell, sizeof(char *) * (arg_count + 1));
         if (!cmd->args)
-        {
-            printf("DEBUG: [create_command] Failed to create args array\n");
             return (NULL);
-        }
-         // 인자 복사
-        curr = *tokens;
-        int i = 0;
-        while (i < arg_count)
-        {
-            printf("DEBUG: [create_command] Copying argument %d: %s\n", 
-                   i, curr->value);
-            cmd->args[i] = shell_strdup(shell, curr->value);
-            if (!cmd->args[i])
-            {
-                printf("DEBUG: [create_command] Failed to copy argument %d\n", i);
-                return (NULL);
-            }
-            curr = curr->next;
-            i++;
-        }
         cmd->args[arg_count] = NULL;
-        printf("DEBUG: [create_command] Arguments copied successfully\n");
+    }
 
-        // 토큰 포인터 업데이트
-        *tokens = curr;
-    }
-    else
+    // 2단계: 토큰을 다시 순회하며 명령어/인자와 리다이렉션 처리
+    curr = *tokens;
+    arg_count = 0;
+    while (curr)
     {
-        printf("DEBUG: [create_command] No arguments found\n");
-        return (NULL);
+        if (curr->type == TOKEN_WORD)
+        {
+            printf("Processing word: %s\n", curr->value);
+            cmd->args[arg_count++] = shell_strdup(shell, curr->value);
+            curr = curr->next;
+        }
+        else if (curr->type == TOKEN_REDIR)
+        {
+            printf("Processing redirection: %s\n", curr->value);
+            t_token *next_token = curr->next;
+            if (!next_token)
+                return (NULL);
+
+            t_redirection *redir = shell_malloc(shell, sizeof(t_redirection));
+            if (!redir)
+                return (NULL);
+
+            redir->next = NULL;
+            if (strcmp(curr->value, "<<") == 0)
+            {
+                redir->type = REDIR_HEREDOC;
+                redir->filename = shell_strdup(shell, next_token->value);
+            }
+            else if (strcmp(curr->value, ">>") == 0)
+            {
+                redir->type = REDIR_APPEND;
+                redir->filename = shell_strdup(shell, next_token->value);
+            }
+            else if (curr->value[0] == '<')
+            {
+                redir->type = REDIR_IN;
+                redir->filename = shell_strdup(shell, next_token->value);
+            }
+            else
+            {
+                redir->type = REDIR_OUT;
+                redir->filename = shell_strdup(shell, next_token->value);
+            }
+
+            // 리다이렉션 리스트에 추가
+            if (!cmd->redirs)
+                cmd->redirs = redir;
+            else
+            {
+                t_redirection *last = cmd->redirs;
+                while (last->next)
+                    last = last->next;
+                last->next = redir;
+            }
+
+            curr = next_token->next;
+        }
+        else
+            break;
     }
-    printf("DEBUG: [create_command] Command creation completed successfully\n");
-    return (cmd);
+
+    *tokens = curr;
+    printf("=== COMMAND CREATED ===\n");
+    return cmd;
 }
 
 // 명령어 인자 배열 생성
@@ -97,29 +138,29 @@ char **create_args_array(t_shell *shell, t_token *start, int arg_count)
     char **args;
     int i;
 
-    printf("DEBUG: Creating args array with count: %d\n", arg_count);
+    printf("DEBUG: [create_args_array] Creating args array with count: %d\n", arg_count);
     args = shell_malloc(shell, sizeof(char *) * (arg_count + 1));
     if (!args)
     {
-        printf("DEBUG: Failed to allocate args array\n");
+        printf("DEBUG: [create_args_array] Failed to allocate args array\n");
         return (NULL);
     }
 
     i = 0;
     while (start && start->type == TOKEN_WORD && i < arg_count)
     {
-        printf("DEBUG: Adding arg[%d]: %s\n", i, start->value);
+        printf("DEBUG: [create_args_array] Adding arg[%d]: %s\n", i, start->value);
         args[i] = shell_strdup(shell, start->value);
         if (!args[i])
         {
-            printf("DEBUG: Failed to duplicate argument\n");
+            printf("DEBUG: [create_args_array] Failed to duplicate argument\n");
             return (NULL);
         }
         start = start->next;
         i++;
     }
     args[i] = NULL;
-    printf("DEBUG: Args array created successfully\n");
+    printf("DEBUG: [create_args_array] Args array created successfully\n");
     return (args);
 }
 
@@ -228,7 +269,7 @@ int parse_input(t_shell *shell)
 {
     t_token *curr_token;
 
-    printf("\nDEBUG: === Starting input parsing ===\n");
+    printf("\nDEBUG: [parse_input] === Starting input parsing ===\n");
 
     // 이전 데이터 초기화
     if (shell->tokens)
@@ -244,17 +285,17 @@ int parse_input(t_shell *shell)
     
     if (tokenize_input(shell) != 0)
     {
-        printf("DEBUG: Tokenization failed\n");
+        printf("DEBUG: [parse_input] Tokenization failed\n");
         return (1);
     }
-    printf("DEBUG: Tokenization completed\n");
+    printf("DEBUG: [parse_input] Tokenization completed\n");
 
     // 토큰 목록 출력
-    printf("\nDEBUG: Token list:\n");
+    printf("\nDEBUG: [parse_input] Token list:\n");
     curr_token = shell->tokens;
     while (curr_token)
     {
-        printf("DEBUG: Token type: %d, value: %s\n", 
+        printf("DEBUG: [parse_input] Token type: %d, value: %s\n", 
                curr_token->type, curr_token->value);
         curr_token = curr_token->next;
     }
@@ -264,11 +305,11 @@ int parse_input(t_shell *shell)
     
     if (!shell->ast_root)
     {
-        printf("DEBUG: Pipeline parsing failed\n");
+        printf("DEBUG: [parse_input] Pipeline parsing failed\n");
         return (1);
     }
 
-    printf("DEBUG: Parsing completed successfully\n");
-    printf("DEBUG: === Parsing finished ===\n\n");
+    printf("DEBUG: [parse_input] Parsing completed successfully\n");
+    printf("DEBUG: [parse_input] === Parsing finished ===\n\n");
     return (0);
 }
