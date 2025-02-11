@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/08 11:04:59 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/12 12:50:37 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static void	init_shell(t_shell *shell, char **envp)
 	shell->heredoc.delimiter = NULL;
 	shell->heredoc.pipe_fd[0] = -1;
 	shell->heredoc.pipe_fd[1] = -1;
-	printf("DEBUG: Shell initialization completed\n");
+	debug_print(1023, 7, "DEBUG: Shell initialization completed\n");
 }
 
 static void	minishell_loop(t_shell *shell)
