@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/11 15:37:14 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/11 18:57:24 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,8 @@ static void	minishell_loop(t_shell *shell)
 int	main(int argc, char **argv, char **envp)
 {
 	t_shell	shell;
-
+	
+	ft_memset(&shell, 0, sizeof(t_shell));
 	debug_print(2047, 7, "DEBUG: minishell starting\n");
 	
 	(void)argv;
