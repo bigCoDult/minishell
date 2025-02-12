@@ -68,7 +68,6 @@ static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 {
 	va_list *ap;
-	(void)str;
 	int	mask;
 	int	type;
 
