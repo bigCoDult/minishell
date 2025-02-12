@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/11 11:45:24 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/12 01:31:36 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,8 @@ static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
     if (original_stdin == -1)
         return (1);
 
+    shell->heredoc.original_stdin = original_stdin;  // 쉘 구조체에 저장
+
     // 왼쪽 명령어의 히어독 찾기
     if (node->left && node->left->type == AST_COMMAND && node->left->cmd)
         left_redirs = node->left->cmd->redirs;
@@ -97,46 +99,43 @@ static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
     if (node->right && node->right->type == AST_COMMAND && node->right->cmd)
         right_redirs = node->right->cmd->redirs;
 
-    // 모든 히어독 처리
+    // 왼쪽 히어독 처리
     while (left_redirs)
     {
         if (left_redirs->type == REDIR_HEREDOC)
         {
             debug_print(1, 1, "Processing left heredoc: %s\n", left_redirs->filename);
             if (handle_heredoc(shell, left_redirs->filename) != 0)
-            {
-                close(original_stdin);
                 return (1);
-            }
             heredoc_count++;
+            
+            // 각 히어독 처리 후 표준 입력 복원
+            if (dup2(original_stdin, STDIN_FILENO) == -1)
+                return (1);
         }
         left_redirs = left_redirs->next;
     }
 
-    // 표준 입력 복원
-    if (dup2(original_stdin, STDIN_FILENO) == -1)
-    {
-        close(original_stdin);
-        return (1);
-    }
-    
+    // 오른쪽 히어독 처리
     while (right_redirs)
     {
         if (right_redirs->type == REDIR_HEREDOC)
         {
             debug_print(1, 1, "Processing right heredoc: %s\n", right_redirs->filename);
             if (handle_heredoc(shell, right_redirs->filename) != 0)
-            {
-                close(original_stdin);
                 return (1);
-            }
             heredoc_count++;
+            
+            // 각 히어독 처리 후 표준 입력 복원
+            if (dup2(original_stdin, STDIN_FILENO) == -1)
+                return (1);
         }
         right_redirs = right_redirs->next;
     }
 
-    close(original_stdin);
     debug_print(1, 1, "Processed %d heredocs\n", heredoc_count);
+    
+    // original_stdin은 닫지 않고 shell 구조체에 저장된 상태로 유지
     return (0);
 }
 

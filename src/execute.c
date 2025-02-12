@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/08 10:57:11 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/12 01:39:21 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,47 +69,47 @@ int execute_simple_command(t_shell *shell, t_command *cmd)
 {
     int ret;
 
-    printf("DEBUG: [execute_simple_command] Starting execution\n");
+    debug_print(1, 1, "\n=== EXECUTE SIMPLE COMMAND START ===\n");
+    debug_print(1, 1, "Command: %s\n", cmd->args[0]);
+    debug_print(1, 1, "Current stdin FD: %d\n", STDIN_FILENO);
     
     // 리다이렉션 처리
     t_redirection *redir = cmd->redirs;
     while (redir)
     {
-        printf("DEBUG: [execute_simple_command] Processing redirection type: %d\n", redir->type);
+        debug_print(1, 1, "Processing redirection type: %d\n", redir->type);
+        debug_print(1, 1, "Redirection filename: %s\n", redir->filename);
+        
+        // 히어독은 이미 handle_all_heredocs에서 처리되었으므로 건너뜀
         if (redir->type == REDIR_HEREDOC)
         {
-            printf("DEBUG: [execute_simple_command] Setting up heredoc\n");
-            if (handle_heredoc(shell, redir->filename) != 0)
-            {
-                printf("DEBUG: [execute_simple_command] Heredoc setup failed\n");
-                return (1);
-            }
+            debug_print(1, 1, "Skipping already processed heredoc\n");
+            redir = redir->next;
+            continue;
         }
+        
+        // 다른 리다이렉션 처리
+        if (setup_redirections(shell, redir) != 0)
+            return (1);
         redir = redir->next;
     }
 
     // 명령어 실행
-    printf("DEBUG: [execute_simple_command] Command args[0]: %s\n", cmd->args[0]);
+    debug_print(1, 1, "Executing command: %s\n", cmd->args[0]);
     if (is_builtin(cmd->args[0]))
     {
-        printf("DEBUG: [execute_simple_command] Executing builtin command\n");
+        debug_print(1, 1, "Executing builtin command\n");
         ret = execute_builtin(shell, cmd);
     }
     else
     {
-        printf("DEBUG: [execute_simple_command] Executing external command\n");
+        debug_print(1, 1, "Executing external command\n");
         ret = execute_external(shell, cmd);
     }
 
-    // 표준 입력 복원 (히어독이 사용된 경우)
-    if (shell->heredoc.original_stdin != -1)
-    {
-        printf("DEBUG: [execute_simple_command] Restoring original stdin\n");
-        dup2(shell->heredoc.original_stdin, STDIN_FILENO);
-        close(shell->heredoc.original_stdin);
-        shell->heredoc.original_stdin = -1;
-    }
-
+    debug_print(1, 1, "Command execution completed with status: %d\n", ret);
+    debug_print(1, 1, "Current stdin FD: %d\n", STDIN_FILENO);
+    debug_print(1, 1, "=== EXECUTE SIMPLE COMMAND END ===\n\n");
     return ret;
 }
 
