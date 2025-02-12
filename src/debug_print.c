@@ -76,10 +76,13 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 	va_start(ap, str);
 	if (action_combine_bit == 0)
 		return ;
-	while (mask < 1023)
+	while (mask < 2048)
 	{
 		if ((action_combine_bit & mask) && str_type == type)
+		{
+			printf("type = %d\n", type);
 			ft_vprintf(str, ap);
+		}
 		mask <<= 1;
 		type++;
 	}
