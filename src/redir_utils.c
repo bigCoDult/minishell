@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/07 13:30:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/12 15:42:31 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,65 +63,58 @@ static int setup_output_redirect(t_redirection *redir)
     return (0);
 }
 
-// heredoc 처리
-static int setup_heredoc(t_shell *shell, t_redirection *redir)
-{
-    int pipefd[2];
-    char *line;
+// // heredoc 처리
+// static int setup_heredoc(t_shell *shell, t_redirection *redir)
+// {
+//     int pipefd[2];
+//     char *line;
 
-    (void)shell;
-    if (pipe(pipefd) == -1)
-        return (1);
+//     (void)shell;
+//     if (pipe(pipefd) == -1)
+//         return (1);
 
-    while (1)
-    {
-        line = readline("> ");
-        if (!line || strcmp(line, redir->filename) == 0)
-        {
-            free(line);
-            break;
-        }
-        write(pipefd[1], line, strlen(line));
-        write(pipefd[1], "\n", 1);
-        free(line);
-    }
+//     while (1)
+//     {
+//         line = readline("> ");
+//         if (!line || strcmp(line, redir->filename) == 0)
+//         {
+//             free(line);
+//             break;
+//         }
+//         write(pipefd[1], line, strlen(line));
+//         write(pipefd[1], "\n", 1);
+//         free(line);
+//     }
 
-    close(pipefd[1]);
-    if (dup2(pipefd[0], STDIN_FILENO) == -1)
-    {
-        close(pipefd[0]);
-        return (1);
-    }
-    close(pipefd[0]);
-    return (0);
-}
+//     close(pipefd[1]);
+//     if (dup2(pipefd[0], STDIN_FILENO) == -1)
+//     {
+//         close(pipefd[0]);
+//         return (1);
+//     }
+//     close(pipefd[0]);
+//     return (0);
+// }
 
 // 모든 리다이렉션 설정
 int setup_redirections(t_shell *shell, t_redirection *redirs)
 {
-    t_redirection *current;
+    t_redirection *current = redirs;
 
-    current = redirs;
+    (void)shell;  // shell 파라미터 사용하지 않음을 명시
     while (current)
     {
-        switch (current->type)
+        if (current->type == REDIR_IN)
         {
-            case REDIR_NONE:
-                break;
-            case REDIR_IN:
-                if (setup_input_redirect(current) != 0)
-                    return (1);
-                break;
-            case REDIR_OUT:
-            case REDIR_APPEND:
-                if (setup_output_redirect(current) != 0)
-                    return (1);
-                break;
-            case REDIR_HEREDOC:
-                if (setup_heredoc(shell, current) != 0)
-                    return (1);
-                break;
+            if (setup_input_redirect(current) != 0)
+                return (1);
         }
+        else if (current->type == REDIR_OUT || current->type == REDIR_APPEND)
+        {
+            if (setup_output_redirect(current) != 0)
+                return (1);
+        }
+        // 히어독은 이미 처리되었으므로 건너뜀
         current = current->next;
     }
     return (0);
@@ -136,6 +129,7 @@ t_redirection *create_redirection(t_shell *shell, t_token *token)
     if (!redir)
         return (NULL);
 
+    // 리다이렉션 타입 설정
     if (strcmp(token->value, "<<") == 0)
         redir->type = REDIR_HEREDOC;
     else if (strcmp(token->value, "<") == 0)
@@ -145,6 +139,7 @@ t_redirection *create_redirection(t_shell *shell, t_token *token)
     else if (strcmp(token->value, ">>") == 0)
         redir->type = REDIR_APPEND;
 
+    // 파일명/구분자 설정
     redir->filename = shell_strdup(shell, token->next->value);
     if (!redir->filename)
     {
