@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_built.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:42:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/06 10:51:50 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/12 13:27:59 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ int builtin_export(t_shell *shell, char **args)
     i = 1;
     while (args[i])
     {
-        printf("DEBUG: [builtin_export] Processing arg: %s\n", args[i]);
+        debug_print(2047, 2, "DEBUG: [builtin_export] Processing arg: %s\n", args[i]);
         if (parse_env_arg(shell, args[i], &key, &value))
         {
             printf("export: '%s': not a valid identifier\n", args[i]);
@@ -144,14 +144,14 @@ int builtin_env(t_shell *shell)
 {
     t_env *current;
 
-    printf("DEBUG: [builtin_env] Starting to print environment\n");
+    debug_print(2047, 2, "DEBUG: [builtin_env] Starting to print environment\n");
 
     current = shell->env;
     while (current)
     {
         if (current->value)  // value가 있는 환경변수만 출력
         {
-            printf("DEBUG: [builtin_env] Printing: %s=%s\n", 
+            debug_print(2047, 2, "DEBUG: [builtin_env] Printing: %s=%s\n",
                    current->key, current->value);
             printf("%s=%s\n", current->key, current->value);
         }

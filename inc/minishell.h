@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/08 14:30:35 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/12 13:11:58 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,6 +172,7 @@ char *ft_strchr(const char *str, int c);
 int ft_strlen(const char *str);
 char	*shell_strdup(t_shell *shell, const char *str);
 char *ft_strdup(const char *str);
+void	*ft_memset(void *dest, int c, size_t count);
 
 // signal.c
 void setup_signals(void);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_extern.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/05 12:06:58 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/12 13:27:59 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,22 +18,22 @@ int execute_external(t_shell *shell, t_command *cmd)
     int status;
     char *path;
 
-    printf("DEBUG: execute_external start with cmd: %s\n", cmd->args[0]);
+    debug_print(2047, 7, "DEBUG: execute_external start with cmd: %s\n", cmd->args[0]);
     
     pid = fork();
     if (pid == 0)
     {
-        printf("DEBUG: Child process started\n");
+        debug_print(2047, 7, "DEBUG: Child process started\n");
         
         // 리다이렉션 설정 (있는 경우)
         if (cmd->redirs)
         {
-            printf("DEBUG: Setting up redirections\n");
+            debug_print(2047, 10, "DEBUG: Setting up redirections\n");
             setup_redirections(shell, cmd->redirs);
         }
             
         // PATH에서 명령어 찾기
-        printf("DEBUG: Searching for command in PATH\n");
+        debug_print(2047, 6, "DEBUG: Searching for command in PATH\n");
         path = find_command_path(shell, cmd->args[0]);
         if (!path)
         {
@@ -41,22 +41,22 @@ int execute_external(t_shell *shell, t_command *cmd)
             exit(127);
         }
         
-        printf("DEBUG: Found command path: %s\n", path);
-        printf("DEBUG: Executing command with args:\n");
+        debug_print(2047, 6, "DEBUG: Found command path: %s\n", path);
+        debug_print(2047, 7, "DEBUG: Executing command with args:\n");
         for (int i = 0; cmd->args[i]; i++)
-            printf("DEBUG: arg[%d]: %s\n", i, cmd->args[i]);
+            debug_print(2047, 7, "DEBUG: arg[%d]: %s\n", i, cmd->args[i]);
         
         execve(path, cmd->args, get_env_array(shell));
-        printf("DEBUG: execve failed\n");
+        debug_print(2047, 7, "DEBUG: execve failed\n");
         exit(127);
     }
     else if (pid > 0)
     {
-        printf("DEBUG: Parent process waiting for child\n");
+        debug_print(2047, 7, "DEBUG: Parent process waiting for child\n");
         waitpid(pid, &status, 0);
-        printf("DEBUG: Child process finished with status: %d\n", WEXITSTATUS(status));
+        debug_print(2047, 7, "DEBUG: Child process finished with status: %d\n", WEXITSTATUS(status));
         return (WEXITSTATUS(status));
     }
-    printf("DEBUG: Fork failed\n");
+    debug_print(2047, 7, "DEBUG: Fork failed\n");
     return (1);
 }

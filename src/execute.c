@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 01:39:21 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/12 15:28:57 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,21 +69,21 @@ int execute_simple_command(t_shell *shell, t_command *cmd)
 {
     int ret;
 
-    debug_print(1, 1, "\n=== EXECUTE SIMPLE COMMAND START ===\n");
-    debug_print(1, 1, "Command: %s\n", cmd->args[0]);
-    debug_print(1, 1, "Current stdin FD: %d\n", STDIN_FILENO);
+    debug_print(2047, 7, "\n=== EXECUTE SIMPLE COMMAND START ===\n");
+    debug_print(2047, 7, "Command: %s\n", cmd->args[0]);
+    debug_print(2047, 7, "Current stdin FD: %d\n", STDIN_FILENO);
     
     // 리다이렉션 처리
     t_redirection *redir = cmd->redirs;
     while (redir)
     {
-        debug_print(1, 1, "Processing redirection type: %d\n", redir->type);
-        debug_print(1, 1, "Redirection filename: %s\n", redir->filename);
+        debug_print(2047, 7, "Processing redirection type: %d\n", redir->type);
+        debug_print(2047, 7, "Redirection filename: %s\n", redir->filename);
         
         // 히어독은 이미 handle_all_heredocs에서 처리되었으므로 건너뜀
         if (redir->type == REDIR_HEREDOC)
         {
-            debug_print(1, 1, "Skipping already processed heredoc\n");
+            debug_print(2047, 7, "Skipping already processed heredoc\n");
             redir = redir->next;
             continue;
         }
@@ -95,62 +95,62 @@ int execute_simple_command(t_shell *shell, t_command *cmd)
     }
 
     // 명령어 실행
-    debug_print(1, 1, "Executing command: %s\n", cmd->args[0]);
+    debug_print(2047, 7, "Executing command: %s\n", cmd->args[0]);
     if (is_builtin(cmd->args[0]))
     {
-        debug_print(1, 1, "Executing builtin command\n");
+        debug_print(2047, 7, "Executing builtin command\n");
         ret = execute_builtin(shell, cmd);
     }
     else
     {
-        debug_print(1, 1, "Executing external command\n");
+        debug_print(2047, 7, "Executing external command\n");
         ret = execute_external(shell, cmd);
     }
 
-    debug_print(1, 1, "Command execution completed with status: %d\n", ret);
-    debug_print(1, 1, "Current stdin FD: %d\n", STDIN_FILENO);
-    debug_print(1, 1, "=== EXECUTE SIMPLE COMMAND END ===\n\n");
+    debug_print(2047, 7, "Command execution completed with status: %d\n", ret);
+    debug_print(2047, 7, "Current stdin FD: %d\n", STDIN_FILENO);
+    debug_print(2047, 7, "=== EXECUTE SIMPLE COMMAND END ===\n\n");
     return ret;
 }
 
 int execute_ast(t_shell *shell, t_ast_node *node)
 {
-    printf("DEBUG: Executing AST node\n");
+    debug_print(2047, 4, "DEBUG: Executing AST node\n");
     
     if (!node)
     {
-        printf("DEBUG: No node to execute\n");
+        debug_print(2047, 4, "DEBUG: No node to execute\n");
         return (0);
     }
 
     // 노드 타입에 따른 실행
     if (node->type == AST_COMMAND)
     {
-        printf("DEBUG: Executing command node: %s\n", node->cmd->args[0]);
+        debug_print(2047, 4, "DEBUG: Executing command node: %s\n", node->cmd->args[0]);
         return (execute_simple_command(shell, node->cmd));
     }
     else if (node->type == AST_PIPE)
     {
-        printf("DEBUG: Executing pipe node\n");
+        debug_print(2047, 4, "DEBUG: Executing pipe node\n");
         return (execute_pipe(shell, node));
     }
 
-    printf("DEBUG: Unknown node type\n");
+    debug_print(2047, 4, "DEBUG: Unknown node type\n");
     return (1);
 }
 
 // 메인 실행 함수 수정
 int execute_commands(t_shell *shell)
 {
-    printf("DEBUG: Starting command execution\n");
+    debug_print(2047, 4, "DEBUG: Starting command execution\n");
     
     if (!shell->ast_root)
     {
-        printf("DEBUG: No AST root to execute\n");
+        debug_print(2047, 4, "DEBUG: No AST root to execute\n");
         return (0);
     }
 
     int result = execute_ast(shell, shell->ast_root);
-    printf("DEBUG: Command execution completed with status: %d\n", result);
+    debug_print(2047, 4, "DEBUG: Command execution completed with status: %d\n", result);
     return (result);
 }
