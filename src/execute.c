@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 15:28:57 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/12 15:28:27 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,28 +115,48 @@ int execute_simple_command(t_shell *shell, t_command *cmd)
 
 int execute_ast(t_shell *shell, t_ast_node *node)
 {
-    debug_print(2047, 4, "DEBUG: Executing AST node\n");
-    
     if (!node)
-    {
-        debug_print(2047, 4, "DEBUG: No node to execute\n");
-        return (0);
-    }
+        return 0;
 
-    // 노드 타입에 따른 실행
     if (node->type == AST_COMMAND)
     {
-        debug_print(2047, 4, "DEBUG: Executing command node: %s\n", node->cmd->args[0]);
-        return (execute_simple_command(shell, node->cmd));
+        // 히어독 먼저 처리
+        if (node->cmd->redirs)
+        {
+            t_redirection *redir = node->cmd->redirs;
+            while (redir)
+            {
+                if (redir->type == REDIR_HEREDOC)
+                {
+                    if (handle_heredoc(shell, redir->filename) != 0)
+                        return 1;
+                }
+                redir = redir->next;
+            }
+        }
+
+        // 다른 리다이렉션 처리
+        if (node->cmd->redirs)
+        {
+            t_redirection *redir = node->cmd->redirs;
+            while (redir)
+            {
+                if (redir->type != REDIR_HEREDOC)
+                {
+                    if (setup_redirections(shell, redir) != 0)
+                        return 1;
+                }
+                redir = redir->next;
+            }
+        }
+
+        return execute_simple_command(shell, node->cmd);
     }
     else if (node->type == AST_PIPE)
     {
-        debug_print(2047, 4, "DEBUG: Executing pipe node\n");
-        return (execute_pipe(shell, node));
+        return execute_pipe(shell, node);
     }
-
-    debug_print(2047, 4, "DEBUG: Unknown node type\n");
-    return (1);
+    return 1;
 }
 
 // 메인 실행 함수 수정

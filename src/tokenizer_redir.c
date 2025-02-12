@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_redir.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:15:26 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 13:27:59 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/12 14:56:52 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,11 @@ t_token *handle_redirection(t_shell *shell, char **input)
 
     debug_print(2047, 10, "DEBUG: [handle_redirection] Processing redirection\n");
     
-    if (**input == '<' && *(*input + 1) == '<')
+    if (**input == '<' && *(*input + 1) == '<')  // heredoc
     {
         token = create_redir_token(shell, "<<", TOKEN_REDIR);
+        if (!token)
+            return NULL;
         *input += 2;
         
         // 공백 건너뛰기
@@ -62,7 +64,7 @@ t_token *handle_redirection(t_shell *shell, char **input)
         {
             debug_print(2047, 9, "DEBUG: Failed to get delimiter word\n");
             shell_free(shell, token);
-            return (NULL);
+            return NULL;
         }
         
         debug_print(2047, 9, "DEBUG: Creating delimiter token: '%s'\n", word);
@@ -73,7 +75,7 @@ t_token *handle_redirection(t_shell *shell, char **input)
         {
             debug_print(2047, 9, "DEBUG: Failed to create delimiter token\n");
             shell_free(shell, token);
-            return (NULL);
+            return NULL;
         }
         
         *input += word_len;
@@ -81,7 +83,7 @@ t_token *handle_redirection(t_shell *shell, char **input)
         // 토큰들을 리스트에 추가
         add_token(shell, token);
         add_token(shell, delimiter_token);
-        return (token);
+        return token;
     }
     else if (**input == '>' && *(*input + 1) == '>')
     {
@@ -94,11 +96,38 @@ t_token *handle_redirection(t_shell *shell, char **input)
         token = create_redir_token(shell, redir, TOKEN_REDIR);
         (*input)++;
     }
+
     if (!token)
     {
         debug_print(2047, 10, "DEBUG: Failed to create redirection token\n");
-        return (NULL);
+        return NULL;
     }
-    debug_print(2047, 10, "DEBUG: === REDIRECTION HANDLED ===\n\n");
-    return (token);
+
+    // 공백 건너뛰기
+    while (**input && **input == ' ')
+        (*input)++;
+
+    // 파일명 토큰 처리
+    word = handle_word(*input, &word_len);
+    if (!word)
+    {
+        shell_free(shell, token);
+        return NULL;
+    }
+
+    delimiter_token = create_token(shell, word, TOKEN_WORD);
+    free(word);
+    if (!delimiter_token)
+    {
+        shell_free(shell, token);
+        return NULL;
+    }
+
+    *input += word_len;
+
+    // 토큰들을 리스트에 추가
+    add_token(shell, token);
+    add_token(shell, delimiter_token);
+
+    return token;
 }
