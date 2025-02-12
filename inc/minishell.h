@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 13:11:58 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/12 15:22:08 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,22 @@
 # include <errno.h>
 
 extern volatile sig_atomic_t	g_signal;
+
+typedef enum s_redirection_type
+{
+	REDIR_NONE,
+	REDIR_IN,
+	REDIR_OUT,
+	REDIR_APPEND,
+	REDIR_HEREDOC
+}	t_redirection_type;
+
+typedef struct s_redirection
+{
+	t_redirection_type      type;       // REDIR_IN, REDIR_OUT 등
+	char                    *filename;   // 파일명 또는 구분자
+	struct s_redirection    *next;      // 다음 리다이렉션
+} t_redirection;
 
 typedef struct s_status
 {
@@ -67,11 +83,9 @@ typedef struct s_token
 
 typedef struct s_command
 {
-	// char					*name;
-	char					**args;
-	struct s_redirection	*redirs;
-	// struct s_command		*pipe_next;
-}	t_command;
+	char            **args;      // 명령어와 인자들
+	t_redirection   *redirs;     // 리다이렉션 링크드 리스트
+} t_command;
 
 // AST 노드 구조체
 typedef struct s_ast_node
@@ -82,22 +96,6 @@ typedef struct s_ast_node
     struct s_ast_node   *right;        // 파이프 오른쪽 명령어
 } t_ast_node;
 
-typedef enum s_redirection_type
-{
-	REDIR_NONE,
-	REDIR_IN,
-	REDIR_OUT,
-	REDIR_APPEND,
-	REDIR_HEREDOC
-}	t_redirection_type;
-
-typedef struct s_redirection
-{
-	t_redirection_type		type;
-	char					*filename;
-	int						fd;
-	struct s_redirection	*next;
-}	t_redirection;
 
 typedef struct s_memory
 {
@@ -246,5 +244,7 @@ t_redirection *create_redirection(t_shell *shell, t_token *token);
 // debug_print.c
 void debug_print(int action_combine_bit, int str_type, const char *str, ...);
 
+// AST 실행 관련 함수
+int execute_simple_command(t_shell *shell, t_command *cmd);
 
 #endif

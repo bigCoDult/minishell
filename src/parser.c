@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:12 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 13:27:59 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/12 15:11:52 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,101 +34,67 @@ t_command *create_command(t_shell *shell, t_token **tokens)
 {
     t_command *cmd;
     t_token *curr;
-    int arg_count;
+    int arg_count = 0;
+    t_redirection *last_redir = NULL;
 
     debug_print(2047, 7, "\n=== CREATE COMMAND ===\n");
     cmd = shell_malloc(shell, sizeof(t_command));
     if (!cmd)
-        return (NULL);
+        return NULL;
 
     cmd->args = NULL;
     cmd->redirs = NULL;
 
-    // 1단계: 먼저 명령어와 인자 개수를 세기
+    // 1단계: 명령어와 인자 개수 세기
     curr = *tokens;
-    arg_count = 0;
-    while (curr && (curr->type == TOKEN_WORD || curr->type == TOKEN_REDIR))
+    while (curr && curr->type != TOKEN_PIPE)
     {
-        if (curr->type == TOKEN_WORD)
+        if (curr->type == TOKEN_WORD && 
+            (!curr->prev || curr->prev->type != TOKEN_REDIR))  // 중요: 리다이렉션 다음 토큰은 제외
             arg_count++;
-        else if (curr->type == TOKEN_REDIR)
+        if (curr->type == TOKEN_REDIR)
             curr = curr->next;  // 리다이렉션의 타겟 토큰 건너뛰기
         if (curr)
             curr = curr->next;
     }
 
-    // 인자 배열 할당 및 초기화
-    if (arg_count > 0)
-    {
-        cmd->args = shell_malloc(shell, sizeof(char *) * (arg_count + 1));
-        if (!cmd->args)
-            return (NULL);
-        cmd->args[arg_count] = NULL;
-    }
+    // 인자 배열 할당
+    cmd->args = shell_malloc(shell, sizeof(char *) * (arg_count + 1));
+    cmd->args[arg_count] = NULL;
 
-    // 2단계: 토큰을 다시 순회하며 명령어/인자와 리다이렉션 처리
+    // 2단계: 토큰 처리
     curr = *tokens;
     arg_count = 0;
-    while (curr)
+    while (curr && curr->type != TOKEN_PIPE)
     {
         if (curr->type == TOKEN_WORD)
         {
-            debug_print(2047, 7, "Processing word: %s\n", curr->value);
-            cmd->args[arg_count++] = shell_strdup(shell, curr->value);
+            // 이전 토큰이 리다이렉션이 아닌 경우에만 인자로 처리
+            if (!curr->prev || curr->prev->type != TOKEN_REDIR)
+            {
+                debug_print(2047, 7, "Processing word: %s\n", curr->value);
+                cmd->args[arg_count++] = shell_strdup(shell, curr->value);
+            }
             curr = curr->next;
         }
         else if (curr->type == TOKEN_REDIR)
         {
-            debug_print(2047, 7, "Processing redirection: %s\n", curr->value);
-            t_token *next_token = curr->next;
-            if (!next_token)
-                return (NULL);
-
-            t_redirection *redir = shell_malloc(shell, sizeof(t_redirection));
+            t_redirection *redir = create_redirection(shell, curr);
             if (!redir)
-                return (NULL);
-
-            redir->next = NULL;
-            if (strcmp(curr->value, "<<") == 0)
-            {
-                redir->type = REDIR_HEREDOC;
-                redir->filename = shell_strdup(shell, next_token->value);
-            }
-            else if (strcmp(curr->value, ">>") == 0)
-            {
-                redir->type = REDIR_APPEND;
-                redir->filename = shell_strdup(shell, next_token->value);
-            }
-            else if (curr->value[0] == '<')
-            {
-                redir->type = REDIR_IN;
-                redir->filename = shell_strdup(shell, next_token->value);
-            }
-            else
-            {
-                redir->type = REDIR_OUT;
-                redir->filename = shell_strdup(shell, next_token->value);
-            }
+                return NULL;
 
             // 리다이렉션 리스트에 추가
             if (!cmd->redirs)
                 cmd->redirs = redir;
             else
-            {
-                t_redirection *last = cmd->redirs;
-                while (last->next)
-                    last = last->next;
-                last->next = redir;
-            }
+                last_redir->next = redir;
+            last_redir = redir;
 
-            curr = next_token->next;
+            curr = curr->next->next;
         }
-        else
-            break;
     }
 
-    *tokens = curr;
-    debug_print(2047, 7, "=== COMMAND CREATED ===\n");
+    *tokens = curr;  // 현재 위치 업데이트
     return cmd;
 }
 

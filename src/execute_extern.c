@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_extern.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 13:27:59 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/12 15:16:49 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,14 @@ int execute_external(t_shell *shell, t_command *cmd)
         debug_print(2047, 7, "DEBUG: Executing command with args:\n");
         for (int i = 0; cmd->args[i]; i++)
             debug_print(2047, 7, "DEBUG: arg[%d]: %s\n", i, cmd->args[i]);
+        
+        // 히어독이 있었다면 표준 입력 설정
+        if (shell->heredoc.pipe_fd[0] != -1)
+        {
+            dup2(shell->heredoc.pipe_fd[0], STDIN_FILENO);
+            close(shell->heredoc.pipe_fd[0]);
+            shell->heredoc.pipe_fd[0] = -1;
+        }
         
         execve(path, cmd->args, get_env_array(shell));
         debug_print(2047, 7, "DEBUG: execve failed\n");
