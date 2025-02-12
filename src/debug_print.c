@@ -80,7 +80,7 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 	{
 		if ((action_combine_bit & mask) && str_type == type)
 		{
-			printf("type = %d\n", type);
+			// printf("type = %d\n", type);
 			ft_vprintf(str, ap);
 		}
 		mask <<= 1;
