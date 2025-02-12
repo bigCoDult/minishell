@@ -16,6 +16,7 @@ static int	ft_printfstr_fd(char *s, int fd);
 static int	ft_printfll_fd(long long int n, int fd);
 static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 
+//	모두출력 = 2047
 
 // 이 함수의 목적은
 //	<debug_printf(n> 를 ctrl+shift+f로 검색하여 "일괄 변경"하는 것으로
@@ -29,7 +30,6 @@ static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 // debug_printf(12, 3, "token is %s, token->value);
 // debug_printf(12, 4, "ast is %s, ast->value);
 
-//	모든 디버깅 문자열을 출력하려면 action_combine_bit에 31를 넣으면 됩니다.
 
 // str_type 1 = 단순 문자열
 // action_combine_bit 1
@@ -46,6 +46,24 @@ static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 // str_type 5 = 위의 타입에 해당하지 않으며, 다른 구체적인 타입을 필요로함, 추후 재정의 할것
 // action_combine_bit 16
 
+// str_type 6 = path 확인
+// action_combine_bit 32
+
+// str_type 7 = 진행상황
+// action_combine_bit 64
+
+// str_type 8 = 파이프
+// action_combine_bit 128
+
+// str_type 9 = 히어독
+// action_combine_bit 256
+
+// str_type 10 = 리다이렉션
+// action_combine_bit 512
+
+// str_type 11 = memory
+// action_combine_bit 1024
+
 
 void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 {
@@ -58,7 +76,7 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 	va_start(ap, str);
 	if (action_combine_bit == 0)
 		return ;
-	while (mask < 32)
+	while (mask < 1023)
 	{
 		if ((action_combine_bit & mask) && str_type == type)
 			ft_vprintf(str, ap);
