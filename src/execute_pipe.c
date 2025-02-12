@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 12:54:16 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/12 13:16:48 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
     int heredoc_count = 0;
     int original_stdin;
 
-    debug_print(1, 1, "=== HANDLING ALL HEREDOCS ===\n");
+    debug_print(0, 1, "=== HANDLING ALL HEREDOCS ===\n");
     
     // 현재 표준 입력 저장
     original_stdin = dup(STDIN_FILENO);
@@ -104,7 +104,7 @@ static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
     {
         if (left_redirs->type == REDIR_HEREDOC)
         {
-            debug_print(1, 1, "Processing left heredoc: %s\n", left_redirs->filename);
+            debug_print(0, 1, "Processing left heredoc: %s\n", left_redirs->filename);
             if (handle_heredoc(shell, left_redirs->filename) != 0)
                 return (1);
             heredoc_count++;
@@ -121,7 +121,7 @@ static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
     {
         if (right_redirs->type == REDIR_HEREDOC)
         {
-            debug_print(1, 1, "Processing right heredoc: %s\n", right_redirs->filename);
+            debug_print(0, 1, "Processing right heredoc: %s\n", right_redirs->filename);
             if (handle_heredoc(shell, right_redirs->filename) != 0)
                 return (1);
             heredoc_count++;
@@ -133,7 +133,7 @@ static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
         right_redirs = right_redirs->next;
     }
 
-    debug_print(1, 1, "Processed %d heredocs\n", heredoc_count);
+    debug_print(0, 1, "Processed %d heredocs\n", heredoc_count);
     
     // original_stdin은 닫지 않고 shell 구조체에 저장된 상태로 유지
     return (0);
@@ -145,7 +145,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     pid_t pid1, pid2;
     int status1, status2;
 
-    debug_print(2047, 8, "\n=== EXECUTE PIPE ===\n");
+    debug_print(0, 8, "\n=== EXECUTE PIPE ===\n");
     
     if (!node || !node->left || !node->right)
         return (1);
@@ -170,7 +170,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
             exit(execute_pipe(shell, node->left));
         else if (node->left->type == AST_COMMAND)
         {
-            debug_print(1, 1, "Executing left command: %s\n", node->left->cmd->args[0]);
+            debug_print(0, 1, "Executing left command: %s\n", node->left->cmd->args[0]);
             exit(execute_simple_command(shell, node->left->cmd));
         }
         exit(1);
@@ -187,12 +187,12 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
         
         if (node->right->type == AST_PIPE)
         {
-            debug_print(1, 1, "Executing right pipe\n");
+            debug_print(0, 1, "Executing right pipe\n");
             exit(execute_pipe(shell, node->right));
         }
         else if (node->right->type == AST_COMMAND)
         {
-            debug_print(1, 1, "Executing right command: %s\n", node->right->cmd->args[0]);
+            debug_print(0, 1, "Executing right command: %s\n", node->right->cmd->args[0]);
             exit(execute_simple_command(shell, node->right->cmd));
         }
         exit(1);
@@ -206,8 +206,8 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     waitpid(pid1, &status1, 0);
     waitpid(pid2, &status2, 0);
     
-    debug_print(1, 1, "Left command status: %d\n", WEXITSTATUS(status1));
-    debug_print(1, 1, "Right command status: %d\n", WEXITSTATUS(status2));
+    debug_print(0, 1, "Left command status: %d\n", WEXITSTATUS(status1));
+    debug_print(0, 1, "Right command status: %d\n", WEXITSTATUS(status2));
     
     // 마지막 명령어의 종료 상태를 반환
     return (WEXITSTATUS(status2));
