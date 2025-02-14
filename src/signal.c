@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:59:33 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 15:48:21 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 16:29:26 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void heredoc_signal_handler(int signo)
     {
         g_signal = 1;
         write(1, "\n", 1);
+        exit(1);  // 즉시 프로세스 종료
     }
 }
 

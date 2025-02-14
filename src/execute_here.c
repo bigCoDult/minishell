@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 15:55:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 16:34:23 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,28 +33,35 @@ int handle_heredoc(t_shell *shell, char *delimiter)
     int status;
     char *line;
 
-    // 히어독 시작 전 g_signal 리셋
     g_signal = 0;
+    void (*old_handler)(int) = signal(SIGINT, SIG_IGN);
 
-    // 현재 표준 입력 저장
     shell->heredoc.original_stdin = dup(STDIN_FILENO);
     if (shell->heredoc.original_stdin == -1)
+    {
+        signal(SIGINT, old_handler);
         return 1;
+    }
 
-    // 임시 파일 생성
     shell->heredoc.temp_file = create_temp_heredoc_file(shell);
     if (!shell->heredoc.temp_file)
+    {
+        close(shell->heredoc.original_stdin);
         return 1;
+    }
 
-    // 임시 파일 열기
     shell->heredoc.fd = open(shell->heredoc.temp_file, 
                            O_WRONLY | O_CREAT | O_TRUNC, 0600);
     if (shell->heredoc.fd == -1)
+    {
+        cleanup_heredoc(shell);
         return 1;
+    }
 
     pid = fork();
     if (pid == 0)
     {
+        signal(SIGINT, SIG_DFL);
         signal(SIGINT, heredoc_signal_handler);
         while (1)
         {
@@ -63,7 +70,10 @@ int handle_heredoc(t_shell *shell, char *delimiter)
             {
                 free(line);
                 if (g_signal)
+                {
+                    close(shell->heredoc.fd);
                     exit(1);
+                }
                 exit(0);
             }
             write(shell->heredoc.fd, line, strlen(line));
@@ -74,26 +84,25 @@ int handle_heredoc(t_shell *shell, char *delimiter)
 
     waitpid(pid, &status, 0);
     
-    // 표준 입력 복원
-    if (shell->heredoc.original_stdin != -1)
-    {
-        dup2(shell->heredoc.original_stdin, STDIN_FILENO);
-        close(shell->heredoc.original_stdin);
-    }
+    signal(SIGINT, old_handler);
 
-    close(shell->heredoc.fd);
-
-    if (WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status) != 0))
+    if (WIFSIGNALED(status))
     {
-        unlink(shell->heredoc.temp_file);
+        g_signal = 1;
+        cleanup_heredoc(shell);
         return 1;
     }
 
-    // 읽기 모드로 다시 열기
+    if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+    {
+        cleanup_heredoc(shell);
+        return 1;
+    }
+
     shell->heredoc.fd = open(shell->heredoc.temp_file, O_RDONLY);
     if (shell->heredoc.fd == -1)
     {
-        unlink(shell->heredoc.temp_file);
+        cleanup_heredoc(shell);
         return 1;
     }
 
@@ -102,10 +111,20 @@ int handle_heredoc(t_shell *shell, char *delimiter)
 
 void cleanup_heredoc(t_shell *shell)
 {
+    // readline 상태 초기화
+    rl_on_new_line();
+    rl_replace_line("", 0);
+
     if (shell->heredoc.fd != -1)
     {
         close(shell->heredoc.fd);
         shell->heredoc.fd = -1;
+    }
+    if (shell->heredoc.original_stdin != -1)
+    {
+        dup2(shell->heredoc.original_stdin, STDIN_FILENO);
+        close(shell->heredoc.original_stdin);
+        shell->heredoc.original_stdin = -1;
     }
     if (shell->heredoc.temp_file)
     {
