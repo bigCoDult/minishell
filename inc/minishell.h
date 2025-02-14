@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 08:07:26 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 14:38:54 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,6 +176,7 @@ void	*ft_memset(void *dest, int c, size_t count);
 
 // signal.c
 void setup_signals(void);
+void heredoc_signal_handler(int signo);
 
 // tokenizer.c
 int tokenize_input(t_shell *shell);
