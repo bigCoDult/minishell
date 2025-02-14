@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 14:38:54 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 15:36:24 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,9 +124,10 @@ typedef struct s_env
 
 // 히어독 관리를 위한 구조체
 typedef struct s_heredoc {
-    int original_stdin;     // 원본 표준 입력 파일 디스크립터
-    char *delimiter;        // 현재 히어독의 구분자
-    int pipe_fd[2];        // 히어독 파이프
+    int     original_stdin;  // 원본 표준 입력 저장
+    int     fd;             // 현재 히어독의 파일 디스크립터
+    char    *delimiter;      // 구분자
+    char    *temp_file;     // 임시 파일 경로
 } t_heredoc;
 
 typedef struct s_parser
@@ -249,5 +250,9 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...);
 
 // AST 실행 관련 함수
 int execute_simple_command(t_shell *shell, t_command *cmd);
+
+// 함수 선언 추가
+char *create_temp_heredoc_file(t_shell *shell);
+void cleanup_heredoc(t_shell *shell);
 
 #endif

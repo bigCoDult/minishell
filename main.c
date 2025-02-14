@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 13:27:59 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/14 15:36:24 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,9 @@ static void	init_shell(t_shell *shell, char **envp)
 	shell->status.exit_code = 0;
 	shell->env = init_env(shell, envp);
 	shell->heredoc.original_stdin = -1;
+	shell->heredoc.fd = -1;
+	shell->heredoc.temp_file = NULL;
 	shell->heredoc.delimiter = NULL;
-	shell->heredoc.pipe_fd[0] = -1;
-	shell->heredoc.pipe_fd[1] = -1;
 	debug_print(2047, 7, "DEBUG: Shell initialization completed\n");
 }
 
