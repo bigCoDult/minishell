@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:59:33 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/04 03:59:40 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 16:29:26 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,16 @@ static void signal_handler(int signo)
         g_signal = signo;
         rl_on_new_line();
         rl_redisplay();
+    }
+}
+
+void heredoc_signal_handler(int signo)
+{
+    if (signo == SIGINT)
+    {
+        g_signal = 1;
+        write(1, "\n", 1);
+        exit(1);  // 즉시 프로세스 종료
     }
 }
 
