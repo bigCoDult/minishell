@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:15:26 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 14:56:52 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 08:07:26 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ t_token *handle_redirection(t_shell *shell, char **input)
             (*input)++;
             
         // delimiter 단어 처리
-        word = handle_word(*input, &word_len);
+        word = handle_word(shell, *input, &word_len);
         if (!word)
         {
             debug_print(2047, 9, "DEBUG: Failed to get delimiter word\n");
@@ -69,7 +69,7 @@ t_token *handle_redirection(t_shell *shell, char **input)
         
         debug_print(2047, 9, "DEBUG: Creating delimiter token: '%s'\n", word);
         delimiter_token = create_token(shell, word, TOKEN_WORD);
-        free(word);
+        shell_free(shell, word);
         
         if (!delimiter_token)
         {
@@ -108,7 +108,7 @@ t_token *handle_redirection(t_shell *shell, char **input)
         (*input)++;
 
     // 파일명 토큰 처리
-    word = handle_word(*input, &word_len);
+    word = handle_word(shell, *input, &word_len);
     if (!word)
     {
         shell_free(shell, token);
@@ -116,7 +116,7 @@ t_token *handle_redirection(t_shell *shell, char **input)
     }
 
     delimiter_token = create_token(shell, word, TOKEN_WORD);
-    free(word);
+    shell_free(shell, word);
     if (!delimiter_token)
     {
         shell_free(shell, token);

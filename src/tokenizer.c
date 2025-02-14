@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:07:22 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 14:31:07 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 08:00:41 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,8 @@ int tokenize_input(t_shell *shell)
         if (*input == '|')
         {
             token = create_token(shell, "|", TOKEN_PIPE);
+            if (!token)
+                return 1;
             add_token(shell, token);
             input++;
         }
@@ -99,21 +101,20 @@ int tokenize_input(t_shell *shell)
         {
             token = handle_redirection(shell, &input);
             if (!token)
-                return (1);
-            // handle_redirection 내부에서 토큰 추가 처리
+                return 1;
         }
         else
         {
-            word = handle_word(input, &word_len);
+            word = handle_word(shell, input, &word_len);
             if (!word)
-                return (1);
+                return 1;
             token = create_token(shell, word, TOKEN_WORD);
-            free(word);
-            input += word_len;
+            shell_free(shell, word);
             if (!token)
-                return (1);
+                return 1;
             add_token(shell, token);
+            input += word_len;
         }
     }
-    return (0);
+    return 0;
 }

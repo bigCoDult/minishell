@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 15:22:08 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 08:07:26 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,8 @@ void	free_command_memory(t_shell *shell);
 t_env	*init_env(t_shell *shell, char **envp);
 void	set_env_value(t_shell *shell, const char *key, const char *value);
 int	parse_env_arg(t_shell *shell, char *arg, char **key, char **value);
+char *get_env_value(t_shell *shell, const char *key);
+char *expand_env_var(t_shell *shell, const char *str);
 
 // env_array.c
 char **get_env_array(t_shell *shell);
@@ -183,7 +185,7 @@ t_token *create_token(t_shell *shell, char *value, t_token_type type);
 t_token *handle_redirection(t_shell *shell, char **input);
 
 // tokenizer_utils.c
-char *handle_word(char *input, int *len);
+char *handle_word(t_shell *shell, char *input, int *len);
 void add_token(t_shell *shell, t_token *token);
 
 // execute.c
