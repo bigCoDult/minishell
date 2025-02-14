@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:33:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 13:27:59 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/14 08:00:41 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,4 +160,86 @@ t_env *init_env(t_shell *shell, char **envp)
         i++;
     }
     return (env_list);
+}
+
+// 환경변수 값 가져오기
+char *get_env_value(t_shell *shell, const char *key)
+{
+    t_env *current;
+
+    current = shell->env;
+    while (current)
+    {
+        if (strcmp(current->key, key) == 0)
+            return current->value;
+        current = current->next;
+    }
+    return NULL;
+}
+
+// 환경변수 확장 처리
+char *expand_env_var(t_shell *shell, const char *str)
+{
+    char *result;
+    char *write_pos;
+    
+    // $가 없으면 원본 반환
+    if (!str || !strchr(str, '$'))
+        return shell_strdup(shell, str);
+    
+    result = shell_malloc(shell, strlen(str) * 2);
+    write_pos = result;
+    
+    while (*str)
+    {
+        if (*str == '$' && (isalnum(*(str + 1)) || *(str + 1) == '_' || *(str + 1) == '?'))
+        {
+            str++;  // $ 건너뛰기
+            if (*str == '?')  // $? 처리
+            {
+                char status[16];
+                snprintf(status, sizeof(status), "%d", shell->status.exit_code);
+                strcpy(write_pos, status);
+                write_pos += strlen(status);
+                str++;
+                continue;
+            }
+
+            const char *var_start = str;
+            while (isalnum(*str) || *str == '_')
+                str++;
+            
+            int var_len = str - var_start;
+            char *var_name = shell_malloc(shell, var_len + 1);
+            strncpy(var_name, var_start, var_len);
+            var_name[var_len] = '\0';
+            
+            char *var_value = get_env_value(shell, var_name);
+            if (var_value)
+            {
+                strcpy(write_pos, var_value);
+                write_pos += strlen(var_value);
+            }
+            shell_free(shell, var_name);
+        }
+        else
+            *write_pos++ = *str++;
+    }
+    *write_pos = '\0';
+    
+    return result;
+}
+
+// 특수 환경변수 처리 함수
+char *handle_special_var(t_shell *shell, const char *var_name)
+{
+    if (strcmp(var_name, "?") == 0)
+    {
+        // 마지막 명령어의 종료 상태
+        char status[16];
+        snprintf(status, sizeof(status), "%d", shell->status.exit_code);
+        return shell_strdup(shell, status);
+    }
+    // 다른 특수 변수 추가 가능
+    return NULL;
 }
