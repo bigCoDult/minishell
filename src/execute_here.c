@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 16:34:23 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 16:41:26 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,14 @@ int handle_heredoc(t_shell *shell, char *delimiter)
     char *line;
 
     g_signal = 0;
-    void (*old_handler)(int) = signal(SIGINT, SIG_IGN);
+    void (*old_int_handler)(int) = signal(SIGINT, SIG_IGN);
+    void (*old_quit_handler)(int) = signal(SIGQUIT, SIG_IGN);
 
     shell->heredoc.original_stdin = dup(STDIN_FILENO);
     if (shell->heredoc.original_stdin == -1)
     {
-        signal(SIGINT, old_handler);
+        signal(SIGINT, old_int_handler);
+        signal(SIGQUIT, old_quit_handler);
         return 1;
     }
 
@@ -62,6 +64,7 @@ int handle_heredoc(t_shell *shell, char *delimiter)
     if (pid == 0)
     {
         signal(SIGINT, SIG_DFL);
+        signal(SIGQUIT, SIG_IGN);
         signal(SIGINT, heredoc_signal_handler);
         while (1)
         {
@@ -84,7 +87,8 @@ int handle_heredoc(t_shell *shell, char *delimiter)
 
     waitpid(pid, &status, 0);
     
-    signal(SIGINT, old_handler);
+    signal(SIGINT, old_int_handler);
+    signal(SIGQUIT, old_quit_handler);
 
     if (WIFSIGNALED(status))
     {
