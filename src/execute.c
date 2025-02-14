@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 15:28:27 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 15:55:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,9 @@ int execute_ast(t_shell *shell, t_ast_node *node)
 // 메인 실행 함수 수정
 int execute_commands(t_shell *shell)
 {
+    // 명령어 실행 전 g_signal 리셋
+    g_signal = 0;
+
     debug_print(2047, 4, "DEBUG: Starting command execution\n");
     
     if (!shell->ast_root)

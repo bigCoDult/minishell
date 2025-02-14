@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 15:36:24 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 15:55:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ static void	minishell_loop(t_shell *shell)
 	
 	while (1)
 	{
+		g_signal = 0;  // 새로운 명령어 입력 전 g_signal 리셋
 		debug_print(2047, 7, "DEBUG: Waiting for command input\n");
 		shell->input_line = readline("MINISHELL$> ");
 		

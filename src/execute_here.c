@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 15:48:21 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/14 15:55:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,9 @@ int handle_heredoc(t_shell *shell, char *delimiter)
     pid_t pid;
     int status;
     char *line;
+
+    // 히어독 시작 전 g_signal 리셋
+    g_signal = 0;
 
     // 현재 표준 입력 저장
     shell->heredoc.original_stdin = dup(STDIN_FILENO);
