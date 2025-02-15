@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/15 16:42:23 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/15 18:17:42 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,10 +86,13 @@ void free_command_memory(t_shell *shell)
     {
         next = current->next;
         // env 구조체는 건너뛰기
-        if (current->addr != env_ptr && 
-            (current->addr < (void *)env_ptr || 
-             current->addr > (void *)(env_ptr + sizeof(t_env))))
-        {
+        // if (current->addr != env_ptr &&
+        //     (current->addr < (void *)env_ptr ||
+        //      current->addr > (void *)(env_ptr + sizeof(t_env))))
+        if (current->addr != env_ptr &&
+			((char*)current->addr < (char*)env_ptr ||
+			(char*)current->addr > (char*)env_ptr + sizeof(t_env)))
+		{
             free(current->addr);
             free(current);
             if (prev)
