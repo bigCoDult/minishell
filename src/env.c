@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:33:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/15 16:42:24 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/15 18:06:13 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,8 @@ void set_env_value(t_shell *shell, const char *key, const char *value)
             // 새 값 설정
             if (value)
             {
-                current->value = ft_strdup(value);
+                // current->value = ft_strdup(value);
+				current->value = shell_strdup(shell, value);
                 debug_print(0, 2, "DEBUG: [set_env_value] Updated value: %s\n", current->value);
             }
             return;
@@ -78,7 +79,8 @@ void set_env_value(t_shell *shell, const char *key, const char *value)
 
     // 새 환경변수 노드 생성
     debug_print(0, 2, "DEBUG: [set_env_value] Creating new env variable\n");
-    new_node = malloc(sizeof(t_env));
+    // new_node = malloc(sizeof(t_env));
+    new_node = shell_malloc(shell, sizeof(t_env));
     if (!new_node)
     {
         debug_print(0, 2, "DEBUG: [set_env_value] Failed to allocate new node\n");
@@ -86,8 +88,10 @@ void set_env_value(t_shell *shell, const char *key, const char *value)
     }
 
     // 새 노드 초기화
-    new_node->key = ft_strdup(key);
-    new_node->value = value ? ft_strdup(value) : NULL;
+    // new_node->key = ft_strdup(key);
+	new_node->key = shell_strdup(shell, key);
+    // new_node->value = value ? ft_strdup(value) : NULL;
+	new_node->value = shell_strdup(shell, value);
     new_node->next = NULL;
 
     if (!new_node->key)
@@ -112,11 +116,16 @@ static t_env *create_env_node(t_shell *shell, char *key, char *value)
 
 
     (void)shell;
-    new_node = malloc(sizeof(t_env));
+    // new_node = malloc(sizeof(t_env));
+	new_node = shell_malloc(shell, sizeof(t_env));
     if (!new_node)
         return (NULL);
-    new_node->key = ft_strdup(key);
-    new_node->value = ft_strdup(value);
+    // new_node->key = ft_strdup(key);
+	new_node->key = shell_strdup(shell, key);
+	// new_node->key = key;
+    // new_node->value = ft_strdup(value);
+	new_node->value = shell_strdup(shell, value);
+	// new_node->value = value;
     new_node->next = NULL;
     return (new_node);
 }
