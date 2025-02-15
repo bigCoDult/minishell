@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 05:04:13 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/15 16:42:24 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/15 18:03:08 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,8 @@ static char *get_path_value(t_shell *shell)
         if (current->key && strcmp(current->key, "PATH") == 0)
         {
             debug_print(0, 6, "DEBUG: [get_path_value] Found PATH: %s\n", current->value);
-            return (current->value);
+            // return (current->value);
+            return (shell_strdup(shell, current->value));
         }
         current = current->next;
     }
