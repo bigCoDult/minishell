@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/15 18:17:42 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/15 18:35:29 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,85 +71,144 @@ void shell_free(t_shell *shell, void *ptr)
 // 명령어 실행 관련 메모리만 해제
 void free_command_memory(t_shell *shell)
 {
-    t_memory *current;
-    t_memory *next;
-    t_memory *prev;
-    t_env *env_ptr;
+	t_memory *current;
+	t_memory *next;
+	t_memory *prev;
+	t_env *env_iter;
+	int is_env;
 
-    // 환경 변수 포인터 저장
-    env_ptr = shell->env;
-
-    current = shell->memory;
-    prev = NULL;
-
-    while (current)
-    {
-        next = current->next;
-        // env 구조체는 건너뛰기
-        // if (current->addr != env_ptr &&
-        //     (current->addr < (void *)env_ptr ||
-        //      current->addr > (void *)(env_ptr + sizeof(t_env))))
-        if (current->addr != env_ptr &&
-			((char*)current->addr < (char*)env_ptr ||
-			(char*)current->addr > (char*)env_ptr + sizeof(t_env)))
+	current = shell->memory;
+	prev = NULL;
+	while (current)
+	{
+		next = current->next;
+		is_env = 0;
+		env_iter = shell->env;
+		while (env_iter)
 		{
-            free(current->addr);
-            free(current);
-            if (prev)
-                prev->next = next;
-            else
-                shell->memory = next;
-        }
-        else
-        {
-            prev = current;
-        }
-        current = next;
-    }
+			if (current->addr == env_iter ||
+				current->addr == env_iter->key ||
+				current->addr == env_iter->value)
+			{
+				is_env = 1;
+				break;
+			}
+			env_iter = env_iter->next;
+		}
+		if (!is_env)
+		{
+			free(current->addr);
+			free(current);
+			if (prev)
+				prev->next = next;
+			else
+				shell->memory = next;
+		}
+		else
+		{
+			prev = current;
+		}
+		current = next;
+	}
 }
+
+// void free_command_memory(t_shell *shell)
+// {
+//     t_memory *current;
+//     t_memory *next;
+//     t_memory *prev;
+//     t_env *env_ptr;
+
+//     // 환경 변수 포인터 저장
+//     env_ptr = shell->env;
+
+//     current = shell->memory;
+//     prev = NULL;
+
+//     while (current)
+//     {
+//         next = current->next;
+//         // env 구조체는 건너뛰기
+//         if (current->addr != env_ptr &&
+//             (current->addr < (void *)env_ptr ||
+//              current->addr > (void *)(env_ptr + sizeof(t_env))))
+//         {
+//             free(current->addr);
+//             free(current);
+//             if (prev)
+//                 prev->next = next;
+//             else
+//                 shell->memory = next;
+//         }
+//         else
+//         {
+//             prev = current;
+//         }
+//         current = next;
+//     }
+// }
 
 // 모든 할당된 메모리 해제
 void free_all_memory(t_shell *shell)
 {
-    t_memory *current;
-    t_memory *next;
-    t_memory *prev;
+	t_memory *current;
+	t_memory *next;
 
-    debug_print(0, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
+	debug_print(0, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
 
-    current = shell->memory;
-    prev = NULL;
-    
-    while (current)
-    {
-        next = current->next;
-        t_env *env_ptr = shell->env;
-        int is_env = 0;
-
-        while (env_ptr)
-        {
-            if (current->addr == env_ptr || 
-                current->addr == env_ptr->key || 
-                 current->addr == env_ptr->value)
-            {
-                is_env = 1;
-                break;
-            }
-            env_ptr = env_ptr->next;
-        }
-        if (!is_env)
-        {
-            if (prev)
-                prev->next = next;
-            else
-                shell->memory = next;
-            free(current->addr);
-            free(current);
-        }
-        else
-        {
-            prev = current;
-        }
-        current = next;
-    }
+	current = shell->memory;
+	while (current)
+	{
+		next = current->next;
+		free(current->addr);
+		free(current);
+		current = next;
+	}
+	shell->memory = NULL;
+	shell->env = NULL;
 }
+
+// void free_all_memory(t_shell *shell)
+// {
+//     t_memory *current;
+//     t_memory *next;
+//     t_memory *prev;
+
+//     debug_print(0, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
+
+//     current = shell->memory;
+//     prev = NULL;
+    
+//     while (current)
+//     {
+//         next = current->next;
+//         t_env *env_ptr = shell->env;
+//         int is_env = 0;
+
+//         while (env_ptr)
+//         {
+//             if (current->addr == env_ptr ||
+//                 current->addr == env_ptr->key ||
+//                  current->addr == env_ptr->value)
+//             {
+//                 is_env = 1;
+//                 break;
+//             }
+//             env_ptr = env_ptr->next;
+//         }
+//         if (!is_env)
+//         {
+//             if (prev)
+//                 prev->next = next;
+//             else
+//                 shell->memory = next;
+//             free(current->addr);
+//             free(current);
+//         }
+//         else
+//         {
+//             prev = current;
+//         }
+//         current = next;
+//     }
+// }
