@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/15 22:18:49 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/17 20:15:34 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,6 +166,12 @@ void free_all_memory(t_shell *shell)
 	}
 	shell->memory = NULL;
 	shell->env = NULL;
+}
+
+void exit_with_free(t_shell *shell, int status)
+{
+	free_all_memory(shell);
+	exit(status);
 }
 
 // void free_all_memory(t_shell *shell)

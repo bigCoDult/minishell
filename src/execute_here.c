@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_here.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 16:41:26 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/17 20:17:14 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,9 +75,11 @@ int handle_heredoc(t_shell *shell, char *delimiter)
                 if (g_signal)
                 {
                     close(shell->heredoc.fd);
-                    exit(1);
+					exit_with_free(shell, 1);
+                    // exit(1);
                 }
-                exit(0);
+				exit_with_free(shell, 0);
+                // exit(0);
             }
             write(shell->heredoc.fd, line, strlen(line));
             write(shell->heredoc.fd, "\n", 1);

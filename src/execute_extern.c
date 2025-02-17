@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/17 20:09:41 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/17 20:16:45 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,9 @@ int execute_external(t_shell *shell, t_command *cmd)
             printf("minishell: %s: command not found\n", cmd->args[0]);
 			// free_command_memory(shell);
 			// free_env(shell);
-			free_all_memory(shell);
-            exit(127);
+			// free_all_memory(shell);
+            // exit(127);
+			exit_with_free(shell, 127);
         }
         
         debug_print(2013, 6, "DEBUG: Found command path: %s\n", path);
@@ -58,7 +59,8 @@ int execute_external(t_shell *shell, t_command *cmd)
         
         execve(path, cmd->args, get_env_array(shell));
         debug_print(2013, 7, "DEBUG: execve failed\n");
-        exit(127);
+        // exit(127);
+		exit_with_free(shell, 127);
     }
     else if (pid > 0)
     {
