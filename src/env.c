@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:33:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/17 20:09:41 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/17 20:22:11 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int parse_env_arg(t_shell *shell, char *arg, char **key, char **value)
 {
     char *equals;
 
-    debug_print(2013, 2, "DEBUG: [parse_env_arg] Parsing: %s\n", arg);
+    debug_print(0, 2, "DEBUG: [parse_env_arg] Parsing: %s\n", arg);
     equals = strchr(arg, '=');
     
     if (!equals)
@@ -33,7 +33,7 @@ int parse_env_arg(t_shell *shell, char *arg, char **key, char **value)
     *value = shell_strdup(shell, equals + 1);
     *equals = '=';   // 원래 문자열 복구
 
-    debug_print(2013, 2, "DEBUG: [parse_env_arg] Parsed key: %s, value: %s\n", *key, *value ? *value : "(null)");
+    debug_print(0, 2, "DEBUG: [parse_env_arg] Parsed key: %s, value: %s\n", *key, *value ? *value : "(null)");
 
     if (!*key || (*value && !**value))  // key가 비어있거나, value가 있는데 빈 문자열인 경우
         return (1);
@@ -46,7 +46,7 @@ void set_env_value(t_shell *shell, const char *key, const char *value)
     t_env *current;
     t_env *new_node;
 
-    debug_print(2013, 2, "DEBUG: [set_env_value] Attempting to set %s=%s\n",
+    debug_print(0, 2, "DEBUG: [set_env_value] Attempting to set %s=%s\n",
            key, value ? value : "(null)");
 
     if (!key || !*key)
@@ -58,7 +58,7 @@ void set_env_value(t_shell *shell, const char *key, const char *value)
     {
         if (current->key && strcmp(current->key, key) == 0)
         {
-            debug_print(2013, 2, "DEBUG: [set_env_value] Found existing key: %s\n", key);
+            debug_print(0, 2, "DEBUG: [set_env_value] Found existing key: %s\n", key);
             // 기존 값 해제
             if (current->value)
             {
@@ -70,7 +70,7 @@ void set_env_value(t_shell *shell, const char *key, const char *value)
             {
                 // current->value = ft_strdup(value);
 				current->value = shell_strdup(shell, value);
-                debug_print(2013, 2, "DEBUG: [set_env_value] Updated value: %s\n", current->value);
+                debug_print(0, 2, "DEBUG: [set_env_value] Updated value: %s\n", current->value);
             }
             return;
         }
@@ -78,12 +78,12 @@ void set_env_value(t_shell *shell, const char *key, const char *value)
     }
 
     // 새 환경변수 노드 생성
-    debug_print(2013, 2, "DEBUG: [set_env_value] Creating new env variable\n");
+    debug_print(0, 2, "DEBUG: [set_env_value] Creating new env variable\n");
     // new_node = malloc(sizeof(t_env));
     new_node = shell_malloc(shell, sizeof(t_env));
     if (!new_node)
     {
-        debug_print(2013, 2, "DEBUG: [set_env_value] Failed to allocate new node\n");
+        debug_print(0, 2, "DEBUG: [set_env_value] Failed to allocate new node\n");
         return;
     }
 
@@ -96,17 +96,17 @@ void set_env_value(t_shell *shell, const char *key, const char *value)
 
     if (!new_node->key)
     {
-        debug_print(2013, 2, "DEBUG: [set_env_value] Failed to allocate key\n");
+        debug_print(0, 2, "DEBUG: [set_env_value] Failed to allocate key\n");
         free(new_node);
         return;
     }
 
     // 리스트에 추가
-    debug_print(2013, 2, "DEBUG: [set_env_value] Adding to env list\n");
+    debug_print(0, 2, "DEBUG: [set_env_value] Adding to env list\n");
     new_node->next = shell->env;
     shell->env = new_node;
 
-    debug_print(2013, 2, "DEBUG: [set_env_value] Successfully added %s=%s\n",
+    debug_print(0, 2, "DEBUG: [set_env_value] Successfully added %s=%s\n",
            new_node->key, new_node->value ? new_node->value : "(null)");
 }
 

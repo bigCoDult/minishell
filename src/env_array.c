@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 05:07:15 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/17 20:09:41 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/17 20:22:11 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ char **get_env_array(t_shell *shell)
     t_env *current;
     int count;
 
-    debug_print(2013, 2, "DEBUG: Creating environment array\n");
+    debug_print(0, 2, "DEBUG: Creating environment array\n");
     
     // 환경 변수 개수 세기
     count = 0;
