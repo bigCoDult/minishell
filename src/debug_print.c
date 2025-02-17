@@ -71,14 +71,15 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 	int	mask;
 	int	type;
 
+	if (action_combine_bit == 0)
+		return ;
+
 	type = 1;
 	mask = 1;
 	ap = malloc(sizeof(va_list));
-	va_list *ap2;
-	ap2 = ap;
-	va_start(*ap, str);
-	if (action_combine_bit == 0)
+	if (ap == NULL)
 		return ;
+	va_start(*ap, str);
 	while (mask < 2048)
 	{
 		if ((action_combine_bit & mask) && str_type == type)
@@ -89,8 +90,8 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 		mask <<= 1;
 		type++;
 	}
-	free(ap2);
 	va_end(*ap);
+	free(ap);
 }
 
 
