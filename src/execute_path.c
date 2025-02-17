@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 05:04:13 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/15 22:18:49 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/17 20:09:41 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,39 +17,39 @@ static char *get_path_value(t_shell *shell)
 {
     t_env *current;
 
-    debug_print(2047, 6, "DEBUG: [get_path_value] Starting to get PATH value\n");
+    debug_print(2013, 6, "DEBUG: [get_path_value] Starting to get PATH value\n");
     
     if (!shell)
     {
-        debug_print(2047, 6, "DEBUG: [get_path_value] Shell is NULL\n");
+        debug_print(2013, 6, "DEBUG: [get_path_value] Shell is NULL\n");
         return (NULL);
     }
 
     if (!shell->env)
     {
-        debug_print(2047, 6, "DEBUG: [get_path_value] Shell env is NULL\n");
+        debug_print(2013, 6, "DEBUG: [get_path_value] Shell env is NULL\n");
         return (NULL);
     }
 
-    debug_print(2047, 6, "DEBUG: [get_path_value] Searching through environment variables\n");
+    debug_print(2013, 6, "DEBUG: [get_path_value] Searching through environment variables\n");
     current = shell->env;
     
     while (current)
     {
-        debug_print(2047, 6, "DEBUG: [get_path_value] Checking env: %s=%s\n",
+        debug_print(2013, 6, "DEBUG: [get_path_value] Checking env: %s=%s\n",
                current->key ? current->key : "NULL", 
                current->value ? current->value : "NULL");
         
         if (current->key && strcmp(current->key, "PATH") == 0)
         {
-            debug_print(2047, 6, "DEBUG: [get_path_value] Found PATH: %s\n", current->value);
+            debug_print(2013, 6, "DEBUG: [get_path_value] Found PATH: %s\n", current->value);
             // return (current->value);
             return (shell_strdup(shell, current->value));
         }
         current = current->next;
     }
     
-    debug_print(2047, 6, "DEBUG: [get_path_value] PATH not found in environment\n");
+    debug_print(2013, 6, "DEBUG: [get_path_value] PATH not found in environment\n");
     return (NULL);
 }
 
@@ -120,62 +120,62 @@ char *find_executable(t_shell *shell, const char *cmd)
     char *full_path;
     char *path_copy;
 
-    debug_print(2047, 6, "DEBUG: [find_executable] Starting search for: %s\n", cmd);
+    debug_print(2013, 6, "DEBUG: [find_executable] Starting search for: %s\n", cmd);
     
     // 명령어가 절대 경로나 상대 경로인 경우
     if (cmd[0] == '/' || cmd[0] == '.')
     {
-        debug_print(2047, 6, "DEBUG: [find_executable] Command is a path\n");
+        debug_print(2013, 6, "DEBUG: [find_executable] Command is a path\n");
         return (shell_strdup(shell, cmd));
     }
 
     // PATH 환경 변수 가져오기
-    debug_print(2047, 6, "DEBUG: [find_executable] Getting PATH value\n");
+    debug_print(2013, 6, "DEBUG: [find_executable] Getting PATH value\n");
     path = get_path_value(shell);
     if (!path)
     {
-        debug_print(2047, 6, "DEBUG: [find_executable] PATH not found\n");
+        debug_print(2013, 6, "DEBUG: [find_executable] PATH not found\n");
         return (NULL);
     }
 
-    debug_print(2047, 6, "DEBUG: [find_executable] PATH value: %s\n", path);
+    debug_print(2013, 6, "DEBUG: [find_executable] PATH value: %s\n", path);
     path_copy = shell_strdup(shell, path);
     if (!path_copy)
     {
-        debug_print(2047, 6, "DEBUG: [find_executable] Failed to copy PATH\n");
+        debug_print(2013, 6, "DEBUG: [find_executable] Failed to copy PATH\n");
         return (NULL);
     }
 
-    debug_print(2047, 6, "DEBUG: [find_executable] Searching in PATH directories\n");
+    debug_print(2013, 6, "DEBUG: [find_executable] Searching in PATH directories\n");
     dir = strtok(path_copy, ":");
     
     while (dir)
     {
-        debug_print(2047, 6, "DEBUG: [find_executable] Checking directory: %s\n", dir);
+        debug_print(2013, 6, "DEBUG: [find_executable] Checking directory: %s\n", dir);
         full_path = shell_malloc(shell, strlen(dir) + strlen(cmd) + 2);
         if (!full_path)
         {
-            debug_print(2047, 6, "DEBUG: [find_executable] Memory allocation failed\n");
+            debug_print(2013, 6, "DEBUG: [find_executable] Memory allocation failed\n");
             shell_free(shell, path_copy);
             return (NULL);
         }
         
         sprintf(full_path, "%s/%s", dir, cmd);
-        debug_print(2047, 6, "DEBUG: [find_executable] Trying path: %s\n", full_path);
+        debug_print(2013, 6, "DEBUG: [find_executable] Trying path: %s\n", full_path);
         
         if (access(full_path, X_OK) == 0)
         {
-            debug_print(2047, 6, "DEBUG: [find_executable] Executable found at: %s\n", full_path);
+            debug_print(2013, 6, "DEBUG: [find_executable] Executable found at: %s\n", full_path);
             shell_free(shell, path_copy);
             return (full_path);
         }
         
-        debug_print(2047, 6, "DEBUG: [find_executable] Not found in this directory\n");
+        debug_print(2013, 6, "DEBUG: [find_executable] Not found in this directory\n");
         shell_free(shell, full_path);
         dir = strtok(NULL, ":");
     }
     
-    debug_print(2047, 6, "DEBUG: [find_executable] Executable not found in PATH\n");
+    debug_print(2013, 6, "DEBUG: [find_executable] Executable not found in PATH\n");
     shell_free(shell, path_copy);
     return (NULL);
 }
@@ -188,12 +188,12 @@ char *find_command_path(t_shell *shell, const char *cmd)
     char *full_path;
     int i;
 
-    debug_print(2047, 6, "DEBUG: find_command_path start for cmd: %s\n", cmd);
+    debug_print(2013, 6, "DEBUG: find_command_path start for cmd: %s\n", cmd);
 
     // 명령어가 이미 전체 경로인 경우
     if (cmd[0] == '/' || cmd[0] == '.')
     {
-        debug_print(2047, 6, "DEBUG: Command is a path\n");
+        debug_print(2013, 6, "DEBUG: Command is a path\n");
         if (is_executable(cmd))
             return (shell_strdup(shell, cmd));
         return (NULL);
@@ -201,7 +201,7 @@ char *find_command_path(t_shell *shell, const char *cmd)
 
     // PATH 환경변수 가져오기
     path_str = get_path_value(shell);
-    debug_print(2047, 6, "DEBUG: PATH value: %s\n", path_str ? path_str : "NULL");
+    debug_print(2013, 6, "DEBUG: PATH value: %s\n", path_str ? path_str : "NULL");
     if (!path_str)
         return (NULL);
 
@@ -209,7 +209,7 @@ char *find_command_path(t_shell *shell, const char *cmd)
     paths = split_path(shell, path_str);
     if (!paths)
     {
-        debug_print(2047, 6, "DEBUG: Failed to split PATH\n");
+        debug_print(2013, 6, "DEBUG: Failed to split PATH\n");
         return (NULL);
     }
 
@@ -217,20 +217,20 @@ char *find_command_path(t_shell *shell, const char *cmd)
     i = 0;
     while (paths[i])
     {
-        debug_print(2047, 6, "DEBUG: Checking path: %s\n", paths[i]);
+        debug_print(2013, 6, "DEBUG: Checking path: %s\n", paths[i]);
         full_path = shell_malloc(shell, strlen(paths[i]) + strlen(cmd) + 2);
         if (!full_path)
         {
-            debug_print(2047, 6, "DEBUG: Memory allocation failed\n");
+            debug_print(2013, 6, "DEBUG: Memory allocation failed\n");
             return (NULL);
         }
 
         sprintf(full_path, "%s/%s", paths[i], cmd);
-        debug_print(2047, 6, "DEBUG: Checking full path: %s\n", full_path);
+        debug_print(2013, 6, "DEBUG: Checking full path: %s\n", full_path);
         
         if (is_executable(full_path))
         {
-            debug_print(2047, 6, "DEBUG: Found executable at: %s\n", full_path);
+            debug_print(2013, 6, "DEBUG: Found executable at: %s\n", full_path);
             return (full_path);
         }
         
@@ -238,6 +238,6 @@ char *find_command_path(t_shell *shell, const char *cmd)
         i++;
     }
 
-    debug_print(2047, 6, "DEBUG: Command not found in any PATH\n");
+    debug_print(2013, 6, "DEBUG: Command not found in any PATH\n");
     return (NULL);
 }
