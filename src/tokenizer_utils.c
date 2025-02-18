@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 08:07:44 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 18:42:49 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ static int get_word_length(char *input)
 {
     int len;
 
-    debug_print(2047, 3, "DEBUG: Calculating word length\n");
+    debug_print(0, 3, "DEBUG: Calculating word length\n");
     len = 0;
     while (input[len] && !strchr(" |<>", input[len]))
     {
@@ -32,10 +32,10 @@ static int get_word_length(char *input)
                 len++;
             continue;
         }
-        debug_print(2047, 3, "DEBUG: Checking character: %c\n", input[len]);
+        debug_print(0, 3, "DEBUG: Checking character: %c\n", input[len]);
         len++;
     }
-    debug_print(2047, 3, "DEBUG: Word length: %d\n", len);
+    debug_print(0, 3, "DEBUG: Word length: %d\n", len);
     return (len);
 }
 
@@ -44,19 +44,19 @@ char *handle_word(t_shell *shell, char *input, int *len)
 {
     char *word;
     
-    debug_print(2047, 3, "DEBUG: Handling word starting with: %c\n", *input);
+    debug_print(0, 3, "DEBUG: Handling word starting with: %c\n", *input);
     
     *len = get_word_length(input);
     if (*len == 0)
     {
-        debug_print(2047, 3, "DEBUG: Empty word\n");
+        debug_print(0, 3, "DEBUG: Empty word\n");
         return NULL;
     }
 
     word = shell_malloc(shell, *len + 1);
     if (!word)
     {
-        debug_print(2047, 3, "DEBUG: Failed to allocate memory for word\n");
+        debug_print(0, 3, "DEBUG: Failed to allocate memory for word\n");
         return NULL;
     }
 
@@ -67,7 +67,7 @@ char *handle_word(t_shell *shell, char *input, int *len)
     char *expanded = expand_env_var(shell, word);
     shell_free(shell, word);
     
-    debug_print(2047, 3, "DEBUG: Expanded word: %s\n", expanded);
+    debug_print(0, 3, "DEBUG: Expanded word: %s\n", expanded);
     return expanded;
 }
 
