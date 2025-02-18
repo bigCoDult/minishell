@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:12 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 15:11:52 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 07:59:16 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,6 +274,11 @@ int parse_input(t_shell *shell)
         debug_print(2047, 3, "DEBUG: [parse_input] Pipeline parsing failed\n");
         return (1);
     }
+
+    // AST 구조 출력 추가
+    debug_print(2047, 4, "\nDEBUG: === AST Structure ===\n");
+    print_ast(shell->ast_root, 0);
+    debug_print(2047, 4, "DEBUG: === End of AST ===\n\n");
 
     debug_print(2047, 3, "DEBUG: [parse_input] Parsing completed successfully\n");
     debug_print(2047, 3, "DEBUG: [parse_input] === Parsing finished ===\n\n");

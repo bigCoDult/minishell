@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 15:36:24 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 07:59:16 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,5 +254,10 @@ int execute_simple_command(t_shell *shell, t_command *cmd);
 // 함수 선언 추가
 char *create_temp_heredoc_file(t_shell *shell);
 void cleanup_heredoc(t_shell *shell);
+
+// AST 출력 관련 함수 선언 추가
+void print_ast(t_ast_node *node, int depth);
+void print_command(t_command *cmd);
+void print_redirection(t_redirection *redir);
 
 #endif
