@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 13:27:59 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 12:45:46 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,4 +149,11 @@ void free_all_memory(t_shell *shell)
         }
         current = next;
     }
+}
+
+void free_exit(t_shell *shell, int status)
+{
+	free_all_memory(shell);
+	free(shell);
+	exit(status);
 }
