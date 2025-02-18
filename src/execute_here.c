@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 16:41:26 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 09:16:32 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,86 +31,41 @@ int handle_heredoc(t_shell *shell, char *delimiter)
 {
     pid_t pid;
     int status;
-    char *line;
+    int pipe_fds[2];
 
-    g_signal = 0;
-    void (*old_int_handler)(int) = signal(SIGINT, SIG_IGN);
-    void (*old_quit_handler)(int) = signal(SIGQUIT, SIG_IGN);
-
-    shell->heredoc.original_stdin = dup(STDIN_FILENO);
-    if (shell->heredoc.original_stdin == -1)
-    {
-        signal(SIGINT, old_int_handler);
-        signal(SIGQUIT, old_quit_handler);
-        return 1;
-    }
-
-    shell->heredoc.temp_file = create_temp_heredoc_file(shell);
-    if (!shell->heredoc.temp_file)
-    {
-        close(shell->heredoc.original_stdin);
-        return 1;
-    }
-
-    shell->heredoc.fd = open(shell->heredoc.temp_file, 
-                           O_WRONLY | O_CREAT | O_TRUNC, 0600);
-    if (shell->heredoc.fd == -1)
-    {
-        cleanup_heredoc(shell);
-        return 1;
-    }
+    if (pipe(pipe_fds) == -1)
+        return (1);
 
     pid = fork();
     if (pid == 0)
     {
-        signal(SIGINT, SIG_DFL);
-        signal(SIGQUIT, SIG_IGN);
-        signal(SIGINT, heredoc_signal_handler);
+        close(pipe_fds[0]);
         while (1)
         {
-            line = readline("> ");
-            if (!line || g_signal || strcmp(line, delimiter) == 0)
+            char *line = readline("> ");
+            if (!line || strcmp(line, delimiter) == 0)
             {
                 free(line);
-                if (g_signal)
-                {
-                    close(shell->heredoc.fd);
-                    exit(1);
-                }
+                close(pipe_fds[1]);
                 exit(0);
             }
-            write(shell->heredoc.fd, line, strlen(line));
-            write(shell->heredoc.fd, "\n", 1);
+            write(pipe_fds[1], line, strlen(line));
+            write(pipe_fds[1], "\n", 1);
             free(line);
         }
     }
 
+    close(pipe_fds[1]);
     waitpid(pid, &status, 0);
-    
-    signal(SIGINT, old_int_handler);
-    signal(SIGQUIT, old_quit_handler);
 
-    if (WIFSIGNALED(status))
+    if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
     {
-        g_signal = 1;
-        cleanup_heredoc(shell);
-        return 1;
+        shell->heredoc.fd = pipe_fds[0];
+        return (0);
     }
 
-    if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
-    {
-        cleanup_heredoc(shell);
-        return 1;
-    }
-
-    shell->heredoc.fd = open(shell->heredoc.temp_file, O_RDONLY);
-    if (shell->heredoc.fd == -1)
-    {
-        cleanup_heredoc(shell);
-        return 1;
-    }
-
-    return 0;
+    close(pipe_fds[0]);
+    return (1);
 }
 
 void cleanup_heredoc(t_shell *shell)
