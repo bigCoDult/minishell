@@ -6,11 +6,43 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 08:05:06 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 09:17:33 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+static int handle_heredocs_recursive(t_shell *shell, t_ast_node *node)
+{
+    if (!node)
+        return (0);
+
+    // 현재 노드가 명령어인 경우
+    if (node->type == AST_COMMAND)
+    {
+        t_redirection *redir = node->cmd->redirs;
+        while (redir)
+        {
+            if (redir->type == REDIR_HEREDOC)
+            {
+                if (handle_heredoc(shell, redir->filename) != 0)
+                    return (1);
+            }
+            redir = redir->next;
+        }
+        return (0);
+    }
+
+    // 파이프 노드인 경우 양쪽 모두 처리
+    if (node->type == AST_PIPE)
+    {
+        if (handle_heredocs_recursive(shell, node->left) != 0)
+            return (1);
+        return handle_heredocs_recursive(shell, node->right);
+    }
+
+    return (0);
+}
 
 void setup_pipe(t_shell *shell, int pipefd[2], int is_first, int is_last)
 {
@@ -77,66 +109,28 @@ int execute_piped_command(t_shell *shell, t_command *cmd)
 // 히어독 처리 함수 추가
 static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
 {
-    t_redirection *left_redirs = NULL;
-    t_redirection *right_redirs = NULL;
-    int heredoc_count = 0;
     int original_stdin;
-
-    debug_print(2047, 9, "=== HANDLING ALL HEREDOCS ===\n");
     
-    // 현재 표준 입력 저장
+    // 표준 입력 저장
     original_stdin = dup(STDIN_FILENO);
     if (original_stdin == -1)
         return (1);
 
-    shell->heredoc.original_stdin = original_stdin;  // 쉘 구조체에 저장
+    // 디버그 출력을 임시로 비활성화
+    int debug_fd = dup(STDOUT_FILENO);
+    if (debug_fd == -1)
+        return (1);
 
-    // 왼쪽 명령어의 히어독 찾기
-    if (node->left && node->left->type == AST_COMMAND && node->left->cmd)
-        left_redirs = node->left->cmd->redirs;
-    
-    // 오른쪽 명령어의 히어독 찾기
-    if (node->right && node->right->type == AST_COMMAND && node->right->cmd)
-        right_redirs = node->right->cmd->redirs;
+    // 재귀적으로 모든 히어독 처리
+    int result = handle_heredocs_recursive(shell, node);
 
-    // 왼쪽 히어독 처리
-    while (left_redirs)
-    {
-        if (left_redirs->type == REDIR_HEREDOC)
-        {
-            debug_print(2047, 9, "Processing left heredoc: %s\n", left_redirs->filename);
-            if (handle_heredoc(shell, left_redirs->filename) != 0)
-                return (1);
-            heredoc_count++;
-            
-            // 각 히어독 처리 후 표준 입력 복원
-            if (dup2(original_stdin, STDIN_FILENO) == -1)
-                return (1);
-        }
-        left_redirs = left_redirs->next;
-    }
+    // 표준 입력/출력 복원
+    dup2(original_stdin, STDIN_FILENO);
+    dup2(debug_fd, STDOUT_FILENO);
+    close(original_stdin);
+    close(debug_fd);
 
-    // 오른쪽 히어독 처리
-    while (right_redirs)
-    {
-        if (right_redirs->type == REDIR_HEREDOC)
-        {
-            debug_print(2047, 9, "Processing right heredoc: %s\n", right_redirs->filename);
-            if (handle_heredoc(shell, right_redirs->filename) != 0)
-                return (1);
-            heredoc_count++;
-            
-            // 각 히어독 처리 후 표준 입력 복원
-            if (dup2(original_stdin, STDIN_FILENO) == -1)
-                return (1);
-        }
-        right_redirs = right_redirs->next;
-    }
-
-    debug_print(2047, 9, "Processed %d heredocs\n", heredoc_count);
-    
-    // original_stdin은 닫지 않고 shell 구조체에 저장된 상태로 유지
-    return (0);
+    return result;
 }
 
 int execute_pipe(t_shell *shell, t_ast_node *node)
