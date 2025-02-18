@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 19:28:52 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 21:59:20 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,8 @@ static void free_shell_malloc(t_shell *shell)
 	}
 }
 
-static void free_env(t_shell *shell)
+// static void free_env(t_shell *shell)
+void free_env(t_shell *shell)
 {
 	t_env *current;
 	t_env *next;
