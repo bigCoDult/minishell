@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 19:07:47 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 19:25:32 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,53 +106,53 @@ void free_command_memory(t_shell *shell)
 }
 
 // 모든 할당된 메모리 해제
-// void free_all_memory(t_shell *shell)
-// {
-//     t_memory *current;
-//     t_memory *next;
-//     t_memory *prev;
-
-//     debug_print(0, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
-
-//     current = shell->memory;
-//     prev = NULL;
-    
-//     while (current)
-//     {
-//         next = current->next;
-//         t_env *env_ptr = shell->env;
-//         int is_env = 0;
-
-//         while (env_ptr)
-//         {
-//             if (current->addr == env_ptr ||
-//                 current->addr == env_ptr->key ||
-//                  current->addr == env_ptr->value)
-//             {
-//                 is_env = 1;
-//                 break;
-//             }
-//             env_ptr = env_ptr->next;
-//         }
-//         if (!is_env)
-//         {
-//             if (prev)
-//                 prev->next = next;
-//             else
-//                 shell->memory = next;
-//             free(current->addr);
-//             free(current);
-//         }
-//         else
-//         {
-//             prev = current;
-//         }
-//         current = next;
-//     }
-// }
-
-// 단순하게 링크드 리스트 전무 해제
 void free_all_memory(t_shell *shell)
+{
+    t_memory *current;
+    t_memory *next;
+    t_memory *prev;
+
+    debug_print(0, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
+
+    current = shell->memory;
+    prev = NULL;
+    
+    while (current)
+    {
+        next = current->next;
+        t_env *env_ptr = shell->env;
+        int is_env = 0;
+
+        while (env_ptr)
+        {
+            if (current->addr == env_ptr ||
+                current->addr == env_ptr->key ||
+                 current->addr == env_ptr->value)
+            {
+                is_env = 1;
+                break;
+            }
+            env_ptr = env_ptr->next;
+        }
+        if (!is_env)
+        {
+            if (prev)
+                prev->next = next;
+            else
+                shell->memory = next;
+            free(current->addr);
+            free(current);
+        }
+        else
+        {
+            prev = current;
+        }
+        current = next;
+    }
+}
+
+// 단순하게 링크드 리스트 전부 해제
+void free_shell_malloc(t_shell *shell)
 {
 	t_memory *current;
 	t_memory *next;
@@ -171,7 +171,9 @@ void free_all_memory(t_shell *shell)
 
 void free_exit(t_shell *shell, int status)
 {
-	free_all_memory(shell);
+	free_shell_malloc(shell);
 	// free(shell);
+	// free_command_memory(shell);
+	free_env(shell->env);
 	exit(status);
 }
