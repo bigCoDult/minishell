@@ -70,7 +70,7 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 	va_list *ap;
 	int	mask;
 	int	type;
-	signal(SIGINT, SIG_IGN);
+	// signal(SIGPIPE, SIG_IGN);
 
 	if (action_combine_bit == 0)
 		return ;
