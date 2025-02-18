@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 18:42:49 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 19:10:00 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,14 +88,17 @@ int execute_piped_command(t_shell *shell, t_command *cmd)
         // 명령어 실행
         char *executable_path = find_command_path(shell, cmd->args[0]);
         if (!executable_path)
-            exit(127);
+            // exit(127);
+			free_exit(shell, 127);
 
         char **env_array = get_env_array(shell);
         if (!env_array)
-            exit(1);
+            // exit(1);
+			free_exit(shell, 1);
 
         execve(executable_path, cmd->args, env_array);
-        exit(127);
+        // exit(127);
+		free_exit(shell, 127);
     }
     
     // 부모 프로세스에서 파이프 fd 정리
@@ -157,15 +160,18 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     {
         close(pipefd[0]);
         if (dup2(pipefd[1], STDOUT_FILENO) == -1)
-            exit(1);
+            // exit(1);
+			free_exit(shell, 1);
         close(pipefd[1]);
         
         if (node->left->type == AST_COMMAND)
         {
             debug_print(0, 8, "Executing left command: %s\n", node->left->cmd->args[0]);
-            exit(execute_simple_command(shell, node->left->cmd));
+            // exit(execute_simple_command(shell, node->left->cmd));
+			free_exit(shell, execute_simple_command(shell, node->left->cmd));
         }
-        exit(1);
+        // exit(1);
+		free_exit(shell, 1);
     }
 
     // 두 번째 명령어 실행 (오른쪽 노드)
@@ -174,20 +180,24 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     {
         close(pipefd[1]);
         if (dup2(pipefd[0], STDIN_FILENO) == -1)
-            exit(1);
+            // exit(1);
+			free_exit(shell, 1);
         close(pipefd[0]);
         
         if (node->right->type == AST_PIPE)
         {
             debug_print(0, 8, "Executing right pipe\n");
-            exit(execute_pipe(shell, node->right));
+            // exit(execute_pipe(shell, node->right));
+			free_exit(shell, execute_pipe(shell, node->right));
         }
         else if (node->right->type == AST_COMMAND)
         {
             debug_print(0, 8, "Executing right command: %s\n", node->right->cmd->args[0]);
-            exit(execute_simple_command(shell, node->right->cmd));
+            // exit(execute_simple_command(shell, node->right->cmd));
+			free_exit(shell, execute_simple_command(shell, node->right->cmd));
         }
-        exit(1);
+        // exit(1);
+		free_exit(shell, 1);
     }
 
     // 부모 프로세스

@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 18:42:49 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 19:08:57 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,8 @@ int execute_external(t_shell *shell, t_command *cmd)
         if (!path)
         {
             printf("minishell: %s: command not found\n", cmd->args[0]);
-            exit(127);
+            // exit(127);
+			free_exit(shell, 127);
         }
         
         debug_print(0, 6, "DEBUG: Found command path: %s\n", path);
@@ -55,7 +56,8 @@ int execute_external(t_shell *shell, t_command *cmd)
         
         execve(path, cmd->args, get_env_array(shell));
         debug_print(0, 7, "DEBUG: execve failed\n");
-        exit(127);
+        // exit(127);
+		free_exit(shell, 127);
     }
     else if (pid > 0)
     {
