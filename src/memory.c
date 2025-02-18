@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 21:59:20 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void free_all_memory(t_shell *shell)
     t_memory *next;
     t_memory *prev;
 
-    debug_print(0, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
+    debug_print(2047, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
 
     current = shell->memory;
     prev = NULL;
@@ -157,7 +157,7 @@ static void free_shell_malloc(t_shell *shell)
 	t_memory *current;
 	t_memory *next;
 
-	debug_print(0, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
+	debug_print(2047, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
 
 	current = shell->memory;
 	while (current)

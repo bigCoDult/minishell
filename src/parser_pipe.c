@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/05 01:43:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 18:42:49 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,13 @@ t_ast_node *parse_pipeline(t_shell *shell, t_token **tokens)
     t_ast_node *first_cmd;
     // t_token *start_token;
 
-    debug_print(0, 8, "\nDEBUG: Starting to parse pipeline\n");
+    debug_print(2047, 8, "\nDEBUG: Starting to parse pipeline\n");
     
     // 첫 번째 명령어 파싱
     first_cmd = parse_simple_command(shell, tokens);
     if (!first_cmd)
     {
-        debug_print(0, 8, "DEBUG: Failed to parse first command\n");
+        debug_print(2047, 8, "DEBUG: Failed to parse first command\n");
         return (NULL);
     }
 
@@ -33,13 +33,13 @@ t_ast_node *parse_pipeline(t_shell *shell, t_token **tokens)
     {
         t_ast_node *pipe_node;
         
-        debug_print(0, 8, "DEBUG: Found pipe token\n");
+        debug_print(2047, 8, "DEBUG: Found pipe token\n");
         *tokens = (*tokens)->next;  // 파이프 토큰 건너뛰기
         
         pipe_node = create_ast_node(shell, AST_PIPE);
         if (!pipe_node)
         {
-            debug_print(0, 8, "DEBUG: Failed to create pipe node\n");
+            debug_print(2047, 8, "DEBUG: Failed to create pipe node\n");
             return (NULL);
         }
 
@@ -50,11 +50,11 @@ t_ast_node *parse_pipeline(t_shell *shell, t_token **tokens)
         pipe_node->right = parse_pipeline(shell, tokens);
         if (!pipe_node->right)
         {
-            debug_print(0, 8, "DEBUG: Failed to parse right pipeline\n");
+            debug_print(2047, 8, "DEBUG: Failed to parse right pipeline\n");
             return (NULL);
         }
 
-        debug_print(0, 8, "DEBUG: Successfully created pipe node\n");
+        debug_print(2047, 8, "DEBUG: Successfully created pipe node\n");
         return pipe_node;
     }
 
