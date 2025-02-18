@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:42:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 18:42:49 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 22:06:47 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,5 +176,6 @@ int builtin_exit(t_shell *shell, char **args)
 
     printf("exit\n");
     free_all_memory(shell);
+	free_env(shell);
     exit(exit_code);
 }
