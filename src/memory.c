@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 19:25:32 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 19:28:52 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ void free_all_memory(t_shell *shell)
 }
 
 // 단순하게 링크드 리스트 전부 해제
-void free_shell_malloc(t_shell *shell)
+static void free_shell_malloc(t_shell *shell)
 {
 	t_memory *current;
 	t_memory *next;
@@ -169,11 +169,25 @@ void free_shell_malloc(t_shell *shell)
 	}
 }
 
+static void free_env(t_shell *shell)
+{
+	t_env *current;
+	t_env *next;
+
+	current = shell->env;
+	while (current)
+	{
+		next = current->next;
+		free(current->key);
+		free(current->value);
+		free(current);
+		current = next;
+	}
+}
+
 void free_exit(t_shell *shell, int status)
 {
 	free_shell_malloc(shell);
-	// free(shell);
-	// free_command_memory(shell);
-	free_env(shell->env);
+	free_env(shell);
 	exit(status);
 }
