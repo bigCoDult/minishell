@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 15:28:20 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 08:05:06 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,9 +166,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
             exit(1);
         close(pipefd[1]);
         
-        if (node->left->type == AST_PIPE)
-            exit(execute_pipe(shell, node->left));
-        else if (node->left->type == AST_COMMAND)
+        if (node->left->type == AST_COMMAND)
         {
             debug_print(2047, 8, "Executing left command: %s\n", node->left->cmd->args[0]);
             exit(execute_simple_command(shell, node->left->cmd));
