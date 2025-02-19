@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/19 04:36:57 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/19 08:20:12 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,16 @@ char *handle_word(t_shell *shell, char *input, int *len)
         final_quote_state = 1;  // 작은따옴표로 시작
     else if (input[0] == '"' && input[0] != '$')
         final_quote_state = 2;  // 큰따옴표로 시작
-
+    else if (input[0] == '$' && input[1] == '"')
+    {
+        final_quote_state = 3;  // $"로 시작
+        i += 2;
+    }
+    else if (input[0] == '$' && input[1] == '\'')
+    {
+        final_quote_state = 4;  // $'로 시작
+        i += 2;
+    }
     while (i < *len)
     {
         if (input[i] == '$' && !state.in_single_quote)
