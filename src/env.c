@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:33:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 08:00:41 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,7 +187,8 @@ char *expand_env_var(t_shell *shell, const char *str)
     if (!str || !strchr(str, '$'))
         return shell_strdup(shell, str);
     
-    result = shell_malloc(shell, strlen(str) * 2);
+    // result = shell_malloc(shell, strlen(str) * 2);
+    result = shell_malloc(shell, strlen(str) * 20000);
     write_pos = result;
     
     while (*str)

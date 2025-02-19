@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_pipe.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/05 01:43:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 08:05:22 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

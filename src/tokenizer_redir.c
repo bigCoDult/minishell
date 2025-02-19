@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_redir.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:15:26 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 08:07:26 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

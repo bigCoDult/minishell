@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/14 15:55:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,8 @@ int	main(int argc, char **argv, char **envp)
 	
 	debug_print(2047, 7, "DEBUG: Cleaning up memory\n");
 	free_all_memory(&shell);
+	// free_all_memory()가 환경변수를 free하지 못하고 있어서 임시로 추가
+	free_env(&shell);
 	
 	debug_print(2047, 7, "DEBUG: minishell exiting with status: %d\n", shell.status.exit_code);
 	return (shell.status.exit_code);

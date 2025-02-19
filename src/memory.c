@@ -6,7 +6,7 @@
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:24:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 13:27:59 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,8 +125,8 @@ void free_all_memory(t_shell *shell)
 
         while (env_ptr)
         {
-            if (current->addr == env_ptr || 
-                current->addr == env_ptr->key || 
+            if (current->addr == env_ptr ||
+                current->addr == env_ptr->key ||
                  current->addr == env_ptr->value)
             {
                 is_env = 1;
@@ -149,4 +149,46 @@ void free_all_memory(t_shell *shell)
         }
         current = next;
     }
+}
+
+// 단순하게 링크드 리스트 전부 해제
+static void free_shell_malloc(t_shell *shell)
+{
+	t_memory *current;
+	t_memory *next;
+
+	debug_print(2047, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
+
+	current = shell->memory;
+	while (current)
+	{
+		next = current->next;
+		free(current->addr);
+		free(current);
+		current = next;
+	}
+}
+
+// static void free_env(t_shell *shell)
+void free_env(t_shell *shell)
+{
+	t_env *current;
+	t_env *next;
+
+	current = shell->env;
+	while (current)
+	{
+		next = current->next;
+		free(current->key);
+		free(current->value);
+		free(current);
+		current = next;
+	}
+}
+
+void free_exit(t_shell *shell, int status)
+{
+	free_shell_malloc(shell);
+	free_env(shell);
+	exit(status);
 }

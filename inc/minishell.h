@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 07:59:16 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/18 21:59:24 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,6 +156,10 @@ void	*shell_malloc(t_shell *shell, size_t size);
 void	shell_free(t_shell *shell, void *ptr);
 void	free_all_memory(t_shell *shell);
 void	free_command_memory(t_shell *shell);
+void	free_exit(t_shell *shell, int status);
+void free_env(t_shell *shell);
+
+
 
 // env.c
 t_env	*init_env(t_shell *shell, char **envp);
