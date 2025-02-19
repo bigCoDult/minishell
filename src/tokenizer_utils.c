@@ -3,38 +3,71 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/19 04:36:57 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+// 토큰 처리 상태를 추적하기 위한 구조체
+typedef struct s_token_state {
+    int in_single_quote;  // 작은따옴표 안인지
+    int in_double_quote;  // 큰따옴표 안인지
+} t_token_state;
+
 // 단어의 길이 계산
 static int get_word_length(char *input)
 {
     int len;
+    t_token_state state;
+    int dollar_sign;  // $ 기호 직후인지 추적
 
     debug_print(2047, 3, "DEBUG: Calculating word length\n");
     len = 0;
-    while (input[len] && !strchr(" |<>", input[len]))
+    state.in_single_quote = 0;
+    state.in_double_quote = 0;
+    dollar_sign = 0;
+
+    while (input[len])
     {
-        // 따옴표 처리 추가
-        if (input[len] == '"' || input[len] == '\'')
+        // $ 기호 체크
+        if (input[len] == '$' && !state.in_single_quote)
+            dollar_sign = 1;
+        // 따옴표 처리 ($ 직후의 따옴표는 일반 문자로 처리)
+        else if (input[len] == '"' && !state.in_single_quote && !dollar_sign)
         {
-            char quote = input[len];
+            state.in_double_quote = !state.in_double_quote;
             len++;
-            while (input[len] && input[len] != quote)
-                len++;
-            if (input[len])
-                len++;
             continue;
         }
+        else if (input[len] == '\'' && !state.in_double_quote && !dollar_sign)
+        {
+            state.in_single_quote = !state.in_single_quote;
+            len++;
+            continue;
+        }
+        else
+            dollar_sign = 0;  // $ 다음 문자를 처리했으므로 리셋
+
+        // 단어 끝 확인 (따옴표 안이 아닐 때만)
+        if (!state.in_single_quote && !state.in_double_quote && 
+            strchr(" |<>", input[len]))
+            break;
+
         debug_print(2047, 3, "DEBUG: Checking character: %c\n", input[len]);
         len++;
     }
+
+    // 닫히지 않은 따옴표 체크
+    if (state.in_single_quote || state.in_double_quote)
+    {
+        debug_print(2047, 3, "DEBUG: Unclosed quote detected\n");
+        // 나중에 에러 처리 추가
+    }
+
     debug_print(2047, 3, "DEBUG: Word length: %d\n", len);
     return (len);
 }
@@ -43,32 +76,67 @@ static int get_word_length(char *input)
 char *handle_word(t_shell *shell, char *input, int *len)
 {
     char *word;
+    char *result;
+    t_token_state state;
+    int i, j;
+    int final_quote_state = 0;
+    int dollar_sign = 0;  // $ 기호 직후인지 추적
     
     debug_print(2047, 3, "DEBUG: Handling word starting with: %c\n", *input);
     
     *len = get_word_length(input);
     if (*len == 0)
-    {
-        debug_print(2047, 3, "DEBUG: Empty word\n");
         return NULL;
-    }
 
     word = shell_malloc(shell, *len + 1);
     if (!word)
-    {
-        debug_print(2047, 3, "DEBUG: Failed to allocate memory for word\n");
         return NULL;
+
+    // 따옴표를 제거하면서 단어 복사
+    state.in_single_quote = 0;
+    state.in_double_quote = 0;
+    i = 0;
+    j = 0;
+
+    // 시작 따옴표 확인
+    if (input[0] == '\'')
+        final_quote_state = 1;  // 작은따옴표로 시작
+    else if (input[0] == '"' && input[0] != '$')
+        final_quote_state = 2;  // 큰따옴표로 시작
+
+    while (i < *len)
+    {
+        if (input[i] == '$' && !state.in_single_quote)
+            dollar_sign = 1;
+        else if (input[i] == '"' && !state.in_single_quote && !dollar_sign)
+        {
+            state.in_double_quote = !state.in_double_quote;
+            i++;
+            continue;
+        }
+        else if (input[i] == '\'' && !state.in_double_quote && !dollar_sign)
+        {
+            state.in_single_quote = !state.in_single_quote;
+            i++;
+            continue;
+        }
+        else
+            dollar_sign = 0;  // $ 다음 문자를 처리했으므로 리셋
+
+        word[j++] = input[i++];
     }
+    word[j] = '\0';
 
-    strncpy(word, input, *len);
-    word[*len] = '\0';
+    debug_print(2047, 3, "DEBUG: Quote state: %d\n", final_quote_state);
+    // 환경변수 확장 (작은따옴표로 감싸진 경우와 $" 형태는 확장하지 않음)
+    if (final_quote_state != 1 && strncmp(word, "$\"", 2) != 0)
+        result = expand_env_var(shell, word);
+    else
+        result = shell_strdup(shell, word);
 
-    // 환경변수 확장
-    char *expanded = expand_env_var(shell, word);
     shell_free(shell, word);
-    
-    debug_print(2047, 3, "DEBUG: Expanded word: %s\n", expanded);
-    return expanded;
+    debug_print(2047, 3, "DEBUG: Expanded word: %s\n", result);
+    return result;
 }
 
 // // 따옴표 처리 함수
