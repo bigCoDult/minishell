@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/19 13:18:56 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,8 @@ int execute_piped_command(t_shell *shell, t_command *cmd)
 static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
 {
     int original_stdin;
+    int debug_fd;
+    int result;
     
     // 표준 입력 저장
     original_stdin = dup(STDIN_FILENO);
@@ -120,18 +122,28 @@ static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
         return (1);
 
     // 디버그 출력을 임시로 비활성화
-    int debug_fd = dup(STDOUT_FILENO);
+    debug_fd = dup(STDOUT_FILENO);
     if (debug_fd == -1)
+    {
+        close(original_stdin);
         return (1);
+    }
 
     // 재귀적으로 모든 히어독 처리
-    int result = handle_heredocs_recursive(shell, node);
+    result = handle_heredocs_recursive(shell, node);
 
     // 표준 입력/출력 복원
     dup2(original_stdin, STDIN_FILENO);
     dup2(debug_fd, STDOUT_FILENO);
     close(original_stdin);
     close(debug_fd);
+
+    // 히어독 파일 디스크립터 정리
+    if (shell->heredoc.fd != -1)
+    {
+        close(shell->heredoc.fd);
+        shell->heredoc.fd = -1;
+    }
 
     return result;
 }
@@ -143,73 +155,93 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     int status1, status2;
 
     debug_print(2047, 8, "\n=== EXECUTE PIPE ===\n");
+    debug_print(2047, 8, "Starting pipe execution process\n");
     
     if (!node || !node->left || !node->right)
+    {
+        debug_print(2047, 8, "Error: Invalid pipe node structure\n");
         return (1);
+    }
 
     // 모든 히어독을 먼저 처리
+    debug_print(2047, 8, "Processing heredocs...\n");
     if (handle_all_heredocs(shell, node) != 0)
+    {
+        debug_print(2047, 8, "Error: Heredoc processing failed\n");
         return (1);
+    }
 
     if (pipe(pipefd) == -1)
+    {
+        debug_print(2047, 8, "Error: Pipe creation failed\n");
         return (1);
+    }
+    debug_print(2047, 8, "Pipe created successfully [read_fd: %d, write_fd: %d]\n", pipefd[0], pipefd[1]);
 
     // 첫 번째 명령어 실행 (왼쪽 노드)
+    debug_print(2047, 8, "Creating first child process...\n");
     pid1 = fork();
     if (pid1 == 0)
     {
+        debug_print(2047, 8, "In first child process (PID: %d)\n", getpid());
         close(pipefd[0]);
         if (dup2(pipefd[1], STDOUT_FILENO) == -1)
-            // exit(1);
-			free_exit(shell, 1);
+        {
+            debug_print(2047, 8, "Error: Failed to redirect stdout in first child\n");
+            free_exit(shell, 1);
+        }
         close(pipefd[1]);
         
         if (node->left->type == AST_COMMAND)
         {
             debug_print(2047, 8, "Executing left command: %s\n", node->left->cmd->args[0]);
-            // exit(execute_simple_command(shell, node->left->cmd));
-			free_exit(shell, execute_simple_command(shell, node->left->cmd));
+            free_exit(shell, execute_simple_command(shell, node->left->cmd));
         }
-        // exit(1);
-		free_exit(shell, 1);
+        debug_print(2047, 8, "Error: Left node is not a command\n");
+        free_exit(shell, 1);
     }
 
     // 두 번째 명령어 실행 (오른쪽 노드)
+    debug_print(2047, 8, "Creating second child process...\n");
     pid2 = fork();
     if (pid2 == 0)
     {
+        debug_print(2047, 8, "In second child process (PID: %d)\n", getpid());
         close(pipefd[1]);
         if (dup2(pipefd[0], STDIN_FILENO) == -1)
-            // exit(1);
-			free_exit(shell, 1);
+        {
+            debug_print(2047, 8, "Error: Failed to redirect stdin in second child\n");
+            free_exit(shell, 1);
+        }
         close(pipefd[0]);
         
         if (node->right->type == AST_PIPE)
         {
             debug_print(2047, 8, "Executing right pipe\n");
-            // exit(execute_pipe(shell, node->right));
-			free_exit(shell, execute_pipe(shell, node->right));
+            free_exit(shell, execute_pipe(shell, node->right));
         }
         else if (node->right->type == AST_COMMAND)
         {
             debug_print(2047, 8, "Executing right command: %s\n", node->right->cmd->args[0]);
-            // exit(execute_simple_command(shell, node->right->cmd));
-			free_exit(shell, execute_simple_command(shell, node->right->cmd));
+            free_exit(shell, execute_simple_command(shell, node->right->cmd));
         }
-        // exit(1);
-		free_exit(shell, 1);
+        debug_print(2047, 8, "Error: Right node is neither pipe nor command\n");
+        free_exit(shell, 1);
     }
 
     // 부모 프로세스
+    debug_print(2047, 8, "In parent process, closing pipe fds\n");
     close(pipefd[0]);
     close(pipefd[1]);
     
     // 자식 프로세스들의 종료를 기다림
+    debug_print(2047, 8, "Waiting for child processes to complete...\n");
     waitpid(pid1, &status1, 0);
     waitpid(pid2, &status2, 0);
     
-    debug_print(2047, 8, "Left command status: %d\n", WEXITSTATUS(status1));
-    debug_print(2047, 8, "Right command status: %d\n", WEXITSTATUS(status2));
+    debug_print(2047, 8, "Left command (PID: %d) status: %d\n", pid1, WEXITSTATUS(status1));
+    debug_print(2047, 8, "Right command (PID: %d) status: %d\n", pid2, WEXITSTATUS(status2));
+    debug_print(2047, 8, "=== PIPE EXECUTION COMPLETE ===\n");
     
     // 마지막 명령어의 종료 상태를 반환
     return (WEXITSTATUS(status2));
