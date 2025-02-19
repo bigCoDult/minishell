@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:33:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/19 04:06:18 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,26 +177,34 @@ char *get_env_value(t_shell *shell, const char *key)
     return NULL;
 }
 
-// 환경변수 확장 처리
+// 환경변수 확장
 char *expand_env_var(t_shell *shell, const char *str)
 {
     char *result;
     char *write_pos;
+    int in_single_quote = 0;
     
-    // $가 없으면 원본 반환
-    if (!str || !strchr(str, '$'))
-        return shell_strdup(shell, str);
+    if (!str)
+        return NULL;
     
-    // result = shell_malloc(shell, strlen(str) * 2);
-    result = shell_malloc(shell, strlen(str) * 20000);
+    result = shell_malloc(shell, strlen(str) * 2);
     write_pos = result;
     
     while (*str)
     {
-        if (*str == '$' && (isalnum(*(str + 1)) || *(str + 1) == '_' || *(str + 1) == '?'))
+        // 작은따옴표 안에서는 환경변수 확장하지 않음
+        if (*str == '\'')
         {
-            str++;  // $ 건너뛰기
-            if (*str == '?')  // $? 처리
+            in_single_quote = !in_single_quote;
+            str++;
+            continue;
+        }
+
+        if (*str == '$' && !in_single_quote && 
+            (isalnum(*(str + 1)) || *(str + 1) == '_' || *(str + 1) == '?'))
+        {
+            str++;
+            if (*str == '?')
             {
                 char status[16];
                 snprintf(status, sizeof(status), "%d", shell->status.exit_code);
