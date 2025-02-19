@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/19 04:26:17 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/19 04:36:57 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,27 +23,34 @@ static int get_word_length(char *input)
 {
     int len;
     t_token_state state;
+    int dollar_sign;  // $ 기호 직후인지 추적
 
     debug_print(2047, 3, "DEBUG: Calculating word length\n");
     len = 0;
     state.in_single_quote = 0;
     state.in_double_quote = 0;
+    dollar_sign = 0;
 
     while (input[len])
     {
-        // 따옴표 처리
-        if (input[len] == '"' && !state.in_single_quote)
+        // $ 기호 체크
+        if (input[len] == '$' && !state.in_single_quote)
+            dollar_sign = 1;
+        // 따옴표 처리 ($ 직후의 따옴표는 일반 문자로 처리)
+        else if (input[len] == '"' && !state.in_single_quote && !dollar_sign)
         {
             state.in_double_quote = !state.in_double_quote;
             len++;
             continue;
         }
-        if (input[len] == '\'' && !state.in_double_quote)
+        else if (input[len] == '\'' && !state.in_double_quote && !dollar_sign)
         {
             state.in_single_quote = !state.in_single_quote;
             len++;
             continue;
         }
+        else
+            dollar_sign = 0;  // $ 다음 문자를 처리했으므로 리셋
 
         // 단어 끝 확인 (따옴표 안이 아닐 때만)
         if (!state.in_single_quote && !state.in_double_quote && 
@@ -72,7 +79,8 @@ char *handle_word(t_shell *shell, char *input, int *len)
     char *result;
     t_token_state state;
     int i, j;
-    int final_quote_state = 0;  // 최종 따옴표 상태를 저장할 변수 추가
+    int final_quote_state = 0;
+    int dollar_sign = 0;  // $ 기호 직후인지 추적
     
     debug_print(2047, 3, "DEBUG: Handling word starting with: %c\n", *input);
     
@@ -93,30 +101,35 @@ char *handle_word(t_shell *shell, char *input, int *len)
     // 시작 따옴표 확인
     if (input[0] == '\'')
         final_quote_state = 1;  // 작은따옴표로 시작
-    else if (input[0] == '"')
+    else if (input[0] == '"' && input[0] != '$')
         final_quote_state = 2;  // 큰따옴표로 시작
 
     while (i < *len)
     {
-        if (input[i] == '"' && !state.in_single_quote)
+        if (input[i] == '$' && !state.in_single_quote)
+            dollar_sign = 1;
+        else if (input[i] == '"' && !state.in_single_quote && !dollar_sign)
         {
             state.in_double_quote = !state.in_double_quote;
             i++;
             continue;
         }
-        if (input[i] == '\'' && !state.in_double_quote)
+        else if (input[i] == '\'' && !state.in_double_quote && !dollar_sign)
         {
             state.in_single_quote = !state.in_single_quote;
             i++;
             continue;
         }
+        else
+            dollar_sign = 0;  // $ 다음 문자를 처리했으므로 리셋
+
         word[j++] = input[i++];
     }
     word[j] = '\0';
 
     debug_print(2047, 3, "DEBUG: Quote state: %d\n", final_quote_state);
-    // 환경변수 확장 (작은따옴표로 감싸진 경우는 확장하지 않음)
-    if (final_quote_state != 1)  // 작은따옴표가 아닌 경우에만 확장
+    // 환경변수 확장 (작은따옴표로 감싸진 경우와 $" 형태는 확장하지 않음)
+    if (final_quote_state != 1 && strncmp(word, "$\"", 2) != 0)
         result = expand_env_var(shell, word);
     else
         result = shell_strdup(shell, word);
