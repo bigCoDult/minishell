@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/19 04:07:47 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/19 04:26:17 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,28 +72,29 @@ char *handle_word(t_shell *shell, char *input, int *len)
     char *result;
     t_token_state state;
     int i, j;
+    int final_quote_state = 0;  // 최종 따옴표 상태를 저장할 변수 추가
     
     debug_print(2047, 3, "DEBUG: Handling word starting with: %c\n", *input);
     
     *len = get_word_length(input);
     if (*len == 0)
-    {
-        debug_print(2047, 3, "DEBUG: Empty word\n");
         return NULL;
-    }
 
     word = shell_malloc(shell, *len + 1);
     if (!word)
-    {
-        debug_print(2047, 3, "DEBUG: Failed to allocate memory for word\n");
         return NULL;
-    }
 
     // 따옴표를 제거하면서 단어 복사
     state.in_single_quote = 0;
     state.in_double_quote = 0;
     i = 0;
     j = 0;
+
+    // 시작 따옴표 확인
+    if (input[0] == '\'')
+        final_quote_state = 1;  // 작은따옴표로 시작
+    else if (input[0] == '"')
+        final_quote_state = 2;  // 큰따옴표로 시작
 
     while (i < *len)
     {
@@ -113,8 +114,9 @@ char *handle_word(t_shell *shell, char *input, int *len)
     }
     word[j] = '\0';
 
-    // 환경변수 확장 (작은따옴표 안이 아닐 때만)
-    if (!state.in_single_quote)
+    debug_print(2047, 3, "DEBUG: Quote state: %d\n", final_quote_state);
+    // 환경변수 확장 (작은따옴표로 감싸진 경우는 확장하지 않음)
+    if (final_quote_state != 1)  // 작은따옴표가 아닌 경우에만 확장
         result = expand_env_var(shell, word);
     else
         result = shell_strdup(shell, word);
