@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_extern.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 22:25:55 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/21 05:15:55 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,10 +48,10 @@ int execute_external(t_shell *shell, t_command *cmd)
             debug_print(2047, 7, "DEBUG: arg[%d]: %s\n", i, cmd->args[i]);
         
         // 히어독이 있었다면 표준 입력 설정
-        if (shell->heredoc.fd != -1)
+        if (shell->heredoc.entries)
         {
-            dup2(shell->heredoc.fd, STDIN_FILENO);
-            close(shell->heredoc.fd);
+            dup2(shell->heredoc.entries->fd, STDIN_FILENO);
+            close(shell->heredoc.entries->fd);
         }
         
         execve(path, cmd->args, get_env_array(shell));

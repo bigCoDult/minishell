@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/18 21:59:24 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/02/21 05:24:21 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,12 +122,19 @@ typedef struct s_env
 // 	int		temp_fd;
 // }	t_heredoc;
 
-// 히어독 관리를 위한 구조체
+// 개별 히어독 정보를 저장하는 구조체 (먼저 선언)
+typedef struct s_heredoc_entry {
+    int     fd;             // 히어독의 파일 디스크립터
+    char    *delimiter;      // 구분자
+    struct s_heredoc_entry *next;  // 다음 히어독 정보
+} t_heredoc_entry;
+
+// 히어독 관리를 위한 구조체 (나중에 선언)
 typedef struct s_heredoc {
     int     original_stdin;  // 원본 표준 입력 저장
-    int     fd;             // 현재 히어독의 파일 디스크립터
-    char    *delimiter;      // 구분자
     char    *temp_file;     // 임시 파일 경로
+    t_heredoc_entry *entries; // 히어독 정보 연결 리스트
+    int     count;          // 현재 히어독 개수
 } t_heredoc;
 
 typedef struct s_parser
@@ -227,6 +234,7 @@ char *find_executable(t_shell *shell, const char *cmd);
 
 // execute_here.c
 int handle_heredoc(t_shell *shell, char *delimiter);
+void setup_command_heredoc(t_shell *shell, t_command *cmd);
 
 // parser.c
 int parse_input(t_shell *shell);
