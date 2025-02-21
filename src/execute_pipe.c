@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/19 13:18:56 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/02/21 05:22:46 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,10 +139,10 @@ static int handle_all_heredocs(t_shell *shell, t_ast_node *node)
     close(debug_fd);
 
     // 히어독 파일 디스크립터 정리
-    if (shell->heredoc.fd != -1)
+    if (shell->heredoc.entries)
     {
-        close(shell->heredoc.fd);
-        shell->heredoc.fd = -1;
+        close(shell->heredoc.entries->fd);
+        shell->heredoc.entries->fd = -1;
     }
 
     return result;
@@ -185,15 +185,13 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     {
         debug_print(2047, 8, "In first child process (PID: %d)\n", getpid());
         close(pipefd[0]);
-        if (dup2(pipefd[1], STDOUT_FILENO) == -1)
-        {
-            debug_print(2047, 8, "Error: Failed to redirect stdout in first child\n");
-            free_exit(shell, 1);
-        }
+        dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
         
         if (node->left->type == AST_COMMAND)
         {
+            // 히어독 설정 추가
+            setup_command_heredoc(shell, node->left->cmd);
             debug_print(2047, 8, "Executing left command: %s\n", node->left->cmd->args[0]);
             free_exit(shell, execute_simple_command(shell, node->left->cmd));
         }
@@ -208,11 +206,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     {
         debug_print(2047, 8, "In second child process (PID: %d)\n", getpid());
         close(pipefd[1]);
-        if (dup2(pipefd[0], STDIN_FILENO) == -1)
-        {
-            debug_print(2047, 8, "Error: Failed to redirect stdin in second child\n");
-            free_exit(shell, 1);
-        }
+        dup2(pipefd[0], STDIN_FILENO);
         close(pipefd[0]);
         
         if (node->right->type == AST_PIPE)
@@ -222,6 +216,8 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
         }
         else if (node->right->type == AST_COMMAND)
         {
+            // 히어독 설정 추가
+            setup_command_heredoc(shell, node->right->cmd);
             debug_print(2047, 8, "Executing right command: %s\n", node->right->cmd->args[0]);
             free_exit(shell, execute_simple_command(shell, node->right->cmd));
         }
