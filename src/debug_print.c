@@ -70,10 +70,10 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 	va_list *ap;
 	int	mask;
 	int	type;
-	signal(SIGPIPE, SIG_IGN);
+	// signal(SIGPIPE, SIG_IGN);
 
-	if (action_combine_bit == 0)
-		return ;
+	// if (action_combine_bit == 0)
+	// 	return ;
 
 	type = 1;
 	mask = 1;
@@ -83,6 +83,9 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 	va_start(*ap, str);
 	while (mask < 2048)
 	{
+		
+		printf("%d ", mask);
+		
 		if ((action_combine_bit & mask) && str_type == type)
 		{
 			// printf("type = %d\n", type);
@@ -90,6 +93,10 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 		}
 		mask <<= 1;
 		type++;
+		
+		if (mask == 2048)
+			printf("%d\n", mask);
+	
 	}
 	va_end(*ap);
 	free(ap);
