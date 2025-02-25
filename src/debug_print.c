@@ -95,7 +95,7 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 	while (mask < 2048)
 	{
 		
-		printf("%d ", mask);
+		// printf("%d ", mask);
 		
 		if ((action_combine_bit & mask) && str_type == type)
 		{
@@ -105,8 +105,8 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 		mask <<= 1;
 		type++;
 		
-		if (mask == 2048)
-			printf("%d\n", mask);
+		// if (mask == 2048)
+		// 	printf("%d\n", mask);
 	
 	}
 	va_end(*ap);
