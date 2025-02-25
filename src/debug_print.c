@@ -64,13 +64,24 @@ static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 // str_type 11 = memory
 // action_combine_bit 1024
 
+#include <signal.h>
 
 void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 {
+	// signal(SIGPIPE, SIG_IGN);
+	struct sigaction old_act, ignore_act;
+
+    // Set up a temporary handler that ignores SIGPIPE
+    ignore_act.sa_handler = SIG_IGN;
+    sigemptyset(&ignore_act.sa_mask);
+    ignore_act.sa_flags = 0;
+
+    // Save the current SIGPIPE handler and then ignore SIGPIPE
+    sigaction(SIGPIPE, &ignore_act, &old_act);
+	
 	va_list *ap;
 	int	mask;
 	int	type;
-	// signal(SIGPIPE, SIG_IGN);
 
 	// if (action_combine_bit == 0)
 	// 	return ;
@@ -100,6 +111,7 @@ void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 	}
 	va_end(*ap);
 	free(ap);
+	sigaction(SIGPIPE, &old_act, NULL);
 }
 
 
