@@ -112,7 +112,7 @@ void free_all_memory(t_shell *shell)
     t_memory *next;
     t_memory *prev;
 
-    debug_print(0, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
+    debug_print(2047, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
 
     current = shell->memory;
     prev = NULL;
@@ -157,7 +157,7 @@ static void free_shell_malloc(t_shell *shell)
 	t_memory *current;
 	t_memory *next;
 
-	debug_print(0, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
+	debug_print(2047, 11, "DEBUG: [free_all_memory] Starting to free all memory\n");
 
 	current = shell->memory;
 	while (current)

@@ -154,36 +154,36 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
     pid_t pid1, pid2;
     int status1, status2;
 
-    debug_print(0, 8, "\n=== EXECUTE PIPE ===\n");
-    debug_print(0, 8, "Starting pipe execution process\n");
+    debug_print(2047, 8, "\n=== EXECUTE PIPE ===\n");
+    debug_print(2047, 8, "Starting pipe execution process\n");
     
     if (!node || !node->left || !node->right)
     {
-        debug_print(0, 8, "Error: Invalid pipe node structure\n");
+        debug_print(2047, 8, "Error: Invalid pipe node structure\n");
         return (1);
     }
 
     // 모든 히어독을 먼저 처리
-    debug_print(0, 8, "Processing heredocs...\n");
+    debug_print(2047, 8, "Processing heredocs...\n");
     if (handle_all_heredocs(shell, node) != 0)
     {
-        debug_print(0, 8, "Error: Heredoc processing failed\n");
+        debug_print(2047, 8, "Error: Heredoc processing failed\n");
         return (1);
     }
 
     if (pipe(pipefd) == -1)
     {
-        debug_print(0, 8, "Error: Pipe creation failed\n");
+        debug_print(2047, 8, "Error: Pipe creation failed\n");
         return (1);
     }
-    debug_print(0, 8, "Pipe created successfully [read_fd: %d, write_fd: %d]\n", pipefd[0], pipefd[1]);
+    debug_print(2047, 8, "Pipe created successfully [read_fd: %d, write_fd: %d]\n", pipefd[0], pipefd[1]);
 
     // 첫 번째 명령어 실행 (왼쪽 노드)
-    debug_print(0, 8, "Creating first child process...\n");
+    debug_print(2047, 8, "Creating first child process...\n");
     pid1 = fork();
     if (pid1 == 0)
     {
-        debug_print(0, 8, "In first child process (PID: %d)\n", getpid());
+        debug_print(2047, 8, "In first child process (PID: %d)\n", getpid());
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
@@ -192,52 +192,52 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
         {
             // 히어독 설정 추가
             setup_command_heredoc(shell, node->left->cmd);
-            debug_print(0, 8, "Executing left command: %s\n", node->left->cmd->args[0]);
+            debug_print(2047, 8, "Executing left command: %s\n", node->left->cmd->args[0]);
             free_exit(shell, execute_simple_command(shell, node->left->cmd));
         }
-        debug_print(0, 8, "Error: Left node is not a command\n");
+        debug_print(2047, 8, "Error: Left node is not a command\n");
         free_exit(shell, 1);
     }
 
     // 두 번째 명령어 실행 (오른쪽 노드)
-    debug_print(0, 8, "Creating second child process...\n");
+    debug_print(2047, 8, "Creating second child process...\n");
     pid2 = fork();
     if (pid2 == 0)
     {
-        debug_print(0, 8, "In second child process (PID: %d)\n", getpid());
+        debug_print(2047, 8, "In second child process (PID: %d)\n", getpid());
         close(pipefd[1]);
         dup2(pipefd[0], STDIN_FILENO);
         close(pipefd[0]);
         
         if (node->right->type == AST_PIPE)
         {
-            debug_print(0, 8, "Executing right pipe\n");
+            debug_print(2047, 8, "Executing right pipe\n");
             free_exit(shell, execute_pipe(shell, node->right));
         }
         else if (node->right->type == AST_COMMAND)
         {
             // 히어독 설정 추가
             setup_command_heredoc(shell, node->right->cmd);
-            debug_print(0, 8, "Executing right command: %s\n", node->right->cmd->args[0]);
+            debug_print(2047, 8, "Executing right command: %s\n", node->right->cmd->args[0]);
             free_exit(shell, execute_simple_command(shell, node->right->cmd));
         }
-        debug_print(0, 8, "Error: Right node is neither pipe nor command\n");
+        debug_print(2047, 8, "Error: Right node is neither pipe nor command\n");
         free_exit(shell, 1);
     }
 
     // 부모 프로세스
-    debug_print(0, 8, "In parent process, closing pipe fds\n");
+    debug_print(2047, 8, "In parent process, closing pipe fds\n");
     close(pipefd[0]);
     close(pipefd[1]);
     
     // 자식 프로세스들의 종료를 기다림
-    debug_print(0, 8, "Waiting for child processes to complete...\n");
+    debug_print(2047, 8, "Waiting for child processes to complete...\n");
     waitpid(pid1, &status1, 0);
     waitpid(pid2, &status2, 0);
     
-    debug_print(0, 8, "Left command (PID: %d) status: %d\n", pid1, WEXITSTATUS(status1));
-    debug_print(0, 8, "Right command (PID: %d) status: %d\n", pid2, WEXITSTATUS(status2));
-    debug_print(0, 8, "=== PIPE EXECUTION COMPLETE ===\n");
+    debug_print(2047, 8, "Left command (PID: %d) status: %d\n", pid1, WEXITSTATUS(status1));
+    debug_print(2047, 8, "Right command (PID: %d) status: %d\n", pid2, WEXITSTATUS(status2));
+    debug_print(2047, 8, "=== PIPE EXECUTION COMPLETE ===\n");
     
     // 마지막 명령어의 종료 상태를 반환
     return (WEXITSTATUS(status2));

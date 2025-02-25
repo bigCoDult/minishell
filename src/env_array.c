@@ -93,7 +93,7 @@ char **get_env_array(t_shell *shell)
     t_env *current;
     int count;
 
-    debug_print(0, 2, "DEBUG: Creating environment array\n");
+    debug_print(2047, 2, "DEBUG: Creating environment array\n");
     
     // 환경 변수 개수 세기
     count = 0;
