@@ -68,23 +68,24 @@ static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 
 void debug_print(int action_combine_bit, int str_type, const char *str, ...)
 {
+	// if (action_combine_bit == 0)
+	// 	return ;
+	
 	// signal(SIGPIPE, SIG_IGN);
-	struct sigaction old_act, ignore_act;
-
+	
     // Set up a temporary handler that ignores SIGPIPE
+	struct sigaction old_act, ignore_act;
     ignore_act.sa_handler = SIG_IGN;
     sigemptyset(&ignore_act.sa_mask);
     ignore_act.sa_flags = 0;
-
     // Save the current SIGPIPE handler and then ignore SIGPIPE
     sigaction(SIGPIPE, &ignore_act, &old_act);
+
 	
 	va_list *ap;
 	int	mask;
 	int	type;
 
-	// if (action_combine_bit == 0)
-	// 	return ;
 
 	type = 1;
 	mask = 1;
