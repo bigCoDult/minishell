@@ -49,51 +49,78 @@ t_heredoc_entry *create_heredoc_entry(t_shell *shell, char *delimiter)
 
 int handle_heredoc(t_shell *shell, char *delimiter)
 {
+    char *temp_file;
+    int fd;
     pid_t pid;
     int status;
-    int pipe_fds[2];
-    t_heredoc_entry *entry;
 
-    entry = create_heredoc_entry(shell, delimiter);
+    debug_print(2047, 8, "Creating heredoc for delimiter: %s\n", delimiter);
+    temp_file = create_temp_heredoc_file(shell);
+    if (!temp_file)
+        return (1);
+
+    debug_print(2047, 8, "Opening temp file: %s\n", temp_file);
+    fd = open(temp_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd == -1)
+    {
+        shell_free(shell, temp_file);
+        return (1);
+    }
+
+    t_heredoc_entry *entry = create_heredoc_entry(shell, delimiter);
     if (!entry)
+    {
+        close(fd);
+        unlink(temp_file);
+        shell_free(shell, temp_file);
         return (1);
-
-    entry->next = shell->heredoc.entries;
-    shell->heredoc.entries = entry;
-    shell->heredoc.count++;
-
-    if (pipe(pipe_fds) == -1)
-        return (1);
+    }
 
     pid = fork();
     if (pid == 0)
     {
-        close(pipe_fds[0]);
+        signal(SIGINT, heredoc_signal_handler);
         while (1)
         {
             char *line = readline("> ");
             if (!line || strcmp(line, delimiter) == 0)
             {
                 free(line);
-                close(pipe_fds[1]);
+                close(fd);
                 free_exit(shell, 0);
             }
-            write(pipe_fds[1], line, strlen(line));
-            write(pipe_fds[1], "\n", 1);
+            debug_print(2047, 8, "Writing to heredoc: %s\n", line);
+            write(fd, line, strlen(line));
+            write(fd, "\n", 1);
             free(line);
         }
     }
 
-    close(pipe_fds[1]);
     waitpid(pid, &status, 0);
+    close(fd);
 
     if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
     {
-        entry->fd = pipe_fds[0];
+        debug_print(2047, 8, "Opening heredoc for reading: %s\n", temp_file);
+        fd = open(temp_file, O_RDONLY);
+        if (fd == -1)
+        {
+            unlink(temp_file);
+            shell_free(shell, temp_file);
+            return (1);
+        }
+
+        debug_print(2047, 8, "Heredoc fd: %d\n", fd);
+        entry->fd = fd;
+        shell->heredoc.temp_file = temp_file;
+        entry->next = shell->heredoc.entries;
+        shell->heredoc.entries = entry;
+        shell->heredoc.count++;
         return (0);
     }
 
-    close(pipe_fds[0]);
+    unlink(temp_file);
+    shell_free(shell, temp_file);
     return (1);
 }
 
@@ -121,7 +148,6 @@ void cleanup_heredoc(t_shell *shell)
         if (current->fd != -1)
         {
             close(current->fd);
-            current->fd = -1;
         }
         shell_free(shell, current->delimiter);
         shell_free(shell, current);
@@ -137,6 +163,7 @@ void cleanup_heredoc(t_shell *shell)
         shell->heredoc.original_stdin = -1;
     }
 
+    // temp_file 정리는 shell->heredoc에서 처리
     if (shell->heredoc.temp_file)
     {
         unlink(shell->heredoc.temp_file);
@@ -149,6 +176,7 @@ void cleanup_heredoc(t_shell *shell)
 int find_command_heredoc_fd(t_shell *shell, t_command *cmd)
 {
     t_redirection *redir = cmd->redirs;
+    
     while (redir)
     {
         if (redir->type == REDIR_HEREDOC)
@@ -157,7 +185,9 @@ int find_command_heredoc_fd(t_shell *shell, t_command *cmd)
             while (entry)
             {
                 if (strcmp(entry->delimiter, redir->filename) == 0)
+                {
                     return entry->fd;
+                }
                 entry = entry->next;
             }
         }
@@ -172,7 +202,8 @@ void setup_command_heredoc(t_shell *shell, t_command *cmd)
     int heredoc_fd = find_command_heredoc_fd(shell, cmd);
     if (heredoc_fd != -1)
     {
+        lseek(heredoc_fd, 0, SEEK_SET);  // 파일 포인터를 처음으로
         dup2(heredoc_fd, STDIN_FILENO);
-        close(heredoc_fd);
+        // heredoc fd는 dup2 후에도 열어둠 (파이프에서 사용)
     }
 }

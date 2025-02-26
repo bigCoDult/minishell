@@ -235,6 +235,7 @@ char *find_executable(t_shell *shell, const char *cmd);
 // execute_here.c
 int handle_heredoc(t_shell *shell, char *delimiter);
 void setup_command_heredoc(t_shell *shell, t_command *cmd);
+int find_command_heredoc_fd(t_shell *shell, t_command *cmd);
 
 // parser.c
 int parse_input(t_shell *shell);
