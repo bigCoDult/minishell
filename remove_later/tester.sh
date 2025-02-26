@@ -6,8 +6,8 @@ TEST_INPUTS=(
     "cat < parse.md | grep 'fork'"
     "< parse.md cat | grep \"fork\""
     "< parse.md cat | grep \"fork\""
-	"yes hi | grep -m 1 h"
-
+    "yes hi | grep -m 1 h"
+    "cat << delimiter | grep \"fork\"\naaa\nbbb fork\nfork ccc\nddd fork ddd\neee\ndelimiter"
 )
 
 # ANSI 색상 정의
@@ -23,17 +23,18 @@ mkdir -p "$(dirname "$TMP_INPUT")"
 run_test_case() {
     local test_input="$1"
 
-    # minishell 실행 결과 캡처
-    # 테스트 입력을 임시 파일에 기록하여 전달(여러 줄이 필요한 경우도 안전)
+    # 테스트 입력을 임시 파일에 기록하여 전달 (여러 줄인 경우도 안전)
     echo -e "$test_input" > "$TMP_INPUT"
+
+    # minishell 실행 결과 캡처
     local mini_output
     mini_output=$(./minishell < "$TMP_INPUT")
-    # minishell 출력에서 프롬프트(예: "MINISHELL$>") 제거
-    mini_output=$(echo "$mini_output" | sed '/^MINISHELL\$>/d')
+    # minishell 출력에서 프롬프트(예: "MINISHELL$>")와 히어독 입력 부분(> 로 시작하는 줄) 제거
+    mini_output=$(echo "$mini_output" | sed '/^MINISHELL\$>/d' | sed '/^> /d')
 
-    # bash 실행 결과 캡처
+    # bash 실행 결과 캡처 (파일 redirection 방식)
     local bash_output
-    bash_output=$(echo -e "$test_input" | bash)
+    bash_output=$(bash < "$TMP_INPUT")
 
     # 양쪽 출력에서 앞뒤 공백/줄바꿈 제거
     mini_output=$(echo "$mini_output" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
@@ -46,11 +47,11 @@ run_test_case() {
         diff_result="${RED}FAIL${NC}"
     fi
 
-    # 결과 출력
+    # 결과 출력 (echo -e로 개행 적용)
     echo "--------------"
-    echo "입력 : $test_input"
-    echo "mini : $mini_output"
-    echo "bash : $bash_output"
+    echo -e "[입력]\n$test_input\n"
+    echo -e "[minishell]\n$mini_output\n"
+    echo -e "[bash]\n$bash_output\n"
     echo -e "diff : $diff_result"
 }
 
