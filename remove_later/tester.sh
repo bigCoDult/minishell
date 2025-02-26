@@ -3,11 +3,11 @@
 
 # 테스트 입력값, 여기에 테스트 케이스를 추가하면 됨
 TEST_INPUTS=(
-    "cat < parse.md | grep 'fork'"
+    "yes hi | grep -m 3 h"
+    "cat < parse.md | grep \"fork\""
     "< parse.md cat | grep \"fork\""
-    "< parse.md cat | grep \"fork\""
-    "yes hi | grep -m 1 h"
     "cat << delimiter | grep \"fork\"\naaa\nbbb fork\nfork ccc\nddd fork ddd\neee\ndelimiter"
+    "<< delimiter cat | grep \"fork\"\naaa\nbbb fork\nfork ccc\nddd fork ddd\neee\ndelimiter"
 )
 
 # ANSI 색상 정의
