@@ -168,6 +168,7 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
 
         if (node->left->type == AST_COMMAND)
         {
+            // 히어독 처리
             heredoc_fd = find_command_heredoc_fd(shell, node->left->cmd);
             if (heredoc_fd != -1)
             {
@@ -175,6 +176,10 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
                 dup2(heredoc_fd, STDIN_FILENO);
                 close(heredoc_fd);
             }
+            
+            // 리디렉션 처리 추가
+            if (setup_redirections(shell, node->left->cmd->redirs) != 0)
+                free_exit(shell, 1);
 
             if (is_builtin(node->left->cmd->args[0]))
             {
@@ -204,10 +209,11 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
         if (node->right->type == AST_PIPE)
         {
             int ret = execute_pipe(shell, node->right);
-            exit(ret);  // free_exit 대신 일반 exit 사용
+            exit(ret);
         }
         else if (node->right->type == AST_COMMAND)
         {
+            // 히어독 처리
             int heredoc_fd = find_command_heredoc_fd(shell, node->right->cmd);
             if (heredoc_fd != -1)
             {
@@ -215,6 +221,10 @@ int execute_pipe(t_shell *shell, t_ast_node *node)
                 dup2(heredoc_fd, STDIN_FILENO);
                 close(heredoc_fd);
             }
+            
+            // 리디렉션 처리 추가
+            if (setup_redirections(shell, node->right->cmd->redirs) != 0)
+                free_exit(shell, 1);
 
             if (is_builtin(node->right->cmd->args[0]))
             {
