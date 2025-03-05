@@ -12,34 +12,32 @@
 
 #include "minishell.h"
 
-// 빌트인 명령어 체크
-int is_builtin(char *cmd_name)
+int	is_builtin(char *cmd_name)
 {
-    return (!strcmp(cmd_name, "echo") ||
-            !strcmp(cmd_name, "cd") ||
-            !strcmp(cmd_name, "pwd") ||
-            !strcmp(cmd_name, "export") ||
-            !strcmp(cmd_name, "unset") ||
-            !strcmp(cmd_name, "env") ||
-            !strcmp(cmd_name, "exit"));
+	return (!strcmp(cmd_name, "echo")
+		|| !strcmp(cmd_name, "cd")
+		|| !strcmp(cmd_name, "pwd")
+		|| !strcmp(cmd_name, "export")
+		|| !strcmp(cmd_name, "unset")
+		|| !strcmp(cmd_name, "env")
+		|| !strcmp(cmd_name, "exit"));
 }
 
-// 빌트인 명령어 실행
-int execute_builtin(t_shell *shell, t_command *cmd)
+int	execute_builtin(t_shell *shell, t_command *cmd)
 {
-    if (!strcmp(cmd->args[0], "echo"))
-        return (builtin_echo(cmd->args));
-    else if (!strcmp(cmd->args[0], "cd"))
-        return (builtin_cd(shell, cmd->args));
-    else if (!strcmp(cmd->args[0], "pwd"))
-        return (builtin_pwd());
-    else if (!strcmp(cmd->args[0], "export"))
-        return (builtin_export(shell, cmd->args));
-    else if (!strcmp(cmd->args[0], "unset"))
-        return (builtin_unset(shell, cmd->args));
-    else if (!strcmp(cmd->args[0], "env"))
-        return (builtin_env(shell));
-    else if (!strcmp(cmd->args[0], "exit"))
-        return (builtin_exit(shell, cmd->args));
-    return (1);
+	if (!strcmp(cmd->args[0], "echo"))
+		return (builtin_echo(cmd->args));
+	else if (!strcmp(cmd->args[0], "cd"))
+		return (builtin_cd(shell, cmd->args));
+	else if (!strcmp(cmd->args[0], "pwd"))
+		return (builtin_pwd());
+	else if (!strcmp(cmd->args[0], "export"))
+		return (builtin_export(shell, cmd->args));
+	else if (!strcmp(cmd->args[0], "unset"))
+		return (builtin_unset(shell, cmd->args));
+	else if (!strcmp(cmd->args[0], "env"))
+		return (builtin_env(shell));
+	else if (!strcmp(cmd->args[0], "exit"))
+		return (builtin_exit(shell, cmd->args));
+	return (1);
 }
