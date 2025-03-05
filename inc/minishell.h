@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/21 05:24:21 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/05 15:04:15 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,26 +141,79 @@ typedef struct s_shell
 	t_env		*env;
 }	t_shell;
 
-void			*shell_malloc(t_shell *shell, size_t size);
-void			shell_free(t_shell *shell, void *ptr);
-void			free_all_memory(t_shell *shell);
-void			free_command_memory(t_shell *shell);
-void			free_exit(t_shell *shell, int status);
-void			free_env(t_shell *shell);
+char			**get_env_array(t_shell *shell);
+
+void			expand_variable(t_shell *shell, char **write_pos, const char **str);
+int				should_expand_var(const char *str, int in_single_quote);
+char			*expand_env_var(t_shell *shell, const char *str);
+void			expand_exit_code(t_shell *shell, char **write_pos, const char **str);
+
+int				parse_env_arg(t_shell *shell, char *arg, char **key, char **value);
+void			add_env_value(t_shell *shell, const char *key, const char *value);
+void			set_env_value(t_shell *shell, const char *key, const char *value);
+t_env			*create_env_node(t_shell *shell, char *key, char *value);
+void			add_env_node(t_env **env_list, t_env *new_node);
+
+char			*extract_var_name(t_shell *shell, const char **str);
+char			*handle_special_var(t_shell *shell, const char *var_name);
 
 t_env			*init_env(t_shell *shell, char **envp);
-void			set_env_value(t_shell *shell, const char *key, const char *value);
-int				parse_env_arg(t_shell *shell, char *arg, char **key, char **value);
 char			*get_env_value(t_shell *shell, const char *key);
-char			*expand_env_var(t_shell *shell, const char *str);
+void			handle_single_quote(const char **str, int *in_single_quote);
+void			copy_char(char **write_pos, const char **str);
 
-char			**get_env_array(t_shell *shell);
+void			remove_env_var(t_shell *shell, const char *key);
+int				builtin_unset(t_shell *shell, char **args);
+int				builtin_env(t_shell *shell);
+int				builtin_exit(t_shell *shell, char **args);
+
+int				builtin_echo(char **args);
+int				builtin_cd(t_shell *shell, char **args);
+int				builtin_pwd(void);
+int				builtin_export(t_shell *shell, char **args);
+
+int				execute_external(t_shell *shell, t_command *cmd);
+
+char			*create_temp_heredoc_file(t_shell *shell);
+t_heredoc_entry	*create_heredoc_entry(t_shell *shell, char *delimiter);
+int				setup_heredoc_file(t_shell *shell, char **temp_file, int *fd);
+t_heredoc_entry	*setup_heredoc_entry(t_shell *shell, char *delimiter
+		, char *temp_file, int *fd);
+void			process_heredoc_lines(t_shell *shell, char *delimiter, int fd);
+
+int				read_heredoc_content(t_shell *shell, char *delimiter, int fd);
+int				setup_heredoc_read(t_shell *shell, t_heredoc_entry *entry, char *temp_file);
+int				handle_heredoc(t_shell *shell, char *delimiter);
+int				get_heredoc_fd(t_shell *shell, char *delimiter);
+
+void			free_heredoc_entries(t_shell *shell);
+void			cleanup_heredoc(t_shell *shell);
+int				find_command_heredoc_fd(t_shell *shell, t_command *cmd);
+void			setup_command_heredoc(t_shell *shell, t_command *cmd);
 
 char			*ft_strchr(const char *str, int c);
 int				ft_strlen(const char *str);
 char			*shell_strdup(t_shell *shell, const char *str);
 char			*ft_strdup(const char *str);
 void			*ft_memset(void *dest, int c, size_t count);
+
+int				ft_strcmp(const char *s1, const char *s2);
+char			*ft_strcpy(char *dest, const char *src);
+char			*ft_strncpy(char *dest, const char *src, size_t n);
+int				ft_isalnum(int c);
+
+int				ft_atoi(const char *str);
+char			*ft_strcat(char *dest, const char *src);
+
+void			*shell_malloc(t_shell *shell, size_t size);
+void			shell_free(t_shell *shell, void *ptr);
+void			free_command_memory(t_shell *shell);
+
+int				is_env_memory(t_shell *shell, void *addr);
+void			free_all_memory(t_shell *shell);
+void			free_shell_malloc(t_shell *shell);
+void			free_env(t_shell *shell);
+void			free_exit(t_shell *shell, int status);
 
 void			setup_signals(void);
 void			heredoc_signal_handler(int signo);
@@ -185,22 +238,8 @@ void			wait_all_children(t_shell *shell, int cmd_count);
 int				is_builtin(char *cmd_name);
 int				execute_builtin(t_shell *shell, t_command *cmd);
 
-int				builtin_echo(char **args);
-int				builtin_cd(t_shell *shell, char **args);
-int				builtin_pwd(void);
-int				builtin_export(t_shell *shell, char **args);
-int				builtin_unset(t_shell *shell, char **args);
-int				builtin_env(t_shell *shell);
-int				builtin_exit(t_shell *shell, char **args);
-
-int				execute_external(t_shell *shell, t_command *cmd);
-
 char			*find_command_path(t_shell *shell, const char *cmd);
 char			*find_executable(t_shell *shell, const char *cmd);
-
-int				handle_heredoc(t_shell *shell, char *delimiter);
-void			setup_command_heredoc(t_shell *shell, t_command *cmd);
-int				find_command_heredoc_fd(t_shell *shell, t_command *cmd);
 
 int				parse_input(t_shell *shell);
 char			**create_args_array(t_shell *shell, t_token *start, int arg_count);
@@ -220,9 +259,6 @@ t_redirection	*create_redirection(t_shell *shell, t_token *token);
 void			debug_print(int action_combine_bit, int str_type, const char *str, ...);
 
 int				execute_simple_command(t_shell *shell, t_command *cmd);
-
-char			*create_temp_heredoc_file(t_shell *shell);
-void			cleanup_heredoc(t_shell *shell);
 
 void			print_ast(t_ast_node *node, int depth);
 void			print_command(t_command *cmd);

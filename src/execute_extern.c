@@ -3,58 +3,48 @@
 /*                                                        :::      ::::::::   */
 /*   execute_extern.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/25 11:42:12 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/03/05 14:30:05 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+static void	execute_command_in_child(t_shell *shell, t_command *cmd)
+{
+	char	*path;
+
+	if (cmd->redirs)
+		setup_redirections(shell, cmd->redirs);
+	path = find_command_path(shell, cmd->args[0]);
+	if (!path)
+	{
+		printf("minishell: %s: command not found\n", cmd->args[0]);
+		free_exit(shell, 127);
+	}
+	if (shell->heredoc.entries)
+	{
+		dup2(shell->heredoc.entries->fd, STDIN_FILENO);
+		close(shell->heredoc.entries->fd);
+	}
+	execve(path, cmd->args, get_env_array(shell));
+	free_exit(shell, 127);
+}
+
 int	execute_external(t_shell *shell, t_command *cmd)
 {
 	pid_t	pid;
 	int		status;
-	char	*path;
 
-	debug_print(2047, 7, "DEBUG: execute_external start with cmd: %s\n", cmd->args[0]);
 	pid = fork();
 	if (pid == 0)
-	{
-		debug_print(2047, 7, "DEBUG: Child process started\n");
-		if (cmd->redirs)
-		{
-			debug_print(2047, 10, "DEBUG: Setting up redirections\n");
-			setup_redirections(shell, cmd->redirs);
-		}
-		debug_print(2047, 6, "DEBUG: Searching for command in PATH\n");
-		path = find_command_path(shell, cmd->args[0]);
-		if (!path)
-		{
-			printf("minishell: %s: command not found\n", cmd->args[0]);
-			free_exit(shell, 127);
-		}
-		debug_print(2047, 6, "DEBUG: Found command path: %s\n", path);
-		debug_print(2047, 7, "DEBUG: Executing command with args:\n");
-		for (int i = 0; cmd->args[i]; i++)
-			debug_print(2047, 7, "DEBUG: arg[%d]: %s\n", i, cmd->args[i]);
-		if (shell->heredoc.entries)
-		{
-			dup2(shell->heredoc.entries->fd, STDIN_FILENO);
-			close(shell->heredoc.entries->fd);
-		}
-		execve(path, cmd->args, get_env_array(shell));
-		debug_print(2047, 7, "DEBUG: execve failed\n");
-		free_exit(shell, 127);
-	}
+		execute_command_in_child(shell, cmd);
 	else if (pid > 0)
 	{
-		debug_print(2047, 7, "DEBUG: Parent process waiting for child\n");
 		waitpid(pid, &status, 0);
-		debug_print(2047, 7, "DEBUG: Child process finished with status: %d\n", WEXITSTATUS(status));
 		return (WEXITSTATUS(status));
 	}
-	debug_print(2047, 7, "DEBUG: Fork failed\n");
 	return (1);
 }
