@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:28:18 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 16:36:03 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -341,5 +341,12 @@ int				execute_simple_command(t_shell *shell, t_command *cmd);
 void			print_ast(t_ast_node *node, int depth);
 void			print_command(t_command *cmd);
 void			print_redirection(t_redirection *redir);
+
+// 시그널 관련 함수들 추가
+void	setup_signals_interactive(void);
+void	setup_signals_executing(void);
+void	setup_signals_heredoc(void);
+void	heredoc_signal_handler(int signo);
+void	setup_signals(void);
 
 #endif
