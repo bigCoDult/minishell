@@ -32,17 +32,17 @@ int	execute_simple_command(t_shell *shell, t_command *cmd)
 	int				ret;
 	t_redirection	*redir;
 
-	debug_print(2047, 7, "\n=== EXECUTE SIMPLE COMMAND START ===\n");
-	debug_print(2047, 7, "Command: %s\n", cmd->args[0]);
-	debug_print(2047, 7, "Current stdin FD: %d\n", STDIN_FILENO);
+	debug_print(0, 7, "\n=== EXECUTE SIMPLE COMMAND START ===\n");
+	debug_print(0, 7, "Command: %s\n", cmd->args[0]);
+	debug_print(0, 7, "Current stdin FD: %d\n", STDIN_FILENO);
 	redir = cmd->redirs;
 	while (redir)
 	{
-		debug_print(2047, 7, "Processing redirection type: %d\n", redir->type);
-		debug_print(2047, 7, "Redirection filename: %s\n", redir->filename);
+		debug_print(0, 7, "Processing redirection type: %d\n", redir->type);
+		debug_print(0, 7, "Redirection filename: %s\n", redir->filename);
 		if (redir->type == REDIR_HEREDOC)
 		{
-			debug_print(2047, 7, "Skipping already processed heredoc\n");
+			debug_print(0, 7, "Skipping already processed heredoc\n");
 			redir = redir->next;
 			continue ;
 		}
@@ -50,20 +50,20 @@ int	execute_simple_command(t_shell *shell, t_command *cmd)
 			return (1);
 		redir = redir->next;
 	}
-	debug_print(2047, 7, "Executing command: %s\n", cmd->args[0]);
+	debug_print(0, 7, "Executing command: %s\n", cmd->args[0]);
 	if (is_builtin(cmd->args[0]))
 	{
-		debug_print(2047, 7, "Executing builtin command\n");
+		debug_print(0, 7, "Executing builtin command\n");
 		ret = execute_builtin(shell, cmd);
 	}
 	else
 	{
-		debug_print(2047, 7, "Executing external command\n");
+		debug_print(0, 7, "Executing external command\n");
 		ret = execute_external(shell, cmd);
 	}
-	debug_print(2047, 7, "Command execution completed with status: %d\n", ret);
-	debug_print(2047, 7, "Current stdin FD: %d\n", STDIN_FILENO);
-	debug_print(2047, 7, "=== EXECUTE SIMPLE COMMAND END ===\n\n");
+	debug_print(0, 7, "Command execution completed with status: %d\n", ret);
+	debug_print(0, 7, "Current stdin FD: %d\n", STDIN_FILENO);
+	debug_print(0, 7, "=== EXECUTE SIMPLE COMMAND END ===\n\n");
 	return (ret);
 }
 
@@ -113,13 +113,13 @@ int	execute_commands(t_shell *shell)
 	int	result;
 
 	g_signal = 0;
-	debug_print(2047, 4, "DEBUG: Starting command execution\n");
+	debug_print(0, 4, "DEBUG: Starting command execution\n");
 	if (!shell->ast_root)
 	{
-		debug_print(2047, 4, "DEBUG: No AST root to execute\n");
+		debug_print(0, 4, "DEBUG: No AST root to execute\n");
 		return (0);
 	}
 	result = execute_ast(shell, shell->ast_root);
-	debug_print(2047, 4, "DEBUG: Command execution completed with status: %d\n", result);
+	debug_print(0, 4, "DEBUG: Command execution completed with status: %d\n", result);
 	return (result);
 }

@@ -52,7 +52,7 @@ int	setup_heredoc_file(t_shell *shell, char **temp_file, int *fd)
 	*temp_file = create_temp_heredoc_file(shell);
 	if (!*temp_file)
 		return (1);
-	debug_print(2047, 8, "Opening temp file: %s\n", *temp_file);
+	debug_print(0, 8, "Opening temp file: %s\n", *temp_file);
 	*fd = open(*temp_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (*fd == -1)
 	{
@@ -91,7 +91,7 @@ void	process_heredoc_lines(t_shell *shell, char *delimiter, int fd)
 			close(fd);
 			free_exit(shell, 0);
 		}
-		debug_print(2047, 8, "Writing to heredoc: %s\n", line);
+		debug_print(0, 8, "Writing to heredoc: %s\n", line);
 		write(fd, line, strlen(line));
 		write(fd, "\n", 1);
 		free(line);

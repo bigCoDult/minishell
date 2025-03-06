@@ -17,28 +17,28 @@ t_ast_node	*parse_simple_command(t_shell *shell, t_token **tokens)
 	t_ast_node	*node;
 	t_command	*cmd;
 
-	debug_print(2047, 7, "DEBUG: [parse_simple_command] Starting\n");
+	debug_print(0, 7, "DEBUG: [parse_simple_command] Starting\n");
 	if (!*tokens)
 	{
-		debug_print(2047, 7, "DEBUG: [parse_simple_command] No tokens to parse\n");
+		debug_print(0, 7, "DEBUG: [parse_simple_command] No tokens to parse\n");
 		return (NULL);
 	}
-	debug_print(2047, 7, "DEBUG: [parse_simple_command] Creating AST node\n");
+	debug_print(0, 7, "DEBUG: [parse_simple_command] Creating AST node\n");
 	node = create_ast_node(shell, AST_COMMAND);
 	if (!node)
 	{
-		debug_print(2047, 7, "DEBUG: [parse_simple_command] Failed to create AST node\n");
+		debug_print(0, 7, "DEBUG: [parse_simple_command] Failed to create AST node\n");
 		return (NULL);
 	}
-	debug_print(2047, 7, "DEBUG: [parse_simple_command] Creating command\n");
+	debug_print(0, 7, "DEBUG: [parse_simple_command] Creating command\n");
 	cmd = create_command(shell, tokens);
 	if (!cmd)
 	{
-		debug_print(2047, 7, "DEBUG: [parse_simple_command] Failed to create command\n");
+		debug_print(0, 7, "DEBUG: [parse_simple_command] Failed to create command\n");
 		return (NULL);
 	}
-	debug_print(2047, 7, "DEBUG: [parse_simple_command] Setting command in AST node\n");
+	debug_print(0, 7, "DEBUG: [parse_simple_command] Setting command in AST node\n");
 	node->cmd = cmd;
-	debug_print(2047, 7, "DEBUG: [parse_simple_command] Simple command parsing completed\n");
+	debug_print(0, 7, "DEBUG: [parse_simple_command] Simple command parsing completed\n");
 	return (node);
 }
