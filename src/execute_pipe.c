@@ -202,5 +202,6 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 	close(pipefd[1]);
 	waitpid(pid1, &status1, 0);
 	waitpid(pid2, &status2, 0);
+	free_exit(shell, 0);
 	return (WEXITSTATUS(status2));
 }
