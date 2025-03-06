@@ -48,7 +48,8 @@ char	*expand_env_var(t_shell *shell, const char *str)
 	if (!str)
 		return (NULL);
 	in_single_quote = 0;
-	result = shell_malloc(shell, strlen(str) * 2);
+	// result = shell_malloc(shell, strlen(str) * 2);
+	result = shell_malloc(shell, strlen(str) * 200000);
 	write_pos = result;
 	while (*str)
 	{
