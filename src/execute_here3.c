@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:02:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/05 15:02:50 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 08:07:52 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ int	setup_heredoc_read(t_shell *shell, t_heredoc_entry *entry, char *temp_file)
 {
 	int	fd;
 
-	debug_print(2047, 8, "Opening heredoc for reading: %s\n", temp_file);
 	fd = open(temp_file, O_RDONLY);
 	if (fd == -1)
 	{
@@ -40,7 +39,6 @@ int	setup_heredoc_read(t_shell *shell, t_heredoc_entry *entry, char *temp_file)
 		shell_free(shell, temp_file);
 		return (1);
 	}
-	debug_print(2047, 8, "Heredoc fd: %d\n", fd);
 	entry->fd = fd;
 	shell->heredoc.temp_file = temp_file;
 	entry->next = shell->heredoc.entries;

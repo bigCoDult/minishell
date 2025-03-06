@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 14:22:42 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/05 14:22:56 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 08:43:22 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	builtin_echo(char **args)
 
 	n_option = 0;
 	i = 1;
-	if (args[1] && strcmp(args[1], "-n") == 0)
+	if (args[1] && ft_strcmp(args[1], "-n") == 0)
 	{
 		n_option = 1;
 		i++;
@@ -45,11 +45,13 @@ int	builtin_cd(t_shell *shell, char **args)
 		path = getenv("HOME");
 	else
 		path = args[1];
+	// chdir?
 	if (chdir(path) != 0)
 	{
 		printf("cd: %s: No such file or directory\n", path);
 		return (1);
 	}
+	// getcwd?
 	if (getcwd(current_path, sizeof(current_path)))
 		set_env_value(shell, "PWD", current_path);
 	return (0);
@@ -59,6 +61,7 @@ int	builtin_pwd(void)
 {
 	char	current_path[1024];
 
+	// getcwd?
 	if (getcwd(current_path, sizeof(current_path)))
 	{
 		printf("%s\n", current_path);

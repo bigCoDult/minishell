@@ -30,7 +30,6 @@ static int	ft_printfhex_fd(int is_x, long long unsigned int n, int fd);
 // debug_printf(12, 3, "token is %s, token->value);
 // debug_printf(12, 4, "ast is %s, ast->value);
 
-
 // str_type 1 = 단순 문자열
 // action_combine_bit 1
 
