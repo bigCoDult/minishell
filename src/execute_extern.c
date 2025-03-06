@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 16:36:02 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 17:59:07 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,10 +41,8 @@ int	execute_external(t_shell *shell, t_command *cmd)
 	pid = fork();
 	if (pid == 0)
 	{
-		// 자식 프로세스에서는 기본 시그널 핸들러로 복원
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
-		
 		execute_command_in_child(shell, cmd);
 	}
 	else if (pid > 0)

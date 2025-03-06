@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:01:47 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 16:36:23 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 17:57:09 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,39 +83,33 @@ void	process_heredoc_lines(t_shell *shell, char *delimiter, int fd)
 	char	*line;
 
 	(void)shell;
-	// 시그널 확인
 	if (g_signal == SIGINT)
 	{
 		close(fd);
-		exit(130); // 명확한 종료 코드
+		exit(130);
 	}
-
 	while (1)
 	{
-		// readline 호출 전 시그널 확인
 		if (g_signal == SIGINT)
 		{
 			close(fd);
 			exit(130);
 		}
-		
 		line = readline("> ");
-		
-		// readline 실패 또는 EOF 확인
 		if (!line)
 		{
 			close(fd);
-			exit(g_signal == SIGINT ? 130 : 0);
+			if (g_signal == SIGINT)
+				exit(130);
+			else
+				exit(0);
 		}
-		
-		// 구분자(delimiter) 확인
 		if (ft_strcmp(line, delimiter) == 0)
 		{
 			free(line);
 			close(fd);
-			exit(0); // 정상 종료
+			exit(0);
 		}
-		
 		write(fd, line, strlen(line));
 		write(fd, "\n", 1);
 		free(line);

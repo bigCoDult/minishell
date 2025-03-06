@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:37:56 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:38:23 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:00:12 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ void	wait_all_children(t_shell *shell, int cmd_count)
 	i = 0;
 	while (i < cmd_count)
 	{
-		// wait?
 		wait(&status);
 		if (i == cmd_count - 1)
 			shell->status.exit_code = WEXITSTATUS(status);

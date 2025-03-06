@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 05:58:23 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:32:23 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:22:42 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 char	*finalize_word(t_shell *shell, char *word, int quote_state)
 {
 	char	*result;
-//ft_strcnmp
-	if (quote_state != 1 && strncmp(word, "$\"", 2) != 0)
+
+	if (quote_state != 1 && ft_strncmp(word, "$\"", 2) != 0)
 		result = expand_env_var(shell, word);
 	else
 		result = shell_strdup(shell, word);

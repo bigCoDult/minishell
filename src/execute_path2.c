@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 04:19:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:40:39 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:09:06 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ int	is_executable(const char *path)
 {
 	struct stat	st;
 
-	// stat?
 	if (stat(path, &st) == 0)
 	{
 		if (S_ISREG(st.st_mode) && (st.st_mode & S_IXUSR))
@@ -40,7 +39,6 @@ char	*search_in_path(t_shell *shell, const char *cmd, char *path_copy)
 			return (NULL);
 		// sprintf?
 		sprintf(full_path, "%s/%s", dir, cmd);
-		// access?
 		if (access(full_path, X_OK) == 0)
 			return (full_path);
 		shell_free(shell, full_path);

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:02:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 17:10:37 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:27:31 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,36 +20,25 @@ int	read_heredoc_content(t_shell *shell, char *delimiter, int fd)
 
 	status = 0;
 	original_g_signal = g_signal;
-	g_signal = 0; // 시그널 상태 초기화
-	
-	// 부모 프로세스에서 히어독 시그널 설정
+	g_signal = 0;
 	setup_signals_heredoc();
-	
 	pid = fork();
 	if (pid == 0)
 	{
-		// 자식 프로세스에서만 SIGINT 핸들러 설정
 		signal(SIGINT, heredoc_signal_handler);
-		free_all_memory(shell);
-		free_env(shell);
+		// free_all_memory(shell);
+		// free_env(shell);
 		process_heredoc_lines(shell, delimiter, fd);
 	}
-	
 	waitpid(pid, &status, 0);
-	
-	// 인터랙티브 모드로 시그널 핸들러 복원
 	setup_signals_interactive();
-	
 	close(fd);
-	// SIGINT로 종료된 경우 명시적으로 처리
 	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
 	{
 		g_signal = SIGINT;
 		shell->status.exit_code = 130;
 		return (0);
 	}
-	
-	// 자식이 종료 코드와 함께 종료된 경우 처리
 	if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 	{
 		if (WEXITSTATUS(status) == 130)
@@ -59,7 +48,6 @@ int	read_heredoc_content(t_shell *shell, char *delimiter, int fd)
 		}
 		return (0);
 	}
-	
 	g_signal = original_g_signal;
 	return (WIFEXITED(status) && WEXITSTATUS(status) == 0);
 }

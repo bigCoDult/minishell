@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 16:48:09 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 17:32:23 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,16 +100,10 @@ int	execute_commands(t_shell *shell)
 	int	result;
 
 	g_signal = 0;
-	
 	if (!shell->ast_root)
 		return (0);
-	
-	// 명령어 실행 중 시그널 핸들러 설정
 	setup_signals_executing();
-	
 	result = execute_ast(shell, shell->ast_root);
-	// 명령어 실행 후 인터랙티브 모드로 복원
 	setup_signals_interactive();
-	
 	return (result);
 }
