@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/05 14:30:05 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 08:42:07 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ int	execute_external(t_shell *shell, t_command *cmd)
 		execute_command_in_child(shell, cmd);
 	else if (pid > 0)
 	{
+		// waitpid?
 		waitpid(pid, &status, 0);
 		return (WEXITSTATUS(status));
 	}

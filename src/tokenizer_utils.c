@@ -3,126 +3,115 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/25 11:42:12 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/03/06 08:32:39 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-typedef struct s_token_state
+int	handle_quote_character(char c, t_token_state *state, int *dollar_sign)
 {
-	int	in_single_quote;
-	int	in_double_quote;
-}	t_token_state;
+	int	skip_char;
 
-static int	get_word_length(char *input)
+	skip_char = 0;
+	if (c == '$' && !state->in_single_quote)
+		*dollar_sign = 1;
+	else if (c == '"' && !state->in_single_quote && !(*dollar_sign))
+	{
+		state->in_double_quote = !state->in_double_quote;
+		skip_char = 1;
+	}
+	else if (c == '\'' && !state->in_double_quote && !(*dollar_sign))
+	{
+		state->in_single_quote = !state->in_single_quote;
+		skip_char = 1;
+	}
+	else
+		*dollar_sign = 0;
+	return (skip_char);
+}
+
+int	is_word_delimiter(char c, t_token_state state)
+{
+	if (!state.in_single_quote && !state.in_double_quote
+		&& ft_strchr(" |<>", c))
+		return (1);
+	return (0);
+}
+
+int	get_word_length(char *input)
 {
 	int				len;
-	t_token_state	state;
 	int				dollar_sign;
+	t_token_state	state;
 
-	debug_print(2047, 3, "DEBUG: Calculating word length\n");
 	len = 0;
 	state.in_single_quote = 0;
 	state.in_double_quote = 0;
 	dollar_sign = 0;
 	while (input[len])
 	{
-		if (input[len] == '$' && !state.in_single_quote)
-			dollar_sign = 1;
-		else if (input[len] == '"' && !state.in_single_quote && !dollar_sign)
+		if (handle_quote_character(input[len], &state, &dollar_sign))
 		{
-			state.in_double_quote = !state.in_double_quote;
 			len++;
 			continue ;
 		}
-		else if (input[len] == '\'' && !state.in_double_quote && !dollar_sign)
-		{
-			state.in_single_quote = !state.in_single_quote;
-			len++;
-			continue ;
-		}
-		else
-			dollar_sign = 0;
-		if (!state.in_single_quote && !state.in_double_quote
-			&& strchr(" |<>", input[len]))
+		if (is_word_delimiter(input[len], state))
 			break ;
-		debug_print(2047, 3, "DEBUG: Checking character: %c\n", input[len]);
 		len++;
 	}
 	if (state.in_single_quote || state.in_double_quote)
-	{
 		debug_print(2047, 3, "DEBUG: Unclosed quote detected\n");
-	}
-	debug_print(2047, 3, "DEBUG: Word length: %d\n", len);
 	return (len);
 }
 
-char	*handle_word(t_shell *shell, char *input, int *len)
+int	determine_quote_state(char *input, int *start_idx)
 {
-	char			*word;
-	char			*result;
-	t_token_state	state;
-	int				i;
-	int				j;
-	int				final_quote_state;
-	int				dollar_sign;
+	int	quote_state;
 
-	debug_print(2047, 3, "DEBUG: Handling word starting with: %c\n", *input);
-	*len = get_word_length(input);
-	if (*len == 0)
-		return (NULL);
-	word = shell_malloc(shell, *len + 1);
-	if (!word)
-		return (NULL);
-	state.in_single_quote = 0;
-	state.in_double_quote = 0;
-	i = 0;
-	j = 0;
+	*start_idx = 0;
 	if (input[0] == '\'')
-		final_quote_state = 1;
+		quote_state = 1;
 	else if (input[0] == '"' && input[0] != '$')
-		final_quote_state = 2;
+		quote_state = 2;
 	else if (input[0] == '$' && input[1] == '"')
 	{
-		final_quote_state = 3;
-		i += 2;
+		quote_state = 3;
+		*start_idx = 2;
 	}
 	else if (input[0] == '$' && input[1] == '\'')
 	{
-		final_quote_state = 4;
-		i += 2;
+		quote_state = 4;
+		*start_idx = 2;
 	}
-	while (i < *len)
+	else
+		quote_state = 0;
+	return (quote_state);
+}
+
+void	process_word_content(char *input, char *word, int len, int start_idx)
+{
+	t_token_state	state;
+	int				i;
+	int				j;
+	int				dollar_sign;
+
+	state.in_single_quote = 0;
+	state.in_double_quote = 0;
+	i = start_idx;
+	j = 0;
+	dollar_sign = 0;
+	while (i < len)
 	{
-		if (input[i] == '$' && !state.in_single_quote)
-			dollar_sign = 1;
-		else if (input[i] == '"' && !state.in_single_quote && !dollar_sign)
+		if (handle_quote_character(input[i], &state, &dollar_sign))
 		{
-			state.in_double_quote = !state.in_double_quote;
 			i++;
 			continue ;
 		}
-		else if (input[i] == '\'' && !state.in_double_quote && !dollar_sign)
-		{
-			state.in_single_quote = !state.in_single_quote;
-			i++;
-			continue ;
-		}
-		else
-			dollar_sign = 0;
 		word[j++] = input[i++];
 	}
 	word[j] = '\0';
-	debug_print(2047, 3, "DEBUG: Quote state: %d\n", final_quote_state);
-	if (final_quote_state != 1 && strncmp(word, "$\"", 2) != 0)
-		result = expand_env_var(shell, word);
-	else
-		result = shell_strdup(shell, word);
-	shell_free(shell, word);
-	debug_print(2047, 3, "DEBUG: Expanded word: %s\n", result);
-	return (result);
 }

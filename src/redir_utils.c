@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 15:42:31 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 08:33:47 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,13 +85,13 @@ t_redirection	*create_redirection(t_shell *shell, t_token *token)
 	redir = shell_malloc(shell, sizeof(t_redirection));
 	if (!redir)
 		return (NULL);
-	if (strcmp(token->value, "<<") == 0)
+	if (ft_strcmp(token->value, "<<") == 0)
 		redir->type = REDIR_HEREDOC;
-	else if (strcmp(token->value, "<") == 0)
+	else if (ft_strcmp(token->value, "<") == 0)
 		redir->type = REDIR_IN;
-	else if (strcmp(token->value, ">") == 0)
+	else if (ft_strcmp(token->value, ">") == 0)
 		redir->type = REDIR_OUT;
-	else if (strcmp(token->value, ">>") == 0)
+	else if (ft_strcmp(token->value, ">>") == 0)
 		redir->type = REDIR_APPEND;
 	redir->filename = shell_strdup(shell, token->next->value);
 	if (!redir->filename)
@@ -101,19 +101,4 @@ t_redirection	*create_redirection(t_shell *shell, t_token *token)
 	}
 	redir->next = NULL;
 	return (redir);
-}
-
-void	add_redirection(t_redirection **redirs, t_redirection *new_redir)
-{
-	t_redirection	*current;
-
-	if (!*redirs)
-	{
-		*redirs = new_redir;
-		return ;
-	}
-	current = *redirs;
-	while (current->next)
-		current = current->next;
-	current->next = new_redir;
 }

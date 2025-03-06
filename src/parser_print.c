@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_print.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/18 07:59:23 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/25 11:42:12 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/03/06 08:29:39 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,18 +32,18 @@ void	print_redirection(t_redirection *redir)
 		{
 			case REDIR_IN:
 				debug_print(2047, 4, "< %s", redir->filename);
-				break;
+				break ;
 			case REDIR_OUT:
 				debug_print(2047, 4, "> %s", redir->filename);
-				break;
+				break ;
 			case REDIR_APPEND:
 				debug_print(2047, 4, ">> %s", redir->filename);
-				break;
+				break ;
 			case REDIR_HEREDOC:
 				debug_print(2047, 4, "<< %s", redir->filename);
-				break;
-			default:
-				break;
+				break ;
+			default :
+				break ;
 		}
 		if (redir->next)
 			debug_print(2047, 4, " ");

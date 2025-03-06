@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 13:29:38 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/05 13:31:51 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 08:45:01 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ char	*expand_env_var(t_shell *shell, const char *str)
 	if (!str)
 		return (NULL);
 	in_single_quote = 0;
-	result = shell_malloc(shell, strlen(str) * 2);
+	result = shell_malloc(shell, strlen(str) * 200000);
 	write_pos = result;
 	while (*str)
 	{
@@ -67,6 +67,7 @@ void	expand_exit_code(t_shell *shell, char **write_pos, const char **str)
 	char	status[16];
 
 	(*str)++;
+	// snprintf?
 	snprintf(status, sizeof(status), "%d", shell->status.exit_code);
 	ft_strcpy(*write_pos, status);
 	*write_pos += ft_strlen(status);
