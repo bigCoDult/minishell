@@ -24,7 +24,7 @@ static int	get_word_length(char *input)
 	t_token_state	state;
 	int				dollar_sign;
 
-	debug_print(2047, 3, "DEBUG: Calculating word length\n");
+	debug_print(0, 3, "DEBUG: Calculating word length\n");
 	len = 0;
 	state.in_single_quote = 0;
 	state.in_double_quote = 0;
@@ -50,14 +50,14 @@ static int	get_word_length(char *input)
 		if (!state.in_single_quote && !state.in_double_quote
 			&& strchr(" |<>", input[len]))
 			break ;
-		debug_print(2047, 3, "DEBUG: Checking character: %c\n", input[len]);
+		debug_print(0, 3, "DEBUG: Checking character: %c\n", input[len]);
 		len++;
 	}
 	if (state.in_single_quote || state.in_double_quote)
 	{
-		debug_print(2047, 3, "DEBUG: Unclosed quote detected\n");
+		debug_print(0, 3, "DEBUG: Unclosed quote detected\n");
 	}
-	debug_print(2047, 3, "DEBUG: Word length: %d\n", len);
+	debug_print(0, 3, "DEBUG: Word length: %d\n", len);
 	return (len);
 }
 
@@ -71,7 +71,8 @@ char	*handle_word(t_shell *shell, char *input, int *len)
 	int				final_quote_state;
 	int				dollar_sign;
 
-	debug_print(2047, 3, "DEBUG: Handling word starting with: %c\n", *input);
+	final_quote_state = 0;
+	debug_print(0, 3, "DEBUG: Handling word starting with: %c\n", *input);
 	*len = get_word_length(input);
 	if (*len == 0)
 		return (NULL);
@@ -117,12 +118,12 @@ char	*handle_word(t_shell *shell, char *input, int *len)
 		word[j++] = input[i++];
 	}
 	word[j] = '\0';
-	debug_print(2047, 3, "DEBUG: Quote state: %d\n", final_quote_state);
+	debug_print(0, 3, "DEBUG: Quote state: %d\n", final_quote_state);
 	if (final_quote_state != 1 && strncmp(word, "$\"", 2) != 0)
 		result = expand_env_var(shell, word);
 	else
 		result = shell_strdup(shell, word);
 	shell_free(shell, word);
-	debug_print(2047, 3, "DEBUG: Expanded word: %s\n", result);
+	debug_print(0, 3, "DEBUG: Expanded word: %s\n", result);
 	return (result);
 }
