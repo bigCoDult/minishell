@@ -72,6 +72,8 @@ char	*handle_word(t_shell *shell, char *input, int *len)
 	int				dollar_sign;
 
 	final_quote_state = 0;
+	dollar_sign = 0;
+
 	debug_print(0, 3, "DEBUG: Handling word starting with: %c\n", *input);
 	*len = get_word_length(input);
 	if (*len == 0)
