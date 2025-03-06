@@ -6,11 +6,49 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:01:47 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 17:57:09 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:35:47 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+void	ft_itoa_simple(char *str, int n)
+{
+    int	i;
+    int	len;
+    int	temp;
+    int	is_negative;
+
+    if (n == 0)
+    {
+        str[0] = '0';
+        str[1] = '\0';
+        return ;
+    }
+    is_negative = 0;
+    if (n < 0)
+    {
+        is_negative = 1;
+        n = -n;
+    }
+    len = 0;
+    temp = n;
+    while (temp > 0)
+    {
+        temp = temp / 10;
+        len++;
+    }
+    if (is_negative)
+        str[0] = '-';
+    i = len - 1 + is_negative;
+    str[i + 1] = '\0';
+    while (n > 0)
+    {
+        str[i] = '0' + (n % 10);
+        n = n / 10;
+        i--;
+    }
+}
 
 char	*create_temp_heredoc_file(t_shell *shell)
 {
@@ -19,8 +57,7 @@ char	*create_temp_heredoc_file(t_shell *shell)
 	char		num[32];
 
 	count = 0;
-	// sprintf?
-	sprintf(num, "%d", count++);
+	ft_itoa_simple(num, count++);
 	filename = shell_malloc(shell, ft_strlen("/tmp/heredoc_")
 			+ ft_strlen(num) + 1);
 	if (!filename)

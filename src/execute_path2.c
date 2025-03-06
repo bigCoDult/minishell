@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 04:19:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:09:06 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:40:15 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,9 @@ char	*search_in_path(t_shell *shell, const char *cmd, char *path_copy)
 				+ ft_strlen(cmd) + 2);
 		if (!full_path)
 			return (NULL);
-		// sprintf?
-		sprintf(full_path, "%s/%s", dir, cmd);
+		ft_strcpy(full_path, dir);
+		ft_strcat(full_path, "/");
+		ft_strcat(full_path, cmd);
 		if (access(full_path, X_OK) == 0)
 			return (full_path);
 		shell_free(shell, full_path);
@@ -79,8 +80,9 @@ char	*search_command_in_paths(t_shell *shell, const char *cmd, char **paths)
 				+ ft_strlen(cmd) + 2);
 		if (!full_path)
 			return (NULL);
-		// sprintf?
-		sprintf(full_path, "%s/%s", paths[i], cmd);
+		ft_strcpy(full_path, paths[i]);
+		ft_strcat(full_path, "/");
+		ft_strcat(full_path, cmd);
 		if (is_executable(full_path))
 			return (full_path);
 		shell_free(shell, full_path);

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:03:44 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 19:11:30 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,6 +258,9 @@ int				ft_isalnum(int c);
 int				ft_atoi(const char *str);
 char			*ft_strcat(char *dest, const char *src);
 int				ft_strncmp(const char *s1, const char *s2, size_t n);
+int				handle_special_cases(char *str, size_t size, int n);
+
+int				ft_itoa_n(char *str, size_t size, int n);
 
 void			*shell_malloc(t_shell *shell, size_t size);
 void			shell_free(t_shell *shell, void *ptr);
@@ -285,7 +288,13 @@ void			add_redirection(t_redirection **redirs,
 t_redirection	*process_redirections(t_shell *shell, t_token **tokens);
 t_command		*create_command(t_shell *shell, t_token **tokens);
 
+void			setup_signals_interactive(void);
+void			setup_signals_executing(void);
+void			setup_signals_heredoc(void);
 void			setup_signals(void);
+
+void			interactive_signal_handler(int signo);
+void			executing_signal_handler(int signo);
 void			heredoc_signal_handler(int signo);
 
 t_token			*create_red_token(t_shell *shell,

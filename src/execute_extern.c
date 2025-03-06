@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 17:59:07 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 19:08:40 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,26 @@ static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 	free_exit(shell, 127);
 }
 
+static int	handle_signal_termination(t_shell *shell, int status)
+{
+	if (WIFSIGNALED(status))
+	{
+		if (WTERMSIG(status) == SIGINT)
+		{
+			g_signal = SIGINT;
+			shell->status.exit_code = 130;
+			return (130);
+		}
+		else if (WTERMSIG(status) == SIGQUIT)
+		{
+			g_signal = SIGQUIT;
+			shell->status.exit_code = 131;
+			return (131);
+		}
+	}
+	return (WEXITSTATUS(status));
+}
+
 int	execute_external(t_shell *shell, t_command *cmd)
 {
 	pid_t	pid;
@@ -48,22 +68,7 @@ int	execute_external(t_shell *shell, t_command *cmd)
 	else if (pid > 0)
 	{
 		waitpid(pid, &status, 0);
-		if (WIFSIGNALED(status))
-		{
-			if (WTERMSIG(status) == SIGINT)
-			{
-				g_signal = SIGINT;
-				shell->status.exit_code = 130;
-				return (130);
-			}
-			else if (WTERMSIG(status) == SIGQUIT)
-			{
-				g_signal = SIGQUIT;
-				shell->status.exit_code = 131;
-				return (131);
-			}
-		}
-		return (WEXITSTATUS(status));
+		return (handle_signal_termination(shell, status));
 	}
 	return (1);
 }

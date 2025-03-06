@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 13:53:06 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:03:06 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 19:05:15 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,4 +70,22 @@ int	ft_strncmp(const char *s1, const char *s2, size_t n)
 		n--;
 	}
 	return (0);
+}
+
+int	handle_special_cases(char *str, size_t size, int n)
+{
+	if (size < 1)
+		return (0);
+	if (n == 0)
+	{
+		if (size >= 2)
+		{
+			str[0] = '0';
+			str[1] = '\0';
+			return (1);
+		}
+		str[0] = '\0';
+		return (0);
+	}
+	return (-1);
 }
