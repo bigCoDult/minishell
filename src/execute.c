@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 05:30:49 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 12:40:27 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,11 @@ int	execute_simple_command(t_shell *shell, t_command *cmd)
 	int				ret;
 	t_redirection	*redir;
 
+	if (!cmd || !cmd->args || !cmd->args[0])
+	{
+		printf("Invalid command structure\n");
+		return (1);
+	}
 	redir = cmd->redirs;
 	while (redir)
 	{
