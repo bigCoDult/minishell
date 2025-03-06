@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_array.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 05:07:15 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/25 11:42:12 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/03/05 13:33:04 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ char	**get_env_array(t_shell *shell)
 	t_env	*current;
 	int		count;
 
-	debug_print(2047, 2, "DEBUG: Creating environment array\n");
 	count = 0;
 	current = shell->env;
 	while (current)
@@ -33,8 +32,8 @@ char	**get_env_array(t_shell *shell)
 	count = 0;
 	while (current)
 	{
-		env_array[count] = shell_malloc(shell, strlen(current->key)
-				+ strlen(current->value) + 2);
+		env_array[count] = shell_malloc(shell, ft_strlen(current->key)
+				+ ft_strlen(current->value) + 2);
 		if (!env_array[count])
 			return (NULL);
 		sprintf(env_array[count], "%s=%s", current->key, current->value);
