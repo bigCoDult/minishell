@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 19:08:40 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 12:59:02 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,10 @@ static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 {
 	char	*path;
 
-	if (cmd->redirs)
-		setup_redirections(shell, cmd->redirs);
+	if (cmd->redirs && setup_redirections(shell, cmd->redirs) != 0)
+	{
+		free_exit(shell, 1);
+	}
 	path = find_command_path(shell, cmd->args[0]);
 	if (!path)
 	{

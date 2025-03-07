@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 11:27:49 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 12:59:51 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,25 +59,51 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 {
 	t_redirection	*current;
 
-	// 표준 입출력 백업
-	shell->heredoc.original_stdin = dup(STDIN_FILENO);
-	shell->original_stdout = dup(STDOUT_FILENO);
-	
-	if (shell->heredoc.original_stdin == -1 || shell->original_stdout == -1)
-		return (1);
+	if (!redirs)
+		return (0);  // 리다이렉션이 없으면 바로 반환
 
+	// 표준 입출력 백업 - 이미 백업되지 않은 경우에만
+	if (shell->heredoc.original_stdin == -1)
+		shell->heredoc.original_stdin = dup(STDIN_FILENO);
+	if (shell->original_stdout == -1)
+		shell->original_stdout = dup(STDOUT_FILENO);
+	
+	// 백업 실패 시 안전하게 처리
+	if (shell->heredoc.original_stdin == -1 || shell->original_stdout == -1)
+	{
+		// 백업된 디스크립터만 닫기
+		if (shell->heredoc.original_stdin != -1)
+		{
+			close(shell->heredoc.original_stdin);
+			shell->heredoc.original_stdin = -1;
+		}
+		if (shell->original_stdout != -1)
+		{
+			close(shell->original_stdout);
+			shell->original_stdout = -1;
+		}
+		return (1);
+	}
+
+	// 모든 리다이렉션 처리
 	current = redirs;
 	while (current)
 	{
 		if (current->type == REDIR_IN)
 		{
 			if (setup_input_redirect(current) != 0)
+			{
+				restore_io(shell);  // 오류 발생 시 원상태로 복원
 				return (1);
+			}
 		}
 		else if (current->type == REDIR_OUT || current->type == REDIR_APPEND)
 		{
 			if (setup_output_redirect(current) != 0)
+			{
+				restore_io(shell);  // 오류 발생 시 원상태로 복원
 				return (1);
+			}
 		}
 		current = current->next;
 	}
@@ -111,25 +137,21 @@ t_redirection	*create_redirection(t_shell *shell, t_token *token)
 
 void	restore_io(t_shell *shell)
 {
+	// 표준 입력 복원
 	if (shell->heredoc.original_stdin != -1)
 	{
 		dup2(shell->heredoc.original_stdin, STDIN_FILENO);
 		close(shell->heredoc.original_stdin);
 		shell->heredoc.original_stdin = -1;
-		
-		// 표준 입력이 터미널인 경우 버퍼 비우기
-		if (isatty(STDIN_FILENO))
-		{
-			// tty 장치를 통해 입력 버퍼 비우기
-			int flush_flag = TCIFLUSH;  // 입력 버퍼만 비움
-			ioctl(STDIN_FILENO, TCFLSH, &flush_flag);
-		}
 	}
 	
+	// 표준 출력 복원
 	if (shell->original_stdout != -1)
 	{
 		dup2(shell->original_stdout, STDOUT_FILENO);
 		close(shell->original_stdout);
 		shell->original_stdout = -1;
 	}
+	
+	// 터미널 버퍼 제어 코드 완전히 제거
 }
