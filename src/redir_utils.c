@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:33:47 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 11:27:49 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,13 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 {
 	t_redirection	*current;
 
-	(void)shell;
+	// 표준 입출력 백업
+	shell->heredoc.original_stdin = dup(STDIN_FILENO);
+	shell->original_stdout = dup(STDOUT_FILENO);
+	
+	if (shell->heredoc.original_stdin == -1 || shell->original_stdout == -1)
+		return (1);
+
 	current = redirs;
 	while (current)
 	{
@@ -101,4 +107,29 @@ t_redirection	*create_redirection(t_shell *shell, t_token *token)
 	}
 	redir->next = NULL;
 	return (redir);
+}
+
+void	restore_io(t_shell *shell)
+{
+	if (shell->heredoc.original_stdin != -1)
+	{
+		dup2(shell->heredoc.original_stdin, STDIN_FILENO);
+		close(shell->heredoc.original_stdin);
+		shell->heredoc.original_stdin = -1;
+		
+		// 표준 입력이 터미널인 경우 버퍼 비우기
+		if (isatty(STDIN_FILENO))
+		{
+			// tty 장치를 통해 입력 버퍼 비우기
+			int flush_flag = TCIFLUSH;  // 입력 버퍼만 비움
+			ioctl(STDIN_FILENO, TCFLSH, &flush_flag);
+		}
+	}
+	
+	if (shell->original_stdout != -1)
+	{
+		dup2(shell->original_stdout, STDOUT_FILENO);
+		close(shell->original_stdout);
+		shell->original_stdout = -1;
+	}
 }

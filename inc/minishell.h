@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 09:00:37 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 11:27:49 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@
 # include <sys/wait.h>
 # include <sys/stat.h>
 # include <errno.h>
+# include <termios.h>
+# include <sys/ioctl.h>
 
 extern volatile sig_atomic_t	g_signal;
 
@@ -145,6 +147,7 @@ typedef struct s_shell
 	t_pipe_info	pipe_info;
 	t_heredoc	heredoc;
 	t_env		*env;
+	int			original_stdout;
 }	t_shell;
 
 char			**get_env_array(t_shell *shell);
@@ -361,5 +364,7 @@ void			setup_signals_executing(void);
 void			setup_signals_heredoc(void);
 void			heredoc_signal_handler(int signo);
 void			setup_signals(void);
+
+void			restore_io(t_shell *shell);
 
 #endif
