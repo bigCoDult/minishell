@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 06:09:18 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 11:27:47 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ static void	init_shell(t_shell *shell, char **envp)
 	shell->heredoc.entries = NULL;
 	shell->heredoc.count = 0;
 	shell->heredoc.temp_file = NULL;
+	shell->original_stdout = -1;
 }
 
 static void	minishell_loop(t_shell *shell)
@@ -31,6 +32,15 @@ static void	minishell_loop(t_shell *shell)
 	while (1)
 	{
 		g_signal = 0;
+		
+		// readline 호출 전에 표준 입력 버퍼를 비움
+		if (isatty(STDIN_FILENO))
+		{
+			struct termios term;
+			tcgetattr(STDIN_FILENO, &term);
+			tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
+		}
+		
 		shell->input_line = readline("MINISHELL$> ");
 		if (!shell->input_line)
 			break ;
