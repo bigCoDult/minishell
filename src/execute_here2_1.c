@@ -23,13 +23,14 @@ void	handle_null_line(t_shell *shell, int fd)
 		exit(0);
 }
 
-void	check_delimiter_match(char *line, char *delimiter, int fd)
+void	check_delimiter_match(char *line, char *delimiter, int fd, t_shell *shell)
 {
 	if (ft_strcmp(line, delimiter) == 0)
 	{
 		free(line);
 		close(fd);
-		exit(0);
+		// exit(0);
+		free_exit(shell, 0);
 	}
 }
 
@@ -45,7 +46,7 @@ void	process_heredoc_lines(t_shell *shell, char *delimiter, int fd)
 		line = readline("> ");
 		if (!line)
 			handle_null_line(shell, fd);
-		check_delimiter_match(line, delimiter, fd);
+		check_delimiter_match(line, delimiter, fd, shell);
 		write(fd, line, strlen(line));
 		write(fd, "\n", 1);
 		free(line);
