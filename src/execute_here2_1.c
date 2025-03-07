@@ -6,14 +6,16 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 03:00:36 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 03:01:04 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 09:06:36 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	handle_null_line(int fd)
+void	handle_null_line(t_shell *shell, int fd)
 {
+	free_env(shell);
+	free_shell_malloc(shell);
 	close(fd);
 	if (g_signal == SIGINT)
 		exit(130);
@@ -42,7 +44,7 @@ void	process_heredoc_lines(t_shell *shell, char *delimiter, int fd)
 		check_heredoc_signal(fd);
 		line = readline("> ");
 		if (!line)
-			handle_null_line(fd);
+			handle_null_line(shell, fd);
 		check_delimiter_match(line, delimiter, fd);
 		write(fd, line, strlen(line));
 		write(fd, "\n", 1);

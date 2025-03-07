@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:02:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:27:31 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 08:59:40 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,6 @@ int	read_heredoc_content(t_shell *shell, char *delimiter, int fd)
 	if (pid == 0)
 	{
 		signal(SIGINT, heredoc_signal_handler);
-		// free_all_memory(shell);
-		// free_env(shell);
 		process_heredoc_lines(shell, delimiter, fd);
 	}
 	waitpid(pid, &status, 0);
