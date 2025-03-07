@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 12:59:51 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 13:05:45 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,19 @@ static void	minishell_loop(t_shell *shell)
 		
 		shell->input_line = readline("MINISHELL$> ");
 		if (!shell->input_line)
-			break ;
+			break;
+		
 		if (shell->input_line[0] != '\0')
 		{
 			add_history(shell->input_line);
+			
 			if (parse_input(shell) == 0)
+			{
 				execute_commands(shell);
+				free_command_memory(shell);
+			}
 		}
+		
 		free(shell->input_line);
 		shell->input_line = NULL;
 	}
