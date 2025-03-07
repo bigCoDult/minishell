@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 11:27:49 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 12:59:51 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,10 +102,17 @@ int	execute_commands(t_shell *shell)
 	g_signal = 0;
 	if (!shell->ast_root)
 		return (0);
+		
+	// 실행 전 파일 디스크립터가 모두 정상 상태인지 확인
+	if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
+	{
+		restore_io(shell);
+	}
+	
 	setup_signals_executing();
 	result = execute_ast(shell, shell->ast_root);
 	
-	// 명령어 실행 후 표준 입출력 복원
+	// 명령어 실행 후 항상 표준 입출력 복원
 	restore_io(shell);
 	
 	setup_signals_interactive();
