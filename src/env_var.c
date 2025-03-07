@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 13:32:18 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:44:17 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:54:47 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,7 @@ char	*handle_special_var(t_shell *shell, const char *var_name)
 
 	if (ft_strcmp(var_name, "?") == 0)
 	{
-		// snprintf?
-		snprintf(status, sizeof(status), "%d", shell->status.exit_code);
+		ft_itoa_n(status, sizeof(status), shell->status.exit_code);
 		return (shell_strdup(shell, status));
 	}
 	return (NULL);

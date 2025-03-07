@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:41:34 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:51:03 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,8 @@ void	setup_command_heredoc(t_shell *shell, t_command *cmd)
 	heredoc_fd = find_command_heredoc_fd(shell, cmd);
 	if (heredoc_fd != -1)
 	{
-		// lseek?
-		lseek(heredoc_fd, 0, SEEK_SET);
+		close(heredoc_fd);
+		heredoc_fd = open(shell->heredoc.temp_file, O_RDONLY);
 		dup2(heredoc_fd, STDIN_FILENO);
 	}
 }

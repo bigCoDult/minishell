@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 05:07:15 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:45:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:37:44 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,9 @@ char	**get_env_array(t_shell *shell)
 				+ ft_strlen(current->value) + 2);
 		if (!env_array[i])
 			return (NULL);
-		// sprintf?
-		sprintf(env_array[i], "%s=%s", current->key, current->value);
+		ft_strcpy(env_array[i], current->key);
+		ft_strcat(env_array[i], "=");
+		ft_strcat(env_array[i], current->value);
 		i++;
 		current = current->next;
 	}
