@@ -193,7 +193,7 @@ t_heredoc_entry	*setup_heredoc_entry(t_shell *shell, char *delimiter,
 void			check_heredoc_signal(int fd);
 
 void			handle_null_line(t_shell *shell, int fd);
-void			check_delimiter_match(char *line, char *delimiter, int fd);
+void			check_delimiter_match(char *line, char *delimiter, int fd, t_shell *shell);
 void			process_heredoc_lines(t_shell *shell, char *delimiter, int fd);
 
 int				read_heredoc_content(t_shell *shell, char *delimiter, int fd);
