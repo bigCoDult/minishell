@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 12:59:51 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 13:05:45 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,5 +153,5 @@ void	restore_io(t_shell *shell)
 		shell->original_stdout = -1;
 	}
 	
-	// 터미널 버퍼 제어 코드 완전히 제거
+	// 터미널 제어 코드 제거 (tcgetattr, tcsetattr 등)
 }
