@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 17:32:23 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 09:03:55 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ int	execute_simple_command(t_shell *shell, t_command *cmd)
 
 	if (!cmd || !cmd->args || !cmd->args[0])
 	{
-		printf("Invalid command structure\n");
+		if (!shell->heredoc.entries)
+			printf("Invalid command structure\n");
 		return (1);
 	}
 	redir = cmd->redirs;

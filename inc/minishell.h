@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 03:05:50 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 09:00:37 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,7 @@ t_heredoc_entry	*setup_heredoc_entry(t_shell *shell, char *delimiter,
 					char *temp_file, int *fd);
 void			check_heredoc_signal(int fd);
 
-void			handle_null_line(int fd);
+void			handle_null_line(t_shell *shell, int fd);
 void			check_delimiter_match(char *line, char *delimiter, int fd);
 void			process_heredoc_lines(t_shell *shell, char *delimiter, int fd);
 
