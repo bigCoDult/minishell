@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 19:11:30 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 03:05:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,6 +190,10 @@ t_heredoc_entry	*create_heredoc_entry(t_shell *shell, char *delimiter);
 int				setup_heredoc_file(t_shell *shell, char **temp_file, int *fd);
 t_heredoc_entry	*setup_heredoc_entry(t_shell *shell, char *delimiter,
 					char *temp_file, int *fd);
+void			check_heredoc_signal(int fd);
+
+void			handle_null_line(int fd);
+void			check_delimiter_match(char *line, char *delimiter, int fd);
 void			process_heredoc_lines(t_shell *shell, char *delimiter, int fd);
 
 int				read_heredoc_content(t_shell *shell, char *delimiter, int fd);
@@ -261,6 +265,10 @@ int				ft_strncmp(const char *s1, const char *s2, size_t n);
 int				handle_special_cases(char *str, size_t size, int n);
 
 int				ft_itoa_n(char *str, size_t size, int n);
+
+void			ft_itoa_simple(char *str, int n);
+
+char			*ft_strtok(char *str, const char *delim);
 
 void			*shell_malloc(t_shell *shell, size_t size);
 void			shell_free(t_shell *shell, void *ptr);
@@ -347,10 +355,6 @@ void			debug_print(int action_combine_bit,
 					int str_type, const char *str, ...);
 
 int				execute_simple_command(t_shell *shell, t_command *cmd);
-
-void			print_ast(t_ast_node *node, int depth);
-void			print_command(t_command *cmd);
-void			print_redirection(t_redirection *redir);
 
 void			setup_signals_interactive(void);
 void			setup_signals_executing(void);

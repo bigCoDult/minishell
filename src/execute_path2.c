@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 04:19:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:40:15 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 03:07:05 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,7 @@ char	*search_in_path(t_shell *shell, const char *cmd, char *path_copy)
 	char	*dir;
 	char	*full_path;
 
-	// strtok?
-	dir = strtok(path_copy, ":");
+	dir = ft_strtok(path_copy, ":");
 	while (dir)
 	{
 		full_path = shell_malloc(shell, ft_strlen(dir)
@@ -43,8 +42,7 @@ char	*search_in_path(t_shell *shell, const char *cmd, char *path_copy)
 		if (access(full_path, X_OK) == 0)
 			return (full_path);
 		shell_free(shell, full_path);
-		// strtok?
-		dir = strtok(NULL, ":");
+		dir = ft_strtok(NULL, ":");
 	}
 	return (NULL);
 }
