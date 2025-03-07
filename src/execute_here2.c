@@ -6,49 +6,11 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:01:47 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:35:47 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/07 03:01:09 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-void	ft_itoa_simple(char *str, int n)
-{
-    int	i;
-    int	len;
-    int	temp;
-    int	is_negative;
-
-    if (n == 0)
-    {
-        str[0] = '0';
-        str[1] = '\0';
-        return ;
-    }
-    is_negative = 0;
-    if (n < 0)
-    {
-        is_negative = 1;
-        n = -n;
-    }
-    len = 0;
-    temp = n;
-    while (temp > 0)
-    {
-        temp = temp / 10;
-        len++;
-    }
-    if (is_negative)
-        str[0] = '-';
-    i = len - 1 + is_negative;
-    str[i + 1] = '\0';
-    while (n > 0)
-    {
-        str[i] = '0' + (n % 10);
-        n = n / 10;
-        i--;
-    }
-}
 
 char	*create_temp_heredoc_file(t_shell *shell)
 {
@@ -115,40 +77,11 @@ t_heredoc_entry	*setup_heredoc_entry(t_shell *shell, char *delimiter
 	return (entry);
 }
 
-void	process_heredoc_lines(t_shell *shell, char *delimiter, int fd)
+void	check_heredoc_signal(int fd)
 {
-	char	*line;
-
-	(void)shell;
 	if (g_signal == SIGINT)
 	{
 		close(fd);
 		exit(130);
-	}
-	while (1)
-	{
-		if (g_signal == SIGINT)
-		{
-			close(fd);
-			exit(130);
-		}
-		line = readline("> ");
-		if (!line)
-		{
-			close(fd);
-			if (g_signal == SIGINT)
-				exit(130);
-			else
-				exit(0);
-		}
-		if (ft_strcmp(line, delimiter) == 0)
-		{
-			free(line);
-			close(fd);
-			exit(0);
-		}
-		write(fd, line, strlen(line));
-		write(fd, "\n", 1);
-		free(line);
 	}
 }
