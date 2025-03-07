@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 05:08:31 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:34:46 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:00:24 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,5 @@ int	parse_input(t_shell *shell)
 	shell->ast_root = parse_pipeline(shell, &curr_token);
 	if (!shell->ast_root)
 		return (1);
-	// print_ast(shell->ast_root, 0);
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:42:07 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 17:59:07 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,29 @@ int	execute_external(t_shell *shell, t_command *cmd)
 
 	pid = fork();
 	if (pid == 0)
+	{
+		signal(SIGINT, SIG_DFL);
+		signal(SIGQUIT, SIG_DFL);
 		execute_command_in_child(shell, cmd);
+	}
 	else if (pid > 0)
 	{
-		// waitpid?
 		waitpid(pid, &status, 0);
+		if (WIFSIGNALED(status))
+		{
+			if (WTERMSIG(status) == SIGINT)
+			{
+				g_signal = SIGINT;
+				shell->status.exit_code = 130;
+				return (130);
+			}
+			else if (WTERMSIG(status) == SIGQUIT)
+			{
+				g_signal = SIGQUIT;
+				shell->status.exit_code = 131;
+				return (131);
+			}
+		}
 		return (WEXITSTATUS(status));
 	}
 	return (1);

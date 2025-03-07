@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:01:47 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:41:19 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 17:57:09 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,14 +82,33 @@ void	process_heredoc_lines(t_shell *shell, char *delimiter, int fd)
 {
 	char	*line;
 
+	(void)shell;
+	if (g_signal == SIGINT)
+	{
+		close(fd);
+		exit(130);
+	}
 	while (1)
 	{
+		if (g_signal == SIGINT)
+		{
+			close(fd);
+			exit(130);
+		}
 		line = readline("> ");
-		if (!line || ft_strcmp(line, delimiter) == 0)
+		if (!line)
+		{
+			close(fd);
+			if (g_signal == SIGINT)
+				exit(130);
+			else
+				exit(0);
+		}
+		if (ft_strcmp(line, delimiter) == 0)
 		{
 			free(line);
 			close(fd);
-			free_exit(shell, 0);
+			exit(0);
 		}
 		write(fd, line, strlen(line));
 		write(fd, "\n", 1);

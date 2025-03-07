@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:28:18 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:03:44 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,6 +257,7 @@ int				ft_isalnum(int c);
 
 int				ft_atoi(const char *str);
 char			*ft_strcat(char *dest, const char *src);
+int				ft_strncmp(const char *s1, const char *s2, size_t n);
 
 void			*shell_malloc(t_shell *shell, size_t size);
 void			shell_free(t_shell *shell, void *ptr);
@@ -341,5 +342,11 @@ int				execute_simple_command(t_shell *shell, t_command *cmd);
 void			print_ast(t_ast_node *node, int depth);
 void			print_command(t_command *cmd);
 void			print_redirection(t_redirection *redir);
+
+void			setup_signals_interactive(void);
+void			setup_signals_executing(void);
+void			setup_signals_heredoc(void);
+void			heredoc_signal_handler(int signo);
+void			setup_signals(void);
 
 #endif

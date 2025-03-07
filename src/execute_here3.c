@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:02:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 08:07:52 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 18:27:31 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,39 @@ int	read_heredoc_content(t_shell *shell, char *delimiter, int fd)
 {
 	pid_t	pid;
 	int		status;
+	int		original_g_signal;
 
+	status = 0;
+	original_g_signal = g_signal;
+	g_signal = 0;
+	setup_signals_heredoc();
 	pid = fork();
 	if (pid == 0)
 	{
 		signal(SIGINT, heredoc_signal_handler);
+		// free_all_memory(shell);
+		// free_env(shell);
 		process_heredoc_lines(shell, delimiter, fd);
 	}
 	waitpid(pid, &status, 0);
+	setup_signals_interactive();
 	close(fd);
+	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
+	{
+		g_signal = SIGINT;
+		shell->status.exit_code = 130;
+		return (0);
+	}
+	if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+	{
+		if (WEXITSTATUS(status) == 130)
+		{
+			g_signal = SIGINT;
+			shell->status.exit_code = 130;
+		}
+		return (0);
+	}
+	g_signal = original_g_signal;
 	return (WIFEXITED(status) && WEXITSTATUS(status) == 0);
 }
 

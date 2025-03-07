@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:42:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 12:03:30 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/06 17:59:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,6 @@ void	remove_env_var(t_shell *shell, const char *key)
 				prev->next = current->next;
 			else
 				shell->env = current->next;
-			// shell_free(shell, current->key);
-			// shell_free(shell, current->value);
-			// shell_free(shell, current);
 			free(current->key);
 			free(current->value);
 			free(current);
