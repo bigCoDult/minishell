@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/08 08:18:26 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/08 12:48:32 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,7 @@ static void	minishell_loop(t_shell *shell)
 			if (parse_input(shell) == 0)
 			{
 				execute_commands(shell);
+				// 실행 후 히어독 관련 정리는 나중에
 				free_command_memory(shell);
 			}
 		}

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/08 08:34:04 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/08 12:48:33 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,22 +15,34 @@
 static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 {
 	char	*path;
-
+	int		heredoc_fd = -1;
+	
+	// 히어독 fd를 찾는 함수를 사용
+	heredoc_fd = find_command_heredoc_fd(shell, cmd);
+	
 	if (cmd->redirs && setup_redirections(shell, cmd->redirs) != 0)
 	{
+		if (heredoc_fd != -1)
+			close(heredoc_fd);
 		free_exit(shell, 1);
 	}
+	
 	path = find_command_path(shell, cmd->args[0]);
 	if (!path)
 	{
+		if (heredoc_fd != -1)
+			close(heredoc_fd);
 		printf("minishell: %s: command not found\n", cmd->args[0]);
 		free_exit(shell, 127);
 	}
-	if (shell->heredoc.entries)
+	
+	// 히어독이 있는 명령어만 표준 입력 리다이렉션
+	if (heredoc_fd != -1)
 	{
-		dup2(shell->heredoc.entries->fd, STDIN_FILENO);
-		close(shell->heredoc.entries->fd);
+		dup2(heredoc_fd, STDIN_FILENO);
+		close(heredoc_fd);
 	}
+	
 	execve(path, cmd->args, get_env_array(shell));
 	free_exit(shell, 127);
 }
