@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 14:22:42 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:05:09 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/08 16:28:02 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,25 @@ int	builtin_echo(char **args)
 
 	n_option = 0;
 	i = 1;
-	if (args[1] && ft_strcmp(args[1], "-n") == 0)
+	// 여러 개의 -n 옵션(-n, -nn, -nnn 등) 처리
+	while (args[i] && args[i][0] == '-')
 	{
-		n_option = 1;
-		i++;
+		int j = 1;
+		// 첫 문자가 '-'이고 나머지가 모두 'n'인지 확인
+		while (args[i][j] == 'n')
+			j++;
+		
+		// 문자열이 "-n..." 형태이고 모든 문자가 'n'인 경우에만 옵션으로 인식
+		if (j > 1 && args[i][j] == '\0')
+		{
+			n_option = 1;
+			i++;
+		}
+		else
+			break; // 'n'이 아닌 다른 문자가 있으면 옵션이 아님
 	}
+	
+	// 인자 출력
 	while (args[i])
 	{
 		printf("%s", args[i]);
@@ -31,6 +45,8 @@ int	builtin_echo(char **args)
 			printf(" ");
 		i++;
 	}
+	
+	// -n 옵션이 없으면 개행 출력
 	if (!n_option)
 		printf("\n");
 	return (0);
