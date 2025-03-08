@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 12:59:02 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/08 08:34:04 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,12 @@ int	execute_external(t_shell *shell, t_command *cmd)
 	int		status;
 
 	pid = fork();
-	if (pid == 0)
+	if (pid == -1)
+	{
+		perror("fork");
+		return (1);
+	}
+	else if (pid == 0)
 	{
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
@@ -70,6 +75,13 @@ int	execute_external(t_shell *shell, t_command *cmd)
 	else if (pid > 0)
 	{
 		waitpid(pid, &status, 0);
+		 // 종료 상태 코드 처리 수정
+        if (WIFEXITED(status))
+            shell->status.exit_code = WEXITSTATUS(status);
+        else if (WIFSIGNALED(status))
+            shell->status.exit_code = 128 + WTERMSIG(status);
+        else
+            shell->status.exit_code = 1;  // 기본 오류 코드
 		return (handle_signal_termination(shell, status));
 	}
 	return (1);
