@@ -6,13 +6,42 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 13:05:45 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/08 08:18:26 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 volatile sig_atomic_t	g_signal;
+
+void setup_terminal_settings(void)
+{
+    struct termios term;
+    
+    // 현재 터미널 속성 가져오기
+    tcgetattr(STDIN_FILENO, &term);
+    
+    // ECHOCTL 플래그 비활성화 (제어 문자가 화면에 출력되지 않도록)
+    term.c_lflag &= ~ECHOCTL;
+    
+    // 변경된 터미널 속성 적용
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+// 프로그램 종료 시 터미널 설정 복원
+void restore_terminal_settings(void)
+{
+    struct termios term;
+    
+    // 현재 터미널 속성 가져오기
+    tcgetattr(STDIN_FILENO, &term);
+    
+    // ECHOCTL 플래그 다시 활성화 (원래 상태로 복원)
+    term.c_lflag |= ECHOCTL;
+    
+    // 변경된 터미널 속성 적용
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
 
 static void	init_shell(t_shell *shell, char **envp)
 {
@@ -71,8 +100,10 @@ int	main(int argc, char **argv, char **envp)
 	}
 	g_signal = 0;
 	init_shell(&shell, envp);
+	setup_terminal_settings();
 	setup_signals();
 	minishell_loop(&shell);
+	restore_terminal_settings();
 	free_all_memory(&shell);
 	free_env(&shell);
 	return (shell.status.exit_code);
