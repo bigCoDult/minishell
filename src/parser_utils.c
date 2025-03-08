@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 05:08:31 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 13:05:45 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/08 12:29:48 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,12 @@ int	parse_input(t_shell *shell)
 
 	if (shell->tokens)
 	{
-		free_command_memory(shell);
+		free_non_heredoc_memory(shell);
 		shell->tokens = NULL;
 	}
 	if (shell->ast_root)
 	{
-		free_command_memory(shell);
+		free_non_heredoc_memory(shell);
 		shell->ast_root = NULL;
 	}
 	if (tokenize_input(shell) != 0)

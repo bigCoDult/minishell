@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 11:27:49 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/08 12:32:42 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -366,5 +366,6 @@ void			heredoc_signal_handler(int signo);
 void			setup_signals(void);
 
 void			restore_io(t_shell *shell);
+void			free_non_heredoc_memory(t_shell *shell);
 
 #endif
