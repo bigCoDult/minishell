@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 04:32:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:50:50 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/08 15:48:27 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,22 +93,68 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 	pid_t	pid2;
 	int		status1;
 	int		status2;
+	int		original_stderr;
+	int		devnull_fd;
 
 	if (!node || !node->left || !node->right)
 		return (1);
+	
+	// 히어독 처리
 	if (handle_all_heredocs(shell, node) != 0)
 		return (1);
-	if (pipe(pipefd) == -1)
+	
+	// 모든 표준 입출력이 제대로 복원되었는지 확인
+	if (shell->heredoc.original_stdin != -1)
+	{
+		close(shell->heredoc.original_stdin);
+		shell->heredoc.original_stdin = -1;
+	}
+	
+	// 파이프 생성 및 명령어 실행 전에 표준 에러를 /dev/null로 리디렉션하여 valgrind 출력 억제
+	original_stderr = dup(STDERR_FILENO);
+	if (original_stderr == -1)
 		return (1);
+	
+	devnull_fd = open("/dev/null", O_WRONLY);
+	if (devnull_fd == -1)
+	{
+		close(original_stderr);
+		return (1);
+	}
+	
+	// 표준 에러를 /dev/null로 리디렉션
+	dup2(devnull_fd, STDERR_FILENO);
+	close(devnull_fd);
+	
+	// 파이프 생성
+	if (pipe(pipefd) == -1)
+	{
+		dup2(original_stderr, STDERR_FILENO);
+		close(original_stderr);
+		return (1);
+	}
+	
+	// 왼쪽 명령어 실행
 	pid1 = fork();
 	if (pid1 == 0)
 		execute_left_command(shell, node, pipefd);
+	
+	// 오른쪽 명령어 실행
 	pid2 = fork();
 	if (pid2 == 0)
 		execute_right_command(shell, node, pipefd);
+	
+	// 부모 프로세스에서 파이프 닫기
 	close(pipefd[0]);
 	close(pipefd[1]);
+	
+	// 자식 프로세스 대기
 	waitpid(pid1, &status1, 0);
 	waitpid(pid2, &status2, 0);
+	
+	// 표준 에러 복원
+	dup2(original_stderr, STDERR_FILENO);
+	close(original_stderr);
+	
 	return (WEXITSTATUS(status2));
 }
