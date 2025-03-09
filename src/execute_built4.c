@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   execute_built4.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/09 21:02:50 by sanbaek           #+#    #+#             */
+/*   Updated: 2025/03/09 21:02:52 by sanbaek          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 void	add_keyvalue(t_env *input_env, t_env *env_head)
@@ -51,52 +63,45 @@ t_env	*find_already(char *key, t_env *env_head)
 	return (NULL);
 }
 
-static int	cd_special_path(t_tree *node, t_env *env_head)
+static int	cd_env(t_env *env_head, char *var, char *error_msg, int print_cwd)
 {
-	char	newpwd[4096];
-	char	*path;
+	char	*p;
+	char	buf[4096];
 
-	if (ft_strcmp(node->value, "cd") != 0)
-		return (0);
-	if (node->left_child == NULL)
+	p = get_env(env_head, var);
+	if (p == NULL || (print_cwd && chdir(p) != 0))
 	{
-		path = get_env(env_head, "HOME");
-		if (path == NULL)
-		{
-			fprintf(stderr, "cd: HOME not set\n");
-			return (1);
-		}
-		chdir(path);
-		return (1);
-	}
-	else if (ft_strcmp(node->left_child->value, "~") == 0)
-	{
-		path = get_env(env_head, "HOME");
-		if (path == NULL)
-		{
-			fprintf(stderr, "cd: HOME not set\n");
-			return (1);
-		}
-		chdir(path);
-		return (1);
-	}
-	else if (ft_strcmp(node->left_child->value, "-") == 0)
-	{
-		path = get_env(env_head, "OLDPWD");
-		if (path == NULL || chdir(path) != 0)
-		{
-			fprintf(stderr, "cd: OLDPWD not set\n");
+		printf("%s\n", error_msg);
+		if (ft_strcmp(var, "OLDPWD") == 0)
 			return (0);
-		}
-		getcwd(newpwd, 4096);
-		printf("%s\n", newpwd);
-		return (1);
+		else
+			return (1);
+	}
+	if (print_cwd)
+	{
+		getcwd(buf, 4096);
+		printf("%s\n", buf);
 	}
 	else
-		return (0);
+	{
+		chdir(p);
+	}
+	return (1);
 }
 
-static void	export_for_cd(char *key, char *value, t_env **env_head, t_shell *shell)
+static int	cd_special_path(t_tree *node, t_env *env_head)
+{
+	if (ft_strcmp(node->value, "cd") != 0)
+		return (0);
+	if (node->left_child == NULL || \
+		ft_strcmp(node->left_child->value, "~") == 0)
+		return (cd_env(env_head, "HOME", "cd: HOME not set", 0));
+	if (ft_strcmp(node->left_child->value, "-") == 0)
+		return (cd_env(env_head, "OLDPWD", "cd: OLDPWD not set", 1));
+	return (0);
+}
+
+void	export_for_cd(char *key, char *value, t_env **env_head, t_shell *shell)
 {
 	if (!find_already(key, *env_head))
 		add_env_value(shell, key, value);
@@ -124,10 +129,10 @@ void	handle_cd_command(t_tree *node, t_env *env_head, t_shell *shell)
 	export_for_cd("PWD", newpwd, &shell->env, shell);
 }
 
-t_tree *convert_args_to_node(char **args, t_tree *node)
+t_tree	*convert_args_to_node(char **args, t_tree *node)
 {
 	int	i;
-	
+
 	i = 0;
 	while (args[i])
 	{
