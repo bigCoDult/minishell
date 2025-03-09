@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/08 12:48:33 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/09 11:43:58 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,35 +15,44 @@
 static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 {
 	char	*path;
-	int		heredoc_fd = -1;
-	
-	// 히어독 fd를 찾는 함수를 사용
+	int		heredoc_fd;
+	int		original_stdout;
+
+	heredoc_fd = -1;
+	original_stdout = -1;
 	heredoc_fd = find_command_heredoc_fd(shell, cmd);
-	
-	if (cmd->redirs && setup_redirections(shell, cmd->redirs) != 0)
-	{
-		if (heredoc_fd != -1)
-			close(heredoc_fd);
-		free_exit(shell, 1);
-	}
-	
 	path = find_command_path(shell, cmd->args[0]);
 	if (!path)
 	{
 		if (heredoc_fd != -1)
 			close(heredoc_fd);
-		printf("minishell: %s: command not found\n", cmd->args[0]);
+		fprintf(stderr, "minishell: %s: command not found\n", cmd->args[0]);
 		free_exit(shell, 127);
 	}
-	
-	// 히어독이 있는 명령어만 표준 입력 리다이렉션
+	original_stdout = dup(STDOUT_FILENO);
+	if (original_stdout == -1)
+	{
+		if (heredoc_fd != -1)
+			close(heredoc_fd);
+		perror("dup");
+		free_exit(shell, 1);
+	}
+	if (cmd->redirs && setup_redirections(shell, cmd->redirs) != 0)
+	{
+		if (heredoc_fd != -1)
+			close(heredoc_fd);
+		dup2(original_stdout, STDOUT_FILENO);
+		close(original_stdout);
+		free_exit(shell, 1);
+	}
+	close(original_stdout);
 	if (heredoc_fd != -1)
 	{
 		dup2(heredoc_fd, STDIN_FILENO);
 		close(heredoc_fd);
 	}
-	
 	execve(path, cmd->args, get_env_array(shell));
+	fprintf(stderr, "minishell: %s: %s\n", cmd->args[0], strerror(errno));
 	free_exit(shell, 127);
 }
 
@@ -69,9 +78,20 @@ static int	handle_signal_termination(t_shell *shell, int status)
 
 int	execute_external(t_shell *shell, t_command *cmd)
 {
-	pid_t	pid;
-	int		status;
+	pid_t			pid;
+	int				status;
+	t_redirection	*redir;
 
+	if (cmd->redirs)
+	{
+		redir = cmd->redirs;
+		while (redir)
+		{
+			if (redir->type == REDIR_OUT || redir->type == REDIR_APPEND)
+				fprintf(stderr, "Debug: Redirecting to file '%s'\n", redir->filename);
+			redir = redir->next;
+		}
+	}
 	pid = fork();
 	if (pid == -1)
 	{
@@ -87,13 +107,12 @@ int	execute_external(t_shell *shell, t_command *cmd)
 	else if (pid > 0)
 	{
 		waitpid(pid, &status, 0);
-		 // 종료 상태 코드 처리 수정
-        if (WIFEXITED(status))
-            shell->status.exit_code = WEXITSTATUS(status);
-        else if (WIFSIGNALED(status))
-            shell->status.exit_code = 128 + WTERMSIG(status);
-        else
-            shell->status.exit_code = 1;  // 기본 오류 코드
+		if (WIFEXITED(status))
+			shell->status.exit_code = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			shell->status.exit_code = 128 + WTERMSIG(status);
+		else
+			shell->status.exit_code = 1;
 		return (handle_signal_termination(shell, status));
 	}
 	return (1);

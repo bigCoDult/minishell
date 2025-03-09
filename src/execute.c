@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 12:59:51 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/09 11:48:12 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,30 +14,21 @@
 
 int	execute_simple_command(t_shell *shell, t_command *cmd)
 {
-	int				ret;
+	int	ret;
 
 	if (!cmd || !cmd->args || !cmd->args[0])
-	{
-		if (!shell->heredoc.entries)
-			printf("Invalid command structure\n");
-		return (1);
-	}
-	
-	// 내장 명령어는 부모 프로세스에서 리다이렉션 설정
+		return (0);
 	if (is_builtin(cmd->args[0]))
 	{
 		if (setup_redirections(shell, cmd->redirs) != 0)
 			return (1);
 		ret = execute_builtin(shell, cmd);
-		restore_io(shell);  // 내장 명령어 실행 후 복원
+		restore_io(shell);
+		if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
+			restore_io(shell);
 	}
 	else
-	{
-		// 외부 명령어는 자식 프로세스에서 리다이렉션을 설정하므로
-		// 부모 프로세스의 표준 입출력은 변경되지 않음
 		ret = execute_external(shell, cmd);
-	}
-	
 	return (ret);
 }
 
@@ -102,19 +93,11 @@ int	execute_commands(t_shell *shell)
 	g_signal = 0;
 	if (!shell->ast_root)
 		return (0);
-		
-	// 실행 전 파일 디스크립터가 모두 정상 상태인지 확인
 	if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
-	{
 		restore_io(shell);
-	}
-	
 	setup_signals_executing();
 	result = execute_ast(shell, shell->ast_root);
-	
-	// 명령어 실행 후 항상 표준 입출력 복원
 	restore_io(shell);
-	
 	setup_signals_interactive();
 	return (result);
 }

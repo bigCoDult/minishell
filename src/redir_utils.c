@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 13:05:45 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/09 11:50:43 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ static int	setup_output_redirect(t_redirection *redir)
 	fd = open(redir->filename, flags, 0644);
 	if (fd == -1)
 	{
-		printf("minishell: %s: Permission denied\n", redir->filename);
+		fprintf(stderr, "minishell: %s: Permission denied\n", redir->filename);
 		return (1);
 	}
 	if (dup2(fd, STDOUT_FILENO) == -1)
@@ -60,18 +60,17 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 	t_redirection	*current;
 
 	if (!redirs)
-		return (0);  // 리다이렉션이 없으면 바로 반환
-
-	// 표준 입출력 백업 - 이미 백업되지 않은 경우에만
+		return (0);
 	if (shell->heredoc.original_stdin == -1)
 		shell->heredoc.original_stdin = dup(STDIN_FILENO);
 	if (shell->original_stdout == -1)
 		shell->original_stdout = dup(STDOUT_FILENO);
-	
-	// 백업 실패 시 안전하게 처리
-	if (shell->heredoc.original_stdin == -1 || shell->original_stdout == -1)
+	if (shell->original_stderr == -1)
+		shell->original_stderr = dup(STDERR_FILENO);
+	if (shell->heredoc.original_stdin == -1 || 
+		shell->original_stdout == -1 ||
+		shell->original_stderr == -1)
 	{
-		// 백업된 디스크립터만 닫기
 		if (shell->heredoc.original_stdin != -1)
 		{
 			close(shell->heredoc.original_stdin);
@@ -82,10 +81,13 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 			close(shell->original_stdout);
 			shell->original_stdout = -1;
 		}
+		if (shell->original_stderr != -1)
+		{
+			close(shell->original_stderr);
+			shell->original_stderr = -1;
+		}
 		return (1);
 	}
-
-	// 모든 리다이렉션 처리
 	current = redirs;
 	while (current)
 	{
@@ -93,7 +95,7 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		{
 			if (setup_input_redirect(current) != 0)
 			{
-				restore_io(shell);  // 오류 발생 시 원상태로 복원
+				restore_io(shell);
 				return (1);
 			}
 		}
@@ -101,7 +103,7 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		{
 			if (setup_output_redirect(current) != 0)
 			{
-				restore_io(shell);  // 오류 발생 시 원상태로 복원
+				restore_io(shell);
 				return (1);
 			}
 		}
@@ -137,21 +139,27 @@ t_redirection	*create_redirection(t_shell *shell, t_token *token)
 
 void	restore_io(t_shell *shell)
 {
-	// 표준 입력 복원
 	if (shell->heredoc.original_stdin != -1)
 	{
-		dup2(shell->heredoc.original_stdin, STDIN_FILENO);
+		if (dup2(shell->heredoc.original_stdin, STDIN_FILENO) == -1)
+			perror("dup2 error while restoring stdin");
 		close(shell->heredoc.original_stdin);
 		shell->heredoc.original_stdin = -1;
 	}
-	
-	// 표준 출력 복원
 	if (shell->original_stdout != -1)
 	{
-		dup2(shell->original_stdout, STDOUT_FILENO);
+		if (dup2(shell->original_stdout, STDOUT_FILENO) == -1)
+			perror("dup2 error while restoring stdout");
 		close(shell->original_stdout);
 		shell->original_stdout = -1;
 	}
-	
-	// 터미널 제어 코드 제거 (tcgetattr, tcsetattr 등)
+	if (shell->original_stderr != -1)
+	{
+		if (dup2(shell->original_stderr, STDERR_FILENO) == -1)
+			perror("dup2 error while restoring stderr");
+		close(shell->original_stderr);
+		shell->original_stderr = -1;
+	}
+	fflush(stdout);
+	fflush(stderr);
 }
