@@ -151,6 +151,12 @@ typedef struct s_shell
 	int			original_stderr;
 }	t_shell;
 
+typedef struct s_tree
+{
+	struct s_tree	*left_child;
+	struct s_tree	*right_sibling;
+	char			*value;
+}	t_tree;
 char			**get_env_array(t_shell *shell);
 
 void			expand_variable(t_shell *shell,
