@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 13:37:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/05 13:44:56 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/08 12:41:25 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,60 @@ void	free_command_memory(t_shell *shell)
 		}
 		else
 			prev = current;
+		current = next;
+	}
+}
+
+void	free_non_heredoc_memory(t_shell *shell)
+{
+	t_memory	*current;
+	t_memory	*next;
+	t_memory	*prev;
+	t_env		*env_ptr;
+	
+	if (!shell || !shell->memory)
+		return ;
+	
+	current = shell->memory;
+	prev = NULL;
+	env_ptr = shell->env;
+	
+	while (current)
+	{
+		next = current->next;
+		
+		// 히어독 관련 메모리인지 확인
+		int is_heredoc_memory = 0;
+		if (shell->heredoc.entries)
+		{
+			t_heredoc_entry *entry = shell->heredoc.entries;
+			// 히어독 엔트리와 관련된 메모리인지 확인
+			if (current->addr == entry || 
+			    (current->addr >= (void *)entry && 
+			     current->addr < (void *)entry + sizeof(t_heredoc_entry) * shell->heredoc.count))
+			{
+				is_heredoc_memory = 1;
+			}
+		}
+		
+		// env와 히어독 관련 메모리는 보존
+		if (current->addr != env_ptr && 
+		    (current->addr < (void *)env_ptr || 
+		     current->addr > (void *)(env_ptr + sizeof(t_env))) &&
+		    !is_heredoc_memory)
+		{
+			free(current->addr);
+			free(current);
+			if (prev)
+				prev->next = next;
+			else
+				shell->memory = next;
+		}
+		else
+		{
+			prev = current;
+		}
+		
 		current = next;
 	}
 }

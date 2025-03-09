@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 12:59:02 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/09 11:43:58 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,23 +15,44 @@
 static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 {
 	char	*path;
+	int		heredoc_fd;
+	int		original_stdout;
 
-	if (cmd->redirs && setup_redirections(shell, cmd->redirs) != 0)
-	{
-		free_exit(shell, 1);
-	}
+	heredoc_fd = -1;
+	original_stdout = -1;
+	heredoc_fd = find_command_heredoc_fd(shell, cmd);
 	path = find_command_path(shell, cmd->args[0]);
 	if (!path)
 	{
-		printf("minishell: %s: command not found\n", cmd->args[0]);
+		if (heredoc_fd != -1)
+			close(heredoc_fd);
+		fprintf(stderr, "minishell: %s: command not found\n", cmd->args[0]);
 		free_exit(shell, 127);
 	}
-	if (shell->heredoc.entries)
+	original_stdout = dup(STDOUT_FILENO);
+	if (original_stdout == -1)
 	{
-		dup2(shell->heredoc.entries->fd, STDIN_FILENO);
-		close(shell->heredoc.entries->fd);
+		if (heredoc_fd != -1)
+			close(heredoc_fd);
+		perror("dup");
+		free_exit(shell, 1);
+	}
+	if (cmd->redirs && setup_redirections(shell, cmd->redirs) != 0)
+	{
+		if (heredoc_fd != -1)
+			close(heredoc_fd);
+		dup2(original_stdout, STDOUT_FILENO);
+		close(original_stdout);
+		free_exit(shell, 1);
+	}
+	close(original_stdout);
+	if (heredoc_fd != -1)
+	{
+		dup2(heredoc_fd, STDIN_FILENO);
+		close(heredoc_fd);
 	}
 	execve(path, cmd->args, get_env_array(shell));
+	fprintf(stderr, "minishell: %s: %s\n", cmd->args[0], strerror(errno));
 	free_exit(shell, 127);
 }
 
@@ -57,11 +78,27 @@ static int	handle_signal_termination(t_shell *shell, int status)
 
 int	execute_external(t_shell *shell, t_command *cmd)
 {
-	pid_t	pid;
-	int		status;
+	pid_t			pid;
+	int				status;
+	t_redirection	*redir;
 
+	if (cmd->redirs)
+	{
+		redir = cmd->redirs;
+		while (redir)
+		{
+			if (redir->type == REDIR_OUT || redir->type == REDIR_APPEND)
+				fprintf(stderr, "Debug: Redirecting to file '%s'\n", redir->filename);
+			redir = redir->next;
+		}
+	}
 	pid = fork();
-	if (pid == 0)
+	if (pid == -1)
+	{
+		perror("fork");
+		return (1);
+	}
+	else if (pid == 0)
 	{
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
@@ -70,6 +107,12 @@ int	execute_external(t_shell *shell, t_command *cmd)
 	else if (pid > 0)
 	{
 		waitpid(pid, &status, 0);
+		if (WIFEXITED(status))
+			shell->status.exit_code = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			shell->status.exit_code = 128 + WTERMSIG(status);
+		else
+			shell->status.exit_code = 1;
 		return (handle_signal_termination(shell, status));
 	}
 	return (1);

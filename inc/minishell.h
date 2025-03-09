@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 11:27:49 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/09 11:14:44 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,7 @@ typedef struct s_shell
 	t_heredoc	heredoc;
 	t_env		*env;
 	int			original_stdout;
+	int			original_stderr;
 }	t_shell;
 
 char			**get_env_array(t_shell *shell);
@@ -366,5 +367,6 @@ void			heredoc_signal_handler(int signo);
 void			setup_signals(void);
 
 void			restore_io(t_shell *shell);
+void			free_non_heredoc_memory(t_shell *shell);
 
 #endif

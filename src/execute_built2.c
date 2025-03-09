@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 14:22:42 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:05:09 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/09 11:47:08 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,23 @@
 int	builtin_echo(char **args)
 {
 	int	i;
+	int	j;
 	int	n_option;
 
 	n_option = 0;
 	i = 1;
-	if (args[1] && ft_strcmp(args[1], "-n") == 0)
+	while (args[i] && args[i][0] == '-')
 	{
-		n_option = 1;
-		i++;
+		j = 1;
+		while (args[i][j] == 'n')
+			j++;
+		if (j > 1 && args[i][j] == '\0')
+		{
+			n_option = 1;
+			i++;
+		}
+		else
+			break ;
 	}
 	while (args[i])
 	{
@@ -33,6 +42,7 @@ int	builtin_echo(char **args)
 	}
 	if (!n_option)
 		printf("\n");
+	fflush(stdout);
 	return (0);
 }
 
