@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/09 11:48:12 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/09 13:01:20 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,6 @@ int	execute_ast(t_shell *shell, t_ast_node *node)
 	{
 		if (node->cmd->redirs)
 		{
-			if (process_heredocs(shell, node->cmd->redirs) != 0)
-				return (1);
 			if (process_redirection(shell, node->cmd->redirs) != 0)
 				return (1);
 		}
@@ -89,12 +87,35 @@ int	execute_ast(t_shell *shell, t_ast_node *node)
 int	execute_commands(t_shell *shell)
 {
 	int	result;
+	int	stdout_backup;
+	int	devnull_fd;
 
 	g_signal = 0;
 	if (!shell->ast_root)
 		return (0);
 	if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
 		restore_io(shell);
+	stdout_backup = dup(STDOUT_FILENO);
+	if (stdout_backup == -1)
+		return (1);
+	devnull_fd = open("/dev/null", O_WRONLY);
+	if (devnull_fd == -1)
+	{
+		close(stdout_backup);
+		return (1);
+	}
+	dup2(devnull_fd, STDOUT_FILENO);
+	close(devnull_fd);
+	fprintf(stderr, "\n--- Processing all heredocs ---\n");
+	int heredoc_result = handle_all_heredocs(shell, shell->ast_root);
+	fprintf(stderr, "--- Heredoc processing complete ---\n\n");
+	dup2(stdout_backup, STDOUT_FILENO);
+	close(stdout_backup);
+	if (heredoc_result != 0)
+	{
+		restore_io(shell);
+		return (1);
+	}
 	setup_signals_executing();
 	result = execute_ast(shell, shell->ast_root);
 	restore_io(shell);

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 04:32:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/08 15:48:27 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/09 13:00:40 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,12 @@ void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 	int	ret;
 
 	close(pipefd[0]);
-	dup2(pipefd[1], STDOUT_FILENO);
+	if (dup2(pipefd[1], STDOUT_FILENO) == -1)
+	{
+		perror("dup2 error in left command");
+		close(pipefd[1]);
+		free_exit(shell, 1);
+	}
 	close(pipefd[1]);
 	if (node->left->type == AST_COMMAND)
 	{
@@ -30,6 +35,7 @@ void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 		else
 			execute_external_command(shell, node->left->cmd);
 	}
+	fprintf(stderr, "minishell: left command error\n");
 	free_exit(shell, 1);
 }
 
@@ -39,8 +45,12 @@ void	execute_external_command(t_shell *shell, t_command *cmd)
 
 	path = find_command_path(shell, cmd->args[0]);
 	if (!path)
+	{
+		fprintf(stderr, "minishell: %s: command not found\n", cmd->args[0]);
 		free_exit(shell, 127);
+	}
 	execve(path, cmd->args, get_env_array(shell));
+	fprintf(stderr, "minishell: %s: %s\n", cmd->args[0], strerror(errno));
 	free_exit(shell, 127);
 }
 
@@ -49,7 +59,12 @@ void	execute_right_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 	int	ret;
 
 	close(pipefd[1]);
-	dup2(pipefd[0], STDIN_FILENO);
+	if (dup2(pipefd[0], STDIN_FILENO) == -1)
+	{
+		perror("dup2 error in right command");
+		close(pipefd[0]);
+		free_exit(shell, 1);
+	}
 	close(pipefd[0]);
 	if (node->right->type == AST_PIPE)
 	{
@@ -67,6 +82,7 @@ void	execute_right_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 		else
 			execute_external_command(shell, node->right->cmd);
 	}
+	fprintf(stderr, "minishell: right command error\n");
 	free_exit(shell, 1);
 }
 
@@ -93,68 +109,39 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 	pid_t	pid2;
 	int		status1;
 	int		status2;
-	int		original_stderr;
-	int		devnull_fd;
 
 	if (!node || !node->left || !node->right)
 		return (1);
-	
-	// 히어독 처리
-	if (handle_all_heredocs(shell, node) != 0)
-		return (1);
-	
-	// 모든 표준 입출력이 제대로 복원되었는지 확인
-	if (shell->heredoc.original_stdin != -1)
-	{
-		close(shell->heredoc.original_stdin);
-		shell->heredoc.original_stdin = -1;
-	}
-	
-	// 파이프 생성 및 명령어 실행 전에 표준 에러를 /dev/null로 리디렉션하여 valgrind 출력 억제
-	original_stderr = dup(STDERR_FILENO);
-	if (original_stderr == -1)
-		return (1);
-	
-	devnull_fd = open("/dev/null", O_WRONLY);
-	if (devnull_fd == -1)
-	{
-		close(original_stderr);
-		return (1);
-	}
-	
-	// 표준 에러를 /dev/null로 리디렉션
-	dup2(devnull_fd, STDERR_FILENO);
-	close(devnull_fd);
-	
-	// 파이프 생성
 	if (pipe(pipefd) == -1)
 	{
-		dup2(original_stderr, STDERR_FILENO);
-		close(original_stderr);
+		perror("pipe");
 		return (1);
 	}
-	
-	// 왼쪽 명령어 실행
 	pid1 = fork();
+	if (pid1 == -1)
+	{
+		perror("fork (left)");
+		close(pipefd[0]);
+		close(pipefd[1]);
+		return (1);
+	}
 	if (pid1 == 0)
 		execute_left_command(shell, node, pipefd);
-	
-	// 오른쪽 명령어 실행
 	pid2 = fork();
+	if (pid2 == -1)
+	{
+		perror("fork (right)");
+		close(pipefd[0]);
+		close(pipefd[1]);
+		kill(pid1, SIGTERM);
+		waitpid(pid1, NULL, 0);
+		return (1);
+	}
 	if (pid2 == 0)
 		execute_right_command(shell, node, pipefd);
-	
-	// 부모 프로세스에서 파이프 닫기
 	close(pipefd[0]);
 	close(pipefd[1]);
-	
-	// 자식 프로세스 대기
 	waitpid(pid1, &status1, 0);
 	waitpid(pid2, &status2, 0);
-	
-	// 표준 에러 복원
-	dup2(original_stderr, STDERR_FILENO);
-	close(original_stderr);
-	
-	return (WEXITSTATUS(status2));
+	return (WIFEXITED(status2) ? WEXITSTATUS(status2) : 1);
 }

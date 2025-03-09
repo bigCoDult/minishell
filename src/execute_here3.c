@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:02:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/07 08:59:40 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/09 12:31:10 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,21 +22,51 @@ int	read_heredoc_content(t_shell *shell, char *delimiter, int fd)
 	original_g_signal = g_signal;
 	g_signal = 0;
 	setup_signals_heredoc();
+	
+	// 자식 프로세스 생성
 	pid = fork();
+	if (pid < 0)
+	{
+		perror("fork");
+		return (0);
+	}
+	
 	if (pid == 0)
 	{
+		// 시그널 핸들러 설정
 		signal(SIGINT, heredoc_signal_handler);
+		
+		// 터미널 설정을 변경하여 입력이 화면에 표시되도록 함
+		struct termios term;
+		if (tcgetattr(STDIN_FILENO, &term) == 0)
+		{
+			// 입력 에코 활성화, 컨트롤 문자 표시 비활성화
+			term.c_lflag |= ECHO;
+			term.c_lflag &= ~ECHOCTL;
+			tcsetattr(STDIN_FILENO, TCSANOW, &term);
+		}
+		
+		// 히어독 처리
 		process_heredoc_lines(shell, delimiter, fd);
+		
+		// 자식 프로세스 종료
+		exit(0);
 	}
+	
+	// 부모 프로세스에서 자식 프로세스 대기
 	waitpid(pid, &status, 0);
 	setup_signals_interactive();
 	close(fd);
+	
+	// 시그널에 의한 종료 처리
 	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
 	{
 		g_signal = SIGINT;
 		shell->status.exit_code = 130;
 		return (0);
 	}
+	
+	// 비정상 종료 처리
 	if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 	{
 		if (WEXITSTATUS(status) == 130)
@@ -46,6 +76,8 @@ int	read_heredoc_content(t_shell *shell, char *delimiter, int fd)
 		}
 		return (0);
 	}
+	
+	// 전역 시그널 상태 복원
 	g_signal = original_g_signal;
 	return (WIFEXITED(status) && WEXITSTATUS(status) == 0);
 }
