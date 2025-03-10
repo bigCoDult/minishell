@@ -375,4 +375,8 @@ void			setup_signals(void);
 void			restore_io(t_shell *shell);
 void			free_non_heredoc_memory(t_shell *shell);
 
+t_tree	*convert_args_to_node(char **args, t_tree *node);
+t_env	*find_already(char *key, t_env *env_head);
+
+
 #endif

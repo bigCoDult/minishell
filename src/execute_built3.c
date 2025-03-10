@@ -11,181 +11,299 @@
 /* ************************************************************************** */
 
 #include "minishell.h"
+# define UPPER_ALPHA_RANGE_START	65
+# define UPPER_ALPHA_RANGE_END		90
+# define LOWER_ALPHA_RANGE_START	97
+# define LOWER_ALPHA_RANGE_END		122
+
+static int	ft_is_range(int c, int start, int end)
+{
+	return (c >= start && c <= end);
+}
+
+static int	ft_is_loweralpha(int c)
+{
+	return (ft_is_range(c, LOWER_ALPHA_RANGE_START, LOWER_ALPHA_RANGE_END));
+}
+
+static int	ft_is_upperalpha(int c)
+{
+	return (ft_is_range(c, UPPER_ALPHA_RANGE_START, UPPER_ALPHA_RANGE_END));
+}
+
+int	ft_isalpha(int c)
+{
+	return (ft_is_loweralpha(c) || ft_is_upperalpha(c));
+}
+int	is_valid_identifier(char *str)
+{
+	int	i;
+
+	i = 1;
+	if (!str || !*str)
+		return (0);
+	if (!ft_isalpha(str[0]) && str[0] != '_')
+		return (0);
+	while (str[i])
+	{
+		if (!ft_isalnum(str[i]) && str[i] != '_')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+void	*ft_memcpy(void *dest, const void *src, size_t count)
+{
+	unsigned char		*dest_tmp;
+	const unsigned char	*src_tmp;
+
+	dest_tmp = (unsigned char *)dest;
+	src_tmp = (const unsigned char *)src;
+	while (count--)
+		*dest_tmp++ = *src_tmp++;
+	return (dest);
+}
+
+char	*ft_strndup(const char *s, size_t n, t_shell *shell)
+{
+	char	*dup;
+	size_t	len;
+	size_t	i;
+
+	len = 0;
+	while (len < n && s[len])
+		len++;
+	dup = (char *)shell_malloc(shell, len + 1);
+	if (!dup)
+		return (NULL);
+	i = 0;
+	while (i < len)
+	{
+		dup[i] = s[i];
+		i++;
+	}
+	dup[i] = '\0';
+	return (dup);
+}
+
+char	*ft_strnstr(const char *big, const char *little, size_t len)
+{
+	size_t	i;
+	size_t	k;
+
+	if (*little == '\0')
+		return ((char *)big);
+	i = 0;
+	while (i < len && big[i])
+	{
+		k = 0;
+		while (big[i + k] == little[k] && i + k < len)
+		{
+			if (little[++k] == '\0')
+				return ((char *)(big + i));
+		}
+		i++;
+	}
+	return (NULL);
+}
+
+char	*ft_strjoin(char const *s1, char const *s2, t_shell *shell)
+{
+	char	*join_s;
+	size_t	i;
+
+	join_s = (char *)shell_malloc(shell, (ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
+	i = 0;
+	while (*s1)
+		join_s[i++] = *s1++;
+	while (*s2)
+		join_s[i++] = *s2++;
+	join_s[i] = '\0';
+	return (join_s);
+}
+void	export_show(t_env *current)
+{
+	while (current)
+	{
+		if (!current->key)
+			current = current->next;
+		else if (!current->value)
+		{
+			printf("declare -x ");
+			printf("%s\n", current->key);
+		}
+		else if (current->value)
+		{
+			printf("declare -x ");
+			printf("%s=\"%s\"\n", current->key, current->value);
+		}
+		current = current->next;
+	}
+}
+
+t_env	*set_input_env(char *str, t_shell *shell)
+{
+	char	*equal_location;
+	char	*stretch_location;
+	t_env	*input_env;
+
+	input_env = (t_env *)shell_malloc(shell, sizeof(t_env));
+	equal_location = ft_strchr(str, '=');
+	stretch_location = ft_strchr(str, '+');
+	input_env->next = NULL;
+	if (!equal_location)
+		input_env->value = NULL;
+	else
+		input_env->value = shell_strdup(shell, equal_location + 1);
+	if (stretch_location && ((stretch_location + 1) == equal_location))
+		input_env->key = ft_strndup(str, stretch_location - str, shell);
+	else
+		input_env->key = ft_strndup(str, equal_location - str, shell);
+	return (input_env);
+}
+
+void	stretch_value(t_env *input_env, t_env *env_head, t_shell *shell)
+{
+	t_env	*target_env;
+	char	*new_value;
+	size_t	len1, len2;
+
+	target_env = find_already(input_env->key, env_head);
+	if (!target_env)
+	{
+		{
+			size_t len = ft_strlen(input_env->value);
+			char *tmp = malloc(len + 1);
+			if (tmp)
+				ft_memcpy(tmp, input_env->value, len + 1);
+			add_env_value(shell, input_env->key, tmp);
+		}
+		return;
+	}
+	if (input_env->value[0] == '\0')
+	{
+		if (target_env->value)
+			free(target_env->value);
+		{
+			size_t len = ft_strlen(input_env->value);
+			char *tmp = malloc(len + 1);
+			if (tmp)
+				ft_memcpy(tmp, input_env->value, len + 1);
+			target_env->value = tmp;
+		}
+		return;
+	}
+	if (target_env->value)
+	{
+		len1 = ft_strlen(target_env->value);
+		len2 = ft_strlen(input_env->value);
+		new_value = malloc(len1 + len2 + 1);
+		if (new_value)
+		{
+			ft_memcpy(new_value, target_env->value, len1);
+			ft_memcpy(new_value + len1, input_env->value, len2 + 1);
+		}
+		free(target_env->value);
+		target_env->value = new_value;
+	}
+	else
+	{
+		{
+			size_t len = ft_strlen(input_env->value);
+			char *tmp = malloc(len + 1);
+			if (tmp)
+				ft_memcpy(tmp, input_env->value, len + 1);
+			target_env->value = tmp;
+		}
+	}
+}
+
+static void	process_export_value(t_env *input_env, t_env *env_head, char *str, t_shell *shell)
+{
+	t_env	*target_env;
+
+	target_env = find_already(input_env->key, env_head);
+	if (input_env->value == NULL)
+	{
+		if (!target_env)
+			add_env_value(shell, input_env->key, NULL);
+	}
+	else if (ft_strnstr(str, "+=", ft_strlen(str)))
+	{
+		stretch_value(input_env, env_head, shell);
+	}
+	else
+	{
+		if (target_env)
+		{
+			if (target_env->value)
+				free(target_env->value);
+			{
+				size_t len = ft_strlen(input_env->value);
+				char *tmp = shell_malloc(shell, len + 1);
+				if (tmp)
+					ft_memcpy(tmp, input_env->value, len + 1);
+				target_env->value = tmp;
+			}
+		}
+		else
+		{
+			{
+				size_t len = ft_strlen(input_env->value);
+				char *tmp = shell_malloc(shell, len + 1);
+				if (tmp)
+					ft_memcpy(tmp, input_env->value, len + 1);
+				add_env_value(shell, input_env->key, tmp);
+			}
+		}
+	}
+}
 
 
-// char	*ft_strndup(const char *s, size_t n)
-// {
-// 	char	*dup;
-// 	size_t	len;
-// 	size_t	i;
+static void	handle_export_values(t_tree *keyvalue_node, t_env *env_head, t_shell *shell)
+{
+	t_env	*input_env;
+	char	*str;
 
-// 	len = 0;
-// 	while (len < n && s[len])
-// 		len++;
-// 	dup = (char *)ft_malloc(len + 1);
-// 	if (!dup)
-// 		return (NULL);
-// 	i = 0;
-// 	while (i < len)
-// 	{
-// 		dup[i] = s[i];
-// 		i++;
-// 	}
-// 	dup[i] = '\0';
-// 	return (dup);
-// }
-
-// char	*ft_strnstr(const char *big, const char *little, size_t len)
-// {
-// 	size_t	i;
-// 	size_t	k;
-
-// 	if (*little == '\0')
-// 		return ((char *)big);
-// 	i = 0;
-// 	while (i < len && big[i])
-// 	{
-// 		k = 0;
-// 		while (big[i + k] == little[k] && i + k < len)
-// 		{
-// 			if (little[++k] == '\0')
-// 				return ((char *)(big + i));
-// 		}
-// 		i++;
-// 	}
-// 	return (NULL);
-// }
-
-
-
-
-
-
-
-// void	add_keyempty(char *key, t_env *current)
-// {
-// 	t_env	*new_node;
-
-// 	if (find_already(key, current))
-// 		return ;
-// 	new_node = create_env_node(key, NULL);
-// 	if (!new_node)
-// 		return ;
-// 	while (current->next)
-// 		current = current->next;
-// 	current->next = new_node;
-// }
-
-// void	stretch_value(t_env *input_env, t_env *current)
-// {
-// 	t_env	*target_env;
-
-// 	target_env = find_already(input_env->key, current);
-// 	if (!target_env)
-// 	{
-// 		make_tail(input_env, current);
-// 		return ;
-// 	}
-// 	if (target_env->value)
-// 		target_env->value = ft_strjoin(target_env->value, input_env->value);
-// 	else
-// 		target_env->value = ft_strdup(input_env->value);
-// }
-
-
-
-
-// void	export_show(t_env *current)
-// {
-// 	while (current)
-// 	{
-// 		if (!current->key)
-// 			current = current->next;
-// 		else if (!current->value)
-// 		{
-// 			printf("declare -x ");
-// 			printf("%s\n", current->key);
-// 		}
-// 		else if (current->value)
-// 		{
-// 			printf("declare -x ");
-// 			printf("%s=%s\n", current->key, current->value);
-// 		}
-// 		current = current->next;
-// 	}
-// }
-
-// t_env	*set_input_env(char *str)
-// {
-// 	char	*equal_location;
-// 	char	*stretch_location;
-// 	t_env	*input_env;
-
-// 	input_env = (t_env *)ft_malloc(sizeof(t_env));
-// 	equal_location = ft_strchr(str, '=');
-// 	stretch_location = ft_strchr(str, '+');
-// 	input_env->next = NULL;
-// 	if (!equal_location)
-// 		input_env->value = NULL;
-// 	else
-// 		input_env->value = ft_strdup(equal_location + 1);
-// 	if (stretch_location && ((stretch_location + 1) == equal_location))
-// 		input_env->key = ft_strndup(str, stretch_location - str);
-// 	else
-// 		input_env->key = ft_strndup(str, equal_location - str);
-// 	return (input_env);
-// }
-
-// static void	process_export_value(t_env *input_env, t_env *env_head, char *str)
-// {
-// 	t_env	*current;
-
-// 	current = env_head;
-// 	if (!input_env->value)
-// 		add_keyempty(str, current);
-// 	else if (ft_strnstr(str, "+=", ft_strlen(str)))
-// 		stretch_value(input_env, current);
-// 	else
-// 		add_keyvalue(input_env, current);
-// }
-
-// static void	handle_export_values(t_tree *keyvalue_node, t_env *env_head)
-// {
-// 	t_env	*input_env;
-// 	char	*str;
-
-// 	while (keyvalue_node)
-// 	{
-// 		str = keyvalue_node->token->value;
-// 		input_env = set_input_env(str);
-// 		if (!is_valid_identifier(input_env->key))
-// 		{
-// 			keyvalue_node = keyvalue_node->right_sibling;
-// 			continue ;
-// 		}
-// 		process_export_value(input_env, env_head, str);
-// 		keyvalue_node = keyvalue_node->right_sibling;
-// 	}
-// }
-
-// void	handle_export_command(t_tree *cmd_node, t_env *env_head)
-// {
-// 	t_tree	*keyvalue_node;
-
-// 	if (!cmd_node)
-// 		return ;
-// 	keyvalue_node = cmd_node->left_child;
-// 	if (!keyvalue_node)
-// 	{
-// 		export_show(env_head);
-// 		return ;
-// 	}
-// 	handle_export_values(keyvalue_node, env_head);
-// }
-
-
+	while (keyvalue_node)
+	{
+		str = keyvalue_node->value;
+		input_env = set_input_env(str, shell);
+		if (!is_valid_identifier(input_env->key))
+		{
+			shell_free(shell, input_env->key);
+			if (input_env->value)
+				shell_free(shell, input_env->value);
+			shell_free(shell, input_env);
+			keyvalue_node = keyvalue_node->right_sibling;
+			continue ;
+		}
+		process_export_value(input_env, env_head, str, shell);
+		shell_free(shell, input_env->key);
+		if (input_env->value)
+			shell_free(shell, input_env->value);
+		shell_free(shell, input_env);
+		keyvalue_node = keyvalue_node->right_sibling;
+	}
+}
 
 int	builtin_export(t_shell *shell, char **args)
+{
+	t_tree	*keyvalue_node;
+	t_tree	node[100];
+
+	convert_args_to_node(args, node);
+	keyvalue_node = node->left_child;
+	if (!keyvalue_node)
+	{
+		export_show(shell->env);
+		return (0);
+	}
+	handle_export_values(keyvalue_node, shell->env, shell);
+	return (1);
+}
+
+int	builtin_export_old(t_shell *shell, char **args)
 {
 	char	*key;
 	char	*value;

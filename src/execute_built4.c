@@ -134,11 +134,21 @@ t_tree	*convert_args_to_node(char **args, t_tree *node)
 	int	i;
 
 	i = 0;
-	while (args[i])
+	if (i == 0)
 	{
 		node[i].value = args[i];
 		if (args[i + 1])
 			node[i].left_child = &node[i + 1];
+		else
+			node[i].left_child = NULL;
+		node[i].right_sibling = NULL;
+		i++;
+	}
+	while (args[i])
+	{
+		node[i].value = args[i];
+		if (args[i + 1])
+			node[i].right_sibling = &node[i + 1];
 		else
 			node[i].left_child = NULL;
 		node[i].right_sibling = NULL;
