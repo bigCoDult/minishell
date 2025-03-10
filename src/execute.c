@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/09 13:01:20 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/10 02:13:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,9 +106,7 @@ int	execute_commands(t_shell *shell)
 	}
 	dup2(devnull_fd, STDOUT_FILENO);
 	close(devnull_fd);
-	fprintf(stderr, "\n--- Processing all heredocs ---\n");
 	int heredoc_result = handle_all_heredocs(shell, shell->ast_root);
-	fprintf(stderr, "--- Heredoc processing complete ---\n\n");
 	dup2(stdout_backup, STDOUT_FILENO);
 	close(stdout_backup);
 	if (heredoc_result != 0)
