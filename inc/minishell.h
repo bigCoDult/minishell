@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/09 11:14:44 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/10 02:16:24 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,6 +268,7 @@ int				ft_strcmp(const char *s1, const char *s2);
 char			*ft_strcpy(char *dest, const char *src);
 char			*ft_strncpy(char *dest, const char *src, size_t n);
 int				ft_isalnum(int c);
+int				ft_isspace(int c);
 
 int				ft_atoi(const char *str);
 char			*ft_strcat(char *dest, const char *src);

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/09 11:43:58 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/10 02:48:44 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ static int	handle_signal_termination(t_shell *shell, int status)
 			return (131);
 		}
 	}
-	return (WEXITSTATUS(status));
+	return (shell->status.exit_code);
 }
 
 int	execute_external(t_shell *shell, t_command *cmd)
@@ -113,7 +113,9 @@ int	execute_external(t_shell *shell, t_command *cmd)
 			shell->status.exit_code = 128 + WTERMSIG(status);
 		else
 			shell->status.exit_code = 1;
-		return (handle_signal_termination(shell, status));
+		
+		handle_signal_termination(shell, status);
+		return (shell->status.exit_code);
 	}
 	return (1);
 }

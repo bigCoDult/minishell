@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:48:14 by yutsong           #+#    #+#             */
-/*   Updated: 2025/02/12 13:10:26 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/03/10 02:16:14 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,4 +71,9 @@ void	*ft_memset(void *dest, int c, size_t count)
 	while (count--)
 		*dest_tmp++ = unsigned_char_c;
 	return (dest);
+}
+
+int	ft_isspace(int c)
+{
+	return (c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r');
 }
