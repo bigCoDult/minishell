@@ -240,7 +240,7 @@ static void	process_export_value(t_env *input_env, t_env *env_head, char *str, t
 				free(target_env->value);
 			{
 				size_t len = ft_strlen(input_env->value);
-				char *tmp = shell_malloc(shell, len + 1);
+				char *tmp = malloc(len + 1);
 				if (tmp)
 					ft_memcpy(tmp, input_env->value, len + 1);
 				target_env->value = tmp;
@@ -250,7 +250,7 @@ static void	process_export_value(t_env *input_env, t_env *env_head, char *str, t
 		{
 			{
 				size_t len = ft_strlen(input_env->value);
-				char *tmp = shell_malloc(shell, len + 1);
+				char *tmp = malloc(len + 1);
 				if (tmp)
 					ft_memcpy(tmp, input_env->value, len + 1);
 				add_env_value(shell, input_env->key, tmp);
