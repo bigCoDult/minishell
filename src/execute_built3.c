@@ -5,16 +5,17 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/09 21:02:59 by sanbaek           #+#    #+#             */
-/*   Updated: 2025/03/09 21:03:03 by sanbaek          ###   ########.fr       */
+/*   Created: 2025/03/10 13:53:23 by sanbaek           #+#    #+#             */
+/*   Updated: 2025/03/10 13:53:26 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-# define UPPER_ALPHA_RANGE_START	65
-# define UPPER_ALPHA_RANGE_END		90
-# define LOWER_ALPHA_RANGE_START	97
-# define LOWER_ALPHA_RANGE_END		122
+
+#define UPPER_ALPHA_RANGE_START	65
+#define UPPER_ALPHA_RANGE_END		90
+#define LOWER_ALPHA_RANGE_START	97
+#define LOWER_ALPHA_RANGE_END		122
 
 static int	ft_is_range(int c, int start, int end)
 {
@@ -35,6 +36,7 @@ int	ft_isalpha(int c)
 {
 	return (ft_is_loweralpha(c) || ft_is_upperalpha(c));
 }
+
 int	is_valid_identifier(char *str)
 {
 	int	i;
@@ -52,6 +54,7 @@ int	is_valid_identifier(char *str)
 	}
 	return (1);
 }
+
 void	*ft_memcpy(void *dest, const void *src, size_t count)
 {
 	unsigned char		*dest_tmp;
@@ -99,7 +102,8 @@ char	*ft_strnstr(const char *big, const char *little, size_t len)
 		k = 0;
 		while (big[i + k] == little[k] && i + k < len)
 		{
-			if (little[++k] == '\0')
+			k++;
+			if (little[k] == '\0')
 				return ((char *)(big + i));
 		}
 		i++;
@@ -112,15 +116,25 @@ char	*ft_strjoin(char const *s1, char const *s2, t_shell *shell)
 	char	*join_s;
 	size_t	i;
 
-	join_s = (char *)shell_malloc(shell, (ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
+	join_s = (char *)shell_malloc(shell, \
+		(ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
 	i = 0;
 	while (*s1)
-		join_s[i++] = *s1++;
+	{
+		join_s[i] = *s1;
+		i++;
+		s1++;
+	}
 	while (*s2)
-		join_s[i++] = *s2++;
+	{
+		join_s[i] = *s2;
+		i++;
+		s2++;
+	}
 	join_s[i] = '\0';
 	return (join_s);
 }
+
 void	export_show(t_env *current)
 {
 	while (current)
@@ -162,63 +176,61 @@ t_env	*set_input_env(char *str, t_shell *shell)
 	return (input_env);
 }
 
+static char	*dup_val(char *value)
+{
+	size_t	len;
+	char	*tmp;
+
+	len = ft_strlen(value);
+	tmp = malloc(len + 1);
+	if (tmp)
+		ft_memcpy(tmp, value, len + 1);
+	return (tmp);
+}
+
+static void	update_target_env_with_concat(t_env *target_env, char *new_part)
+{
+	size_t	len1;
+	size_t	len2;
+	char	*new_value;
+
+	len1 = ft_strlen(target_env->value);
+	len2 = ft_strlen(new_part);
+	new_value = malloc(len1 + len2 + 1);
+	if (new_value)
+	{
+		ft_memcpy(new_value, target_env->value, len1);
+		ft_memcpy(new_value + len1, new_part, len2 + 1);
+	}
+	free(target_env->value);
+	target_env->value = new_value;
+}
+
 void	stretch_value(t_env *input_env, t_env *env_head, t_shell *shell)
 {
 	t_env	*target_env;
-	char	*new_value;
-	size_t	len1, len2;
 
 	target_env = find_already(input_env->key, env_head);
 	if (!target_env)
 	{
-		{
-			size_t len = ft_strlen(input_env->value);
-			char *tmp = malloc(len + 1);
-			if (tmp)
-				ft_memcpy(tmp, input_env->value, len + 1);
-			add_env_value(shell, input_env->key, tmp);
-		}
-		return;
+		add_env_value(shell, input_env->key, dup_val(input_env->value));
+		return ;
 	}
 	if (input_env->value[0] == '\0')
 	{
 		if (target_env->value)
 			free(target_env->value);
-		{
-			size_t len = ft_strlen(input_env->value);
-			char *tmp = malloc(len + 1);
-			if (tmp)
-				ft_memcpy(tmp, input_env->value, len + 1);
-			target_env->value = tmp;
-		}
-		return;
+		target_env->value = dup_val(input_env->value);
+		return ;
 	}
 	if (target_env->value)
-	{
-		len1 = ft_strlen(target_env->value);
-		len2 = ft_strlen(input_env->value);
-		new_value = malloc(len1 + len2 + 1);
-		if (new_value)
-		{
-			ft_memcpy(new_value, target_env->value, len1);
-			ft_memcpy(new_value + len1, input_env->value, len2 + 1);
-		}
-		free(target_env->value);
-		target_env->value = new_value;
-	}
+		update_target_env_with_concat(target_env, input_env->value);
 	else
-	{
-		{
-			size_t len = ft_strlen(input_env->value);
-			char *tmp = malloc(len + 1);
-			if (tmp)
-				ft_memcpy(tmp, input_env->value, len + 1);
-			target_env->value = tmp;
-		}
-	}
+		target_env->value = dup_val(input_env->value);
 }
 
-static void	process_export_value(t_env *input_env, t_env *env_head, char *str, t_shell *shell)
+static void	process_export_value(t_env *input_env, t_env *env_head, char *str,
+		t_shell *shell)
 {
 	t_env	*target_env;
 
@@ -238,29 +250,17 @@ static void	process_export_value(t_env *input_env, t_env *env_head, char *str, t
 		{
 			if (target_env->value)
 				free(target_env->value);
-			{
-				size_t len = ft_strlen(input_env->value);
-				char *tmp = malloc(len + 1);
-				if (tmp)
-					ft_memcpy(tmp, input_env->value, len + 1);
-				target_env->value = tmp;
-			}
+			target_env->value = dup_val(input_env->value);
 		}
 		else
 		{
-			{
-				size_t len = ft_strlen(input_env->value);
-				char *tmp = malloc(len + 1);
-				if (tmp)
-					ft_memcpy(tmp, input_env->value, len + 1);
-				add_env_value(shell, input_env->key, tmp);
-			}
+			add_env_value(shell, input_env->key, dup_val(input_env->value));
 		}
 	}
 }
 
-
-static void	handle_export_values(t_tree *keyvalue_node, t_env *env_head, t_shell *shell)
+static void	handle_export_values(t_tree *keyvalue_node, t_env *env_head,
+		t_shell *shell)
 {
 	t_env	*input_env;
 	char	*str;
@@ -301,27 +301,4 @@ int	builtin_export(t_shell *shell, char **args)
 	}
 	handle_export_values(keyvalue_node, shell->env, shell);
 	return (1);
-}
-
-int	builtin_export_old(t_shell *shell, char **args)
-{
-	char	*key;
-	char	*value;
-	int		i;
-	
-	i = 1;
-	while (args[i])
-	{
-		if (parse_env_arg(shell, args[i], &key, &value))
-		{
-			printf("export: '%s': not a valid identifier\n", args[i]);
-			return (1);
-		}
-		set_env_value(shell, key, value);
-		shell_free(shell, key);
-		if (value)
-		shell_free(shell, value);
-		i++;
-	}
-	return (0);
 }
