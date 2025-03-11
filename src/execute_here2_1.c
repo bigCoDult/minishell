@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 03:00:36 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/09 12:59:09 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/11 14:21:40 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 void	handle_null_line(t_shell *shell, int fd)
 {
+	write(STDERR_FILENO, "\n", 1);
 	free_env(shell);
 	free_shell_malloc(shell);
 	close(fd);
