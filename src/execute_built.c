@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:42:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/12 14:20:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/12 14:27:14 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,24 +68,40 @@ int	builtin_exit(t_shell *shell, char **args)
 {
 	int		exit_code;
 	int		i;
+	char	*arg;
+	size_t	len;
 	
 	printf("exit\n");
 	
 	if (args[1])
 	{
-		// 인자가 숫자인지 확인
+		arg = args[1];
+		len = ft_strlen(arg);
+		
+		// 자릿수 체크 - long long 범위를 벗어나는지 확인
+		// long long 범위: -9223372036854775808 ~ 9223372036854775807 (19~20자리)
+		if (len > 20 || (len == 20 && arg[0] != '-' && ft_strcmp(arg, "9223372036854775807") > 0) ||
+			(len == 20 && arg[0] == '-' && ft_strcmp(arg, "-9223372036854775808") > 0))
+		{
+			fprintf(stderr, "minishell: exit: %s: numeric argument required\n", arg);
+			free_all_memory(shell);
+			free_env(shell);
+			exit(2);
+		}
+		
+		// 숫자 형식 체크
 		i = 0;
-		if (args[1][i] == '-' || args[1][i] == '+')
+		if (arg[i] == '-' || arg[i] == '+')
 			i++;
 		
-		while (args[1][i])
+		while (arg[i])
 		{
-			if (!ft_isdigit(args[1][i]))
+			if (!ft_isdigit(arg[i]))
 			{
-				fprintf(stderr, "minishell: exit: %s: numeric argument required\n", args[1]);
+				fprintf(stderr, "minishell: exit: %s: numeric argument required\n", arg);
 				free_all_memory(shell);
 				free_env(shell);
-				exit(255);
+				exit(2);
 			}
 			i++;
 		}
@@ -97,7 +113,7 @@ int	builtin_exit(t_shell *shell, char **args)
 			return (1);  // 종료하지 않고 에러 코드 반환
 		}
 		
-		exit_code = ft_atoi(args[1]);
+		exit_code = ft_atoi(arg);
 	}
 	else
 		exit_code = shell->status.exit_code;
