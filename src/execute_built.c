@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:42:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 17:59:50 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/12 14:20:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,13 +66,42 @@ int	builtin_env(t_shell *shell)
 
 int	builtin_exit(t_shell *shell, char **args)
 {
-	int	exit_code;
-
+	int		exit_code;
+	int		i;
+	
+	printf("exit\n");
+	
 	if (args[1])
+	{
+		// 인자가 숫자인지 확인
+		i = 0;
+		if (args[1][i] == '-' || args[1][i] == '+')
+			i++;
+		
+		while (args[1][i])
+		{
+			if (!ft_isdigit(args[1][i]))
+			{
+				fprintf(stderr, "minishell: exit: %s: numeric argument required\n", args[1]);
+				free_all_memory(shell);
+				free_env(shell);
+				exit(255);
+			}
+			i++;
+		}
+		
+		// 여러 인자가 주어진 경우
+		if (args[2])
+		{
+			fprintf(stderr, "minishell: exit: too many arguments\n");
+			return (1);  // 종료하지 않고 에러 코드 반환
+		}
+		
 		exit_code = ft_atoi(args[1]);
+	}
 	else
 		exit_code = shell->status.exit_code;
-	printf("exit\n");
+	
 	free_all_memory(shell);
 	free_env(shell);
 	exit(exit_code);
