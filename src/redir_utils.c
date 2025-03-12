@@ -6,67 +6,29 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/09 12:32:21 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/12 14:56:30 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	setup_input_redirect(t_redirection *redir)
-{
-	int	fd;
-
-	fd = open(redir->filename, O_RDONLY);
-	if (fd == -1)
-	{
-		printf("minishell: %s: No such file or directory\n", redir->filename);
-		return (1);
-	}
-	if (dup2(fd, STDIN_FILENO) == -1)
-	{
-		close(fd);
-		return (1);
-	}
-	close(fd);
-	return (0);
-}
-
-static int	setup_output_redirect(t_redirection *redir)
-{
-	int	fd;
-	int	flags;
-
-	if (redir->type == REDIR_OUT)
-		flags = O_WRONLY | O_CREAT | O_TRUNC;
-	else
-		flags = O_WRONLY | O_CREAT | O_APPEND;
-	fd = open(redir->filename, flags, 0644);
-	if (fd == -1)
-	{
-		fprintf(stderr, "minishell: %s: Permission denied\n", redir->filename);
-		return (1);
-	}
-	if (dup2(fd, STDOUT_FILENO) == -1)
-	{
-		close(fd);
-		return (1);
-	}
-	close(fd);
-	return (0);
-}
-
 int	setup_redirections(t_shell *shell, t_redirection *redirs)
 {
 	t_redirection	*current;
+	int				last_input_fd;
+	int				last_output_fd;
 
 	if (!redirs)
 		return (0);
+	
+	// 표준 입출력 백업
 	if (shell->heredoc.original_stdin == -1)
 		shell->heredoc.original_stdin = dup(STDIN_FILENO);
 	if (shell->original_stdout == -1)
 		shell->original_stdout = dup(STDOUT_FILENO);
 	if (shell->original_stderr == -1)
 		shell->original_stderr = dup(STDERR_FILENO);
+	
 	if (shell->heredoc.original_stdin == -1 || 
 		shell->original_stdout == -1 ||
 		shell->original_stderr == -1)
@@ -88,27 +50,77 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		}
 		return (1);
 	}
+	
+	// 우선 입력 리디렉션 처리
+	last_input_fd = -1;
 	current = redirs;
 	while (current)
 	{
 		if (current->type == REDIR_IN)
 		{
-			if (setup_input_redirect(current) != 0)
+			if (last_input_fd != -1)
+				close(last_input_fd);
+				
+			last_input_fd = open(current->filename, O_RDONLY);
+			if (last_input_fd == -1)
 			{
-				restore_io(shell);
-				return (1);
-			}
-		}
-		else if (current->type == REDIR_OUT || current->type == REDIR_APPEND)
-		{
-			if (setup_output_redirect(current) != 0)
-			{
+				fprintf(stderr, "minishell: %s: No such file or directory\n", current->filename);
 				restore_io(shell);
 				return (1);
 			}
 		}
 		current = current->next;
 	}
+	
+	// 마지막 입력 리디렉션 적용
+	if (last_input_fd != -1)
+	{
+		if (dup2(last_input_fd, STDIN_FILENO) == -1)
+		{
+			close(last_input_fd);
+			restore_io(shell);
+			return (1);
+		}
+		close(last_input_fd);
+	}
+	
+	// 출력 리디렉션 처리
+	last_output_fd = -1;
+	current = redirs;
+	while (current)
+	{
+		if (current->type == REDIR_OUT || current->type == REDIR_APPEND)
+		{
+			if (last_output_fd != -1)
+				close(last_output_fd);
+				
+			if (current->type == REDIR_OUT)
+				last_output_fd = open(current->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			else // REDIR_APPEND
+				last_output_fd = open(current->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
+				
+			if (last_output_fd == -1)
+			{
+				fprintf(stderr, "minishell: %s: Permission denied\n", current->filename);
+				restore_io(shell);
+				return (1);
+			}
+		}
+		current = current->next;
+	}
+	
+	// 마지막 출력 리디렉션 적용
+	if (last_output_fd != -1)
+	{
+		if (dup2(last_output_fd, STDOUT_FILENO) == -1)
+		{
+			close(last_output_fd);
+			restore_io(shell);
+			return (1);
+		}
+		close(last_output_fd);
+	}
+	
 	return (0);
 }
 
