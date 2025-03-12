@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/10 02:16:24 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/12 13:07:27 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -329,8 +329,7 @@ int				handle_quote_character(char c,
 int				is_word_delimiter(char c, t_token_state state);
 int				get_word_length(char *input);
 int				determine_quote_state(char *input, int *start_idx);
-void			process_word_content(char *input, char *word,
-					int len, int start_idx);
+void			process_word_content(char *input, char *word, int len);
 
 char			*finalize_word(t_shell *shell, char *word, int quote_state);
 char			*handle_word(t_shell *shell, char *input, int *len);
