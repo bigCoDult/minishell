@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:52:12 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 08:08:03 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 08:10:45 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,34 +37,38 @@ static void	handle_character(t_shell *shell,
 		temp[(params[1])++] = word[(params[0])++];
 }
 
-void	process_word(t_shell *shell, char *word, char *temp, int *j)
+static void	initialize_params(int params[5], int *j)
 {
-	int	params[5];
-
 	params[0] = 0;
 	params[1] = *j;
 	params[2] = 0;
 	params[3] = 0;
+	params[4] = 0;
+}
+
+static void	set_char_type(char *word, int params[5])
+{
+	if ((word[params[0]] == '\'' && !params[3])
+		|| (word[params[0]] == '"' && !params[2]))
+		params[4] = QUOTE_CHAR;
+	else if ((word[params[0]] == '$') && !params[2]
+		&& (ft_isalnum(word[params[0] + 1])
+			|| word[params[0] + 1] == '_'
+			|| word[params[0] + 1] == '?'))
+		params[4] = ENV_VAR;
+	else
+		params[4] = REGULAR_CHAR;
+}
+
+void	process_word(t_shell *shell, char *word, char *temp, int *j)
+{
+	int	params[5];
+
+	initialize_params(params, j);
 	while (word[params[0]])
 	{
-		if ((word[params[0]] == '\'' && !params[3])
-			|| (word[params[0]] == '"' && !params[2]))
-		{
-			params[4] = QUOTE_CHAR;
-			handle_character(shell, word, temp, params);
-		}
-		else if ((word[params[0]] == '$') && !params[2]
-			&& (ft_isalnum(word[params[0] + 1])
-				|| word[params[0] + 1] == '_' || word[params[0] + 1] == '?'))
-		{
-			params[4] = ENV_VAR;
-			handle_character(shell, word, temp, params);
-		}
-		else
-		{
-			params[4] = REGULAR_CHAR;
-			handle_character(shell, word, temp, params);
-		}
+		set_char_type(word, params);
+		handle_character(shell, word, temp, params);
 	}
 	temp[params[1]] = '\0';
 	*j = params[1];
