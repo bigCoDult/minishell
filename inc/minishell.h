@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:30:45 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 07:32:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,6 +195,9 @@ int				builtin_pwd(void);
 int				builtin_export(t_shell *shell, char **args);
 
 int				execute_external(t_shell *shell, t_command *cmd);
+int				handle_signal_termination(t_shell *shell, int status);
+
+void			execute_command_in_child(t_shell *shell, t_command *cmd);
 
 char			*create_temp_heredoc_file(t_shell *shell);
 t_heredoc_entry	*create_heredoc_entry(t_shell *shell, char *delimiter);
