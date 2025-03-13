@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 05:08:02 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 08:16:54 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,42 +82,4 @@ int	execute_ast(t_shell *shell, t_ast_node *node)
 	else if (node->type == AST_PIPE)
 		return (execute_pipe(shell, node));
 	return (1);
-}
-
-int	execute_commands(t_shell *shell)
-{
-	int	result;
-	int	stdout_backup;
-	int	devnull_fd;
-	int	heredoc_result;
-
-	g_signal = 0;
-	if (!shell->ast_root)
-		return (0);
-	if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
-		restore_io(shell);
-	stdout_backup = dup(STDOUT_FILENO);
-	if (stdout_backup == -1)
-		return (1);
-	devnull_fd = open("/dev/null", O_WRONLY);
-	if (devnull_fd == -1)
-	{
-		close(stdout_backup);
-		return (1);
-	}
-	dup2(devnull_fd, STDOUT_FILENO);
-	close(devnull_fd);
-	heredoc_result = handle_all_heredocs(shell, shell->ast_root);
-	dup2(stdout_backup, STDOUT_FILENO);
-	close(stdout_backup);
-	if (heredoc_result != 0)
-	{
-		restore_io(shell);
-		return (1);
-	}
-	setup_signals_executing();
-	result = execute_ast(shell, shell->ast_root);
-	restore_io(shell);
-	setup_signals_interactive();
-	return (result);
 }
