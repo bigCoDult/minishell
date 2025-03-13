@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:41:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/05 12:56:35 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/12 14:19:39 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,4 +62,9 @@ int	ft_isalnum(int c)
 		|| (c >= '0' && c <= '9'))
 		return (1);
 	return (0);
+}
+
+int	ft_isdigit(int c)
+{
+	return (c >= '0' && c <= '9');
 }
