@@ -3,65 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   execute_built4.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 21:02:50 by sanbaek           #+#    #+#             */
-/*   Updated: 2025/03/09 21:02:52 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/03/13 06:15:52 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-void	add_keyvalue(t_env *input_env, t_env *env_head)
-{
-	t_env	*current;
-
-	if (!input_env || !env_head)
-		return ;
-	if (!(input_env->key) || !(input_env->value))
-		return ;
-	current = env_head;
-	while (current)
-	{
-		if (current->key && (ft_strcmp(current->key, input_env->key) == 0))
-		{
-			current->value = ft_strdup(input_env->value);
-			return ;
-		}
-		if (!current->next)
-			break ;
-		current = current->next;
-	}
-	add_env_node(&env_head, input_env);
-}
-
-char	*get_env(t_env *head, char *key)
-{
-	t_env	*current;
-
-	current = head;
-	while (current)
-	{
-		if (ft_strcmp(current->key, key) == 0)
-			return (current->value);
-		current = current->next;
-	}
-	return (NULL);
-}
-
-t_env	*find_already(char *key, t_env *env_head)
-{
-	t_env	*current;
-
-	current = env_head;
-	while (current)
-	{
-		if (current->key && (ft_strcmp(current->key, key) == 0))
-			return (current);
-		current = current->next;
-	}
-	return (NULL);
-}
 
 static int	cd_env(t_env *env_head, char *var, char *error_msg, int print_cwd)
 {
@@ -83,9 +32,7 @@ static int	cd_env(t_env *env_head, char *var, char *error_msg, int print_cwd)
 		printf("%s\n", buf);
 	}
 	else
-	{
 		chdir(p);
-	}
 	return (1);
 }
 
@@ -99,14 +46,6 @@ static int	cd_special_path(t_tree *node, t_env *env_head)
 	if (ft_strcmp(node->left_child->value, "-") == 0)
 		return (cd_env(env_head, "OLDPWD", "cd: OLDPWD not set", 1));
 	return (0);
-}
-
-void	export_for_cd(char *key, char *value, t_env **env_head, t_shell *shell)
-{
-	if (!find_already(key, *env_head))
-		add_env_value(shell, key, value);
-	else
-		set_env_value(shell, key, value);
 }
 
 void	handle_cd_command(t_tree *node, t_env *env_head, t_shell *shell)

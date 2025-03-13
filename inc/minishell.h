@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 04:08:45 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 06:30:45 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 # include <errno.h>
 # include <termios.h>
 # include <sys/ioctl.h>
+# include <stdarg.h>
 
 extern volatile sig_atomic_t	g_signal;
 
@@ -368,9 +369,6 @@ int				setup_redirections(t_shell *shell, t_redirection *redirs);
 
 t_redirection	*create_redirection(t_shell *shell, t_token *token);
 
-void			debug_print(int action_combine_bit,
-					int str_type, const char *str, ...);
-
 int				execute_simple_command(t_shell *shell, t_command *cmd);
 
 void			setup_signals_interactive(void);
@@ -384,5 +382,15 @@ void			free_non_heredoc_memory(t_shell *shell);
 
 t_tree			*convert_args_to_node(char **args, t_tree *node);
 t_env			*find_already(char *key, t_env *env_head);
+
+void			print_error(const char *format, ...);
+
+void			write_str(int fd, const char *str);
+
+void			add_keyvalue(t_env *input_env, t_env *env_head);
+char			*get_env(t_env *head, char *key);
+t_env			*find_already(char *key, t_env *env_head);
+void			export_for_cd(char *key, char *value, t_env **env_head, t_shell *shell);
+
 
 #endif

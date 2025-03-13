@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/10 02:13:50 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 05:08:02 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,7 @@ int	execute_commands(t_shell *shell)
 	int	result;
 	int	stdout_backup;
 	int	devnull_fd;
+	int	heredoc_result;
 
 	g_signal = 0;
 	if (!shell->ast_root)
@@ -106,7 +107,7 @@ int	execute_commands(t_shell *shell)
 	}
 	dup2(devnull_fd, STDOUT_FILENO);
 	close(devnull_fd);
-	int heredoc_result = handle_all_heredocs(shell, shell->ast_root);
+	heredoc_result = handle_all_heredocs(shell, shell->ast_root);
 	dup2(stdout_backup, STDOUT_FILENO);
 	close(stdout_backup);
 	if (heredoc_result != 0)

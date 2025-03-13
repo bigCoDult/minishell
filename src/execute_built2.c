@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 14:22:42 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/09 11:47:08 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 05:08:34 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,11 +46,10 @@ int	builtin_echo(char **args)
 	return (0);
 }
 
-
 int	builtin_pwd(void)
 {
 	char	current_path[1024];
-	
+
 	if (getcwd(current_path, sizeof(current_path)))
 	{
 		printf("%s\n", current_path);
@@ -58,7 +57,3 @@ int	builtin_pwd(void)
 	}
 	return (1);
 }
-
-
-
-

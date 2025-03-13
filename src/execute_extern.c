@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 03:03:39 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 06:05:55 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,12 +25,12 @@ static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 	{
 		if (access(cmd->args[0], F_OK) != 0)
 		{
-			fprintf(stderr, "minishell: %s: No such file or directory\n", cmd->args[0]);
+			print_error("minishell: %s: No such file or directory\n", cmd->args[0]);
 			free_exit(shell, 127);
 		}
 		else if (access(cmd->args[0], X_OK) != 0)
 		{
-			fprintf(stderr, "minishell: %s: Permission denied\n", cmd->args[0]);
+			print_error("minishell: %s: Permission denied\n", cmd->args[0]);
 			free_exit(shell, 126);
 		}
 		path = cmd->args[0];
@@ -42,7 +42,7 @@ static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 		{
 			if (heredoc_fd != -1)
 				close(heredoc_fd);
-			fprintf(stderr, "minishell: %s: command not found\n", cmd->args[0]);
+			print_error("minishell: %s: command not found\n", cmd->args[0]);
 			free_exit(shell, 127);
 		}
 	}
@@ -69,7 +69,7 @@ static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 		close(heredoc_fd);
 	}
 	execve(path, cmd->args, get_env_array(shell));
-	fprintf(stderr, "minishell: %s: %s\n", cmd->args[0], strerror(errno));
+	print_error("minishell: %s: %s\n", cmd->args[0], strerror(errno));
 	free_exit(shell, 127);
 }
 
@@ -105,7 +105,7 @@ int	execute_external(t_shell *shell, t_command *cmd)
 		while (redir)
 		{
 			if (redir->type == REDIR_OUT || redir->type == REDIR_APPEND)
-				fprintf(stderr, "Debug: Redirecting to file '%s'\n", redir->filename);
+				print_error("Debug: Redirecting to file '%s'\n", redir->filename);
 			redir = redir->next;
 		}
 	}
