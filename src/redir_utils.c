@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:19:36 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 06:52:20 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,40 +131,4 @@ t_redirection	*create_redirection(t_shell *shell, t_token *token)
 	}
 	redir->next = NULL;
 	return (redir);
-}
-
-void	restore_io(t_shell *shell)
-{
-	if (shell->heredoc.original_stdin != -1)
-	{
-		if (fcntl(shell->heredoc.original_stdin, F_GETFD) != -1)
-		{
-			if (dup2(shell->heredoc.original_stdin, STDIN_FILENO) == -1)
-				perror("dup2 error while restoring stdin");
-			close(shell->heredoc.original_stdin);
-		}
-		shell->heredoc.original_stdin = -1;
-	}
-	if (shell->original_stdout != -1)
-	{
-		if (fcntl(shell->original_stdout, F_GETFD) != -1)
-		{
-			if (dup2(shell->original_stdout, STDOUT_FILENO) == -1)
-				perror("dup2 error while restoring stdout");
-			close(shell->original_stdout);
-		}
-		shell->original_stdout = -1;
-	}
-	if (shell->original_stderr != -1)
-	{
-		if (fcntl(shell->original_stderr, F_GETFD) != -1)
-		{
-			if (dup2(shell->original_stderr, STDERR_FILENO) == -1)
-				perror("dup2 error while restoring stderr");
-			close(shell->original_stderr);
-		}
-		shell->original_stderr = -1;
-	}
-	fflush(stdout);
-	fflush(stderr);
 }
