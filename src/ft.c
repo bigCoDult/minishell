@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:48:14 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:07:30 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 13:49:33 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ char	*shell_strdup(t_shell *shell, const char *str)
 	dup = shell_malloc(shell, len);
 	if (!dup)
 		return (NULL);
-	memcpy(dup, str, len);
+	ft_memcpy(dup, str, len);
 	return (dup);
 }
 
@@ -57,7 +57,7 @@ char	*ft_strdup(const char *str)
 	dup = malloc(len);
 	if (!dup)
 		return (NULL);
-	memcpy(dup, str, len);
+	ft_memcpy(dup, str, len);
 	return (dup);
 }
 

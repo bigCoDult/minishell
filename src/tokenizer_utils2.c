@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 05:58:23 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 07:56:32 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 13:42:40 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ char	*finalize_word(t_shell *shell, char *word, int quote_state)
 	int		j;
 
 	(void)quote_state;
-	temp = shell_malloc(shell, strlen(word) * 2);
+	temp = shell_malloc(shell, ft_strlen(word) * 2);
 	if (!temp)
 		return (NULL);
 	j = 0;

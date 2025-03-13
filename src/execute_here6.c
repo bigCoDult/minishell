@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:07:48 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 07:19:14 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 13:41:22 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ static int	process_line(t_shell *shell, char *line,
 		free_exit(shell, 0);
 		return (1);
 	}
-	write(io_fds[2], line, strlen(line));
+	write(io_fds[2], line, ft_strlen(line));
 	write(io_fds[2], "\n", 1);
 	free(line);
 	return (0);
