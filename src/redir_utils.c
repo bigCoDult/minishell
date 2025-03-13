@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 03:00:03 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 05:55:40 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 			last_input_fd = open(current->filename, O_RDONLY);
 			if (last_input_fd == -1)
 			{
-				fprintf(stderr, "minishell: %s: No such file or directory\n", current->filename);
+				print_error("minishell: %s: No such file or directory\n", current->filename);
 				restore_io(shell);
 				return (1);
 			}
@@ -88,7 +88,7 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 				last_output_fd = open(current->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
 			if (last_output_fd == -1)
 			{
-				fprintf(stderr, "minishell: %s: Permission denied\n", current->filename);
+				print_error("minishell: %s: Permission denied\n", current->filename);
 				restore_io(shell);
 				return (1);
 			}
