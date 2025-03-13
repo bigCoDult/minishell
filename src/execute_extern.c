@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:38:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/12 14:02:59 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 03:03:39 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,20 +21,15 @@ static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 	heredoc_fd = -1;
 	original_stdout = -1;
 	heredoc_fd = find_command_heredoc_fd(shell, cmd);
-	
-	// 슬래시가 포함된 경로인지 확인
 	if (ft_strchr(cmd->args[0], '/'))
 	{
-		// 직접 실행 시도
 		if (access(cmd->args[0], F_OK) != 0)
 		{
-			// 파일이 존재하지 않음
 			fprintf(stderr, "minishell: %s: No such file or directory\n", cmd->args[0]);
 			free_exit(shell, 127);
 		}
 		else if (access(cmd->args[0], X_OK) != 0)
 		{
-			// 파일이 존재하지만 실행 권한이 없음
 			fprintf(stderr, "minishell: %s: Permission denied\n", cmd->args[0]);
 			free_exit(shell, 126);
 		}
@@ -51,7 +46,6 @@ static void	execute_command_in_child(t_shell *shell, t_command *cmd)
 			free_exit(shell, 127);
 		}
 	}
-	
 	original_stdout = dup(STDOUT_FILENO);
 	if (original_stdout == -1)
 	{
@@ -136,7 +130,6 @@ int	execute_external(t_shell *shell, t_command *cmd)
 			shell->status.exit_code = 128 + WTERMSIG(status);
 		else
 			shell->status.exit_code = 1;
-		
 		handle_signal_termination(shell, status);
 		return (shell->status.exit_code);
 	}

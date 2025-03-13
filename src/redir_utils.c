@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/12 14:56:30 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 03:00:03 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,18 +20,14 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 
 	if (!redirs)
 		return (0);
-	
-	// 표준 입출력 백업
 	if (shell->heredoc.original_stdin == -1)
 		shell->heredoc.original_stdin = dup(STDIN_FILENO);
 	if (shell->original_stdout == -1)
 		shell->original_stdout = dup(STDOUT_FILENO);
 	if (shell->original_stderr == -1)
 		shell->original_stderr = dup(STDERR_FILENO);
-	
-	if (shell->heredoc.original_stdin == -1 || 
-		shell->original_stdout == -1 ||
-		shell->original_stderr == -1)
+	if (shell->heredoc.original_stdin == -1
+		|| shell->original_stdout == -1 || shell->original_stderr == -1)
 	{
 		if (shell->heredoc.original_stdin != -1)
 		{
@@ -50,8 +46,6 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		}
 		return (1);
 	}
-	
-	// 우선 입력 리디렉션 처리
 	last_input_fd = -1;
 	current = redirs;
 	while (current)
@@ -60,7 +54,6 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		{
 			if (last_input_fd != -1)
 				close(last_input_fd);
-				
 			last_input_fd = open(current->filename, O_RDONLY);
 			if (last_input_fd == -1)
 			{
@@ -71,8 +64,6 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		}
 		current = current->next;
 	}
-	
-	// 마지막 입력 리디렉션 적용
 	if (last_input_fd != -1)
 	{
 		if (dup2(last_input_fd, STDIN_FILENO) == -1)
@@ -83,8 +74,6 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		}
 		close(last_input_fd);
 	}
-	
-	// 출력 리디렉션 처리
 	last_output_fd = -1;
 	current = redirs;
 	while (current)
@@ -93,12 +82,10 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		{
 			if (last_output_fd != -1)
 				close(last_output_fd);
-				
 			if (current->type == REDIR_OUT)
 				last_output_fd = open(current->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			else // REDIR_APPEND
+			else
 				last_output_fd = open(current->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
-				
 			if (last_output_fd == -1)
 			{
 				fprintf(stderr, "minishell: %s: Permission denied\n", current->filename);
@@ -108,8 +95,6 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		}
 		current = current->next;
 	}
-	
-	// 마지막 출력 리디렉션 적용
 	if (last_output_fd != -1)
 	{
 		if (dup2(last_output_fd, STDOUT_FILENO) == -1)
@@ -120,7 +105,6 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		}
 		close(last_output_fd);
 	}
-	
 	return (0);
 }
 

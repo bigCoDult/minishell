@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 03:00:36 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/11 14:21:40 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 04:48:08 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ void	handle_null_line(t_shell *shell, int fd)
 		exit(0);
 }
 
-void	check_delimiter_match(char *line, char *delimiter, int fd, t_shell *shell)
+void	check_delimiter_match(char *line, char *delimiter,
+			int fd, t_shell *shell)
 {
 	if (ft_strcmp(line, delimiter) == 0)
 	{

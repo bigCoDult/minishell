@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/08 12:46:31 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 04:47:04 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,11 @@ void	free_heredoc_entries(t_shell *shell)
 
 void	cleanup_heredoc(t_shell *shell)
 {
-	// 히어독 파일 디스크립터 닫기
+	t_heredoc_entry	*entry;
+
 	if (shell->heredoc.entries)
 	{
-		t_heredoc_entry *entry = shell->heredoc.entries;
+		entry = shell->heredoc.entries;
 		while (entry)
 		{
 			if (entry->fd != -1)
@@ -49,16 +50,12 @@ void	cleanup_heredoc(t_shell *shell)
 			entry = entry->next;
 		}
 	}
-	
-	// 표준 입력 복원
 	if (shell->heredoc.original_stdin != -1)
 	{
 		dup2(shell->heredoc.original_stdin, STDIN_FILENO);
 		close(shell->heredoc.original_stdin);
 		shell->heredoc.original_stdin = -1;
 	}
-	
-	// 히어독 임시 파일 정리
 	if (shell->heredoc.temp_file)
 	{
 		unlink(shell->heredoc.temp_file);
