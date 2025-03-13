@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 08:06:24 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 08:48:42 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -389,8 +389,6 @@ int				execute_builtin(t_shell *shell, t_command *cmd);
 char			*find_command_path(t_shell *shell, const char *cmd);
 char			*find_executable(t_shell *shell, const char *cmd);
 
-int				setup_redirections(t_shell *shell, t_redirection *redirs);
-
 t_redirection	*create_redirection(t_shell *shell, t_token *token);
 
 int				execute_simple_command(t_shell *shell, t_command *cmd);
@@ -422,5 +420,16 @@ void			update_quote_state(char *word, int *i, int *in_single_quote,
 void			expand_env_var_to_res(t_shell *shell,
 					char *word, char *temp, int indices[2]);
 void			process_word(t_shell *shell, char *word, char *temp, int *j);
+
+int				backup_original_fds(t_shell *shell);
+void			cleanup_backup_fds(t_shell *shell);
+int				open_output_file(t_redirection *redir);
+int				setup_redirections(t_shell *shell, t_redirection *redirs);
+
+int				handle_input_redirections(t_shell *shell,
+					t_redirection *redirs);
+
+int				handle_output_redirections(t_shell *shell,
+					t_redirection *redirs);
 
 #endif

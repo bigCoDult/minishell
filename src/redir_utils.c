@@ -6,107 +6,11 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:56:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 07:23:17 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 08:35:59 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-int	setup_redirections(t_shell *shell, t_redirection *redirs)
-{
-	t_redirection	*current;
-	int				last_input_fd;
-	int				last_output_fd;
-
-	if (!redirs)
-		return (0);
-	if (shell->heredoc.original_stdin == -1)
-		shell->heredoc.original_stdin = dup(STDIN_FILENO);
-	if (shell->original_stdout == -1)
-		shell->original_stdout = dup(STDOUT_FILENO);
-	if (shell->original_stderr == -1)
-		shell->original_stderr = dup(STDERR_FILENO);
-	if (shell->heredoc.original_stdin == -1
-		|| shell->original_stdout == -1 || shell->original_stderr == -1)
-	{
-		if (shell->heredoc.original_stdin != -1)
-		{
-			close(shell->heredoc.original_stdin);
-			shell->heredoc.original_stdin = -1;
-		}
-		if (shell->original_stdout != -1)
-		{
-			close(shell->original_stdout);
-			shell->original_stdout = -1;
-		}
-		if (shell->original_stderr != -1)
-		{
-			close(shell->original_stderr);
-			shell->original_stderr = -1;
-		}
-		return (1);
-	}
-	last_input_fd = -1;
-	current = redirs;
-	while (current)
-	{
-		if (current->type == REDIR_IN)
-		{
-			if (last_input_fd != -1)
-				close(last_input_fd);
-			last_input_fd = open(current->filename, O_RDONLY);
-			if (last_input_fd == -1)
-			{
-				print_error("minishell: %s: No such file or directory\n", current->filename);
-				restore_io(shell);
-				return (1);
-			}
-		}
-		current = current->next;
-	}
-	if (last_input_fd != -1)
-	{
-		if (dup2(last_input_fd, STDIN_FILENO) == -1)
-		{
-			close(last_input_fd);
-			restore_io(shell);
-			return (1);
-		}
-		close(last_input_fd);
-	}
-	last_output_fd = -1;
-	current = redirs;
-	while (current)
-	{
-		if (current->type == REDIR_OUT || current->type == REDIR_APPEND)
-		{
-			if (last_output_fd != -1)
-				close(last_output_fd);
-			if (current->type == REDIR_OUT)
-				last_output_fd = open(current->filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			else
-				last_output_fd = open(current->filename, O_WRONLY | O_CREAT | O_APPEND, 0644);
-			if (last_output_fd == -1)
-			{
-				print_error("minishell: %s: Permission denied\n", current->filename);
-				restore_io(shell);
-				return (1);
-			}
-		}
-		current = current->next;
-	}
-	if (last_output_fd != -1)
-	{
-		if (dup2(last_output_fd, STDOUT_FILENO) == -1)
-		{
-			close(last_output_fd);
-			restore_io(shell);
-			return (1);
-		}
-		close(last_output_fd);
-	}
-	return (0);
-}
 
 t_redirection	*create_redirection(t_shell *shell, t_token *token)
 {
