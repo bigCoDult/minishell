@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/12 14:20:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 04:08:45 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,7 +203,8 @@ t_heredoc_entry	*setup_heredoc_entry(t_shell *shell, char *delimiter,
 void			check_heredoc_signal(int fd);
 
 void			handle_null_line(t_shell *shell, int fd);
-void			check_delimiter_match(char *line, char *delimiter, int fd, t_shell *shell);
+void			check_delimiter_match(char *line, char *delimiter,
+					int fd, t_shell *shell);
 void			process_heredoc_lines(t_shell *shell, char *delimiter, int fd);
 
 int				read_heredoc_content(t_shell *shell, char *delimiter, int fd);
@@ -281,6 +282,11 @@ int				ft_itoa_n(char *str, size_t size, int n);
 void			ft_itoa_simple(char *str, int n);
 
 char			*ft_strtok(char *str, const char *delim);
+
+void			*ft_memcpy(void *dest, const void *src, size_t count);
+char			*ft_strndup(const char *s, size_t n, t_shell *shell);
+char			*ft_strnstr(const char *big, const char *little, size_t len);
+char			*ft_strjoin(char const *s1, char const *s2, t_shell *shell);
 
 void			*shell_malloc(t_shell *shell, size_t size);
 void			shell_free(t_shell *shell, void *ptr);
@@ -376,8 +382,7 @@ void			setup_signals(void);
 void			restore_io(t_shell *shell);
 void			free_non_heredoc_memory(t_shell *shell);
 
-t_tree	*convert_args_to_node(char **args, t_tree *node);
-t_env	*find_already(char *key, t_env *env_head);
-
+t_tree			*convert_args_to_node(char **args, t_tree *node);
+t_env			*find_already(char *key, t_env *env_head);
 
 #endif

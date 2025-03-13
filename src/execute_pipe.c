@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:31:16 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/08 15:48:58 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 04:45:22 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,42 +89,4 @@ int	execute_piped_command(t_shell *shell, t_command *cmd)
 		close(shell->pipe_info.prev_pipe);
 	close(shell->pipe_info.pipefd[1]);
 	return (pid);
-}
-
-int	handle_all_heredocs(t_shell *shell, t_ast_node *node)
-{
-	int	original_stdin;
-	int	original_stdout;
-	int	original_stderr;
-	int	result;
-
-	// 모든 표준 입출력 파일 디스크립터 저장
-	original_stdin = dup(STDIN_FILENO);
-	original_stdout = dup(STDOUT_FILENO);
-	original_stderr = dup(STDERR_FILENO);
-	
-	if (original_stdin == -1 || original_stdout == -1 || original_stderr == -1)
-	{
-		if (original_stdin != -1)
-			close(original_stdin);
-		if (original_stdout != -1)
-			close(original_stdout);
-		if (original_stderr != -1)
-			close(original_stderr);
-		return (1);
-	}
-	
-	shell->heredoc.original_stdin = original_stdin;
-	result = handle_heredocs_recursive(shell, node);
-	
-	// 모든 표준 입출력 복원
-	dup2(original_stdin, STDIN_FILENO);
-	dup2(original_stdout, STDOUT_FILENO);
-	dup2(original_stderr, STDERR_FILENO);
-	
-	close(original_stdin);
-	close(original_stdout);
-	close(original_stderr);
-	
-	return (result);
 }

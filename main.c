@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/09 11:46:07 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 04:07:49 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,20 @@ volatile sig_atomic_t	g_signal;
 
 void	setup_terminal_settings(void)
 {
-    struct termios	term;
+	struct termios	term;
 
-    tcgetattr(STDIN_FILENO, &term);
-    term.c_lflag &= ~ECHOCTL;
-    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+	tcgetattr(STDIN_FILENO, &term);
+	term.c_lflag &= ~ECHOCTL;
+	tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 
-void restore_terminal_settings(void)
+void	restore_terminal_settings(void)
 {
-    struct termios term;
+	struct termios	term;
 
-    tcgetattr(STDIN_FILENO, &term);
-    term.c_lflag |= ECHOCTL;
-    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+	tcgetattr(STDIN_FILENO, &term);
+	term.c_lflag |= ECHOCTL;
+	tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 
 static void	init_shell(t_shell *shell, char **envp)
@@ -51,13 +51,11 @@ static void	minishell_loop(t_shell *shell)
 	while (1)
 	{
 		g_signal = 0;
-		
 		if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
 			restore_io(shell);
 		shell->input_line = readline("MINISHELL$> ");
 		if (!shell->input_line)
-			break;
-		
+			break ;
 		if (shell->input_line[0] != '\0')
 		{
 			add_history(shell->input_line);

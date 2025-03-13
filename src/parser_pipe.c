@@ -6,16 +6,44 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/05 01:43:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 01:38:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 02:56:21 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+static int	handle_pipe_error(t_shell *shell, t_token **tokens)
+{
+	if (!*tokens || (*tokens)->type == TOKEN_PIPE)
+	{
+		write(STDERR_FILENO,
+			"minishell: syntax error near unexpected token '|'\n", 51);
+		shell->status.exit_code = 2;
+		return (1);
+	}
+	return (0);
+}
+
+static t_ast_node	*create_pipe_node(t_shell *shell, t_ast_node *left_cmd,
+									t_token **tokens)
+{
+	t_ast_node	*pipe_node;
+	t_ast_node	*right_cmd;
+
+	pipe_node = create_ast_node(shell, AST_PIPE);
+	if (!pipe_node)
+		return (NULL);
+	pipe_node->left = left_cmd;
+	right_cmd = parse_pipeline(shell, tokens);
+	if (!right_cmd)
+		return (NULL);
+	pipe_node->right = right_cmd;
+	return (pipe_node);
+}
+
 t_ast_node	*parse_pipeline(t_shell *shell, t_token **tokens)
 {
 	t_ast_node	*first_cmd;
-	t_ast_node	*pipe_node;
 
 	first_cmd = parse_simple_command(shell, tokens);
 	if (!first_cmd)
@@ -23,20 +51,9 @@ t_ast_node	*parse_pipeline(t_shell *shell, t_token **tokens)
 	if (*tokens && (*tokens)->type == TOKEN_PIPE)
 	{
 		*tokens = (*tokens)->next;
-		if (!*tokens || (*tokens)->type == TOKEN_PIPE)
-		{
-			fprintf(stderr, "minishell: syntax error near unexpected token '|'\n");
-			shell->status.exit_code = 258;
+		if (handle_pipe_error(shell, tokens))
 			return (NULL);
-		}
-		pipe_node = create_ast_node(shell, AST_PIPE);
-		if (!pipe_node)
-			return (NULL);
-		pipe_node->left = first_cmd;
-		pipe_node->right = parse_pipeline(shell, tokens);
-		if (!pipe_node->right)
-			return (NULL);
-		return (pipe_node);
+		return (create_pipe_node(shell, first_cmd, tokens));
 	}
 	return (first_cmd);
 }

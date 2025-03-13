@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/12 13:13:34 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 04:10:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ int	handle_quote_character(char c, t_token_state *state, int *dollar_sign)
 	int	skip_char;
 
 	skip_char = 0;
-	
-	// 따옴표 처리
 	if (c == '\'' && !state->in_double_quote)
 	{
 		state->in_single_quote = !state->in_single_quote;
@@ -29,13 +27,10 @@ int	handle_quote_character(char c, t_token_state *state, int *dollar_sign)
 		state->in_double_quote = !state->in_double_quote;
 		skip_char = 1;
 	}
-	
-	// $ 기호 처리 - 작은따옴표 안에 있으면 무시
 	if (c == '$' && !state->in_single_quote)
 		*dollar_sign = 1;
 	else if (c != '$')
 		*dollar_sign = 0;
-	
 	return (skip_char);
 }
 
@@ -68,8 +63,7 @@ int	get_word_length(char *input)
 			break ;
 		len++;
 	}
-	if (state.in_single_quote || state.in_double_quote)
-		debug_print(2047, 3, "DEBUG: Unclosed quote detected\n");
+
 	return (len);
 }
 
@@ -80,11 +74,11 @@ int	determine_quote_state(char *input, int *start_idx)
 	*start_idx = 0;
 	if (input[0] == '$' && (input[1] == '\'' || input[1] == '"'))
 	{
-		*start_idx = 1;  // 달러 기호 생략하고 따옴표부터 시작
+		*start_idx = 1;
 		if (input[1] == '\'')
-			quote_state = 1;  // 작은따옴표
+			quote_state = 1;
 		else
-			quote_state = 2;  // 큰따옴표
+			quote_state = 2;
 	}
 	else if (input[0] == '\'')
 		quote_state = 1;
@@ -105,7 +99,6 @@ void	process_word_content(char *input, char *word, int len)
 
 	while (i < len)
 	{
-		// 달러 기호 다음에 따옴표가 오면 달러 기호 건너뛰기
 		if (input[i] == '$' && (input[i+1] == '\'' || input[i+1] == '"') && i+1 < len)
 			i++;
 		word[j++] = input[i++];
