@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/05 01:43:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 04:59:50 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 01:38:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,12 @@ t_ast_node	*parse_pipeline(t_shell *shell, t_token **tokens)
 	if (*tokens && (*tokens)->type == TOKEN_PIPE)
 	{
 		*tokens = (*tokens)->next;
+		if (!*tokens || (*tokens)->type == TOKEN_PIPE)
+		{
+			fprintf(stderr, "minishell: syntax error near unexpected token '|'\n");
+			shell->status.exit_code = 258;
+			return (NULL);
+		}
 		pipe_node = create_ast_node(shell, AST_PIPE);
 		if (!pipe_node)
 			return (NULL);

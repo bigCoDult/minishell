@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 06:05:33 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 06:05:44 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 01:39:27 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,18 @@
 int	process_next_token(t_shell *shell, char **input)
 {
 	t_token	*token;
+	int		is_first_token;
 
+	is_first_token = (shell->tokens == NULL);
+	
 	if (**input == '|')
 	{
+		if (is_first_token)
+		{
+			fprintf(stderr, "minishell: syntax error near unexpected token '|'\n");
+			shell->status.exit_code = 258;
+			return (1);
+		}
 		if (handle_pipe_token(shell, input))
 			return (1);
 	}

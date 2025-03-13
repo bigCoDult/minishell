@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_built3.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 13:53:23 by sanbaek           #+#    #+#             */
-/*   Updated: 2025/03/10 13:53:26 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/03/13 01:45:21 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,19 +176,19 @@ t_env	*set_input_env(char *str, t_shell *shell)
 	return (input_env);
 }
 
-static char	*dup_val(char *value)
+static char	*dup_val(char *value, t_shell *shell)
 {
 	size_t	len;
 	char	*tmp;
 
 	len = ft_strlen(value);
-	tmp = malloc(len + 1);
+	tmp = shell_malloc(shell, len + 1);
 	if (tmp)
 		ft_memcpy(tmp, value, len + 1);
 	return (tmp);
 }
 
-static void	update_target_env_with_concat(t_env *target_env, char *new_part)
+static void	update_target_env_with_concat(t_env *target_env, char *new_part, t_shell *shell)
 {
 	size_t	len1;
 	size_t	len2;
@@ -196,13 +196,13 @@ static void	update_target_env_with_concat(t_env *target_env, char *new_part)
 
 	len1 = ft_strlen(target_env->value);
 	len2 = ft_strlen(new_part);
-	new_value = malloc(len1 + len2 + 1);
+	new_value = shell_malloc(shell, len1 + len2 + 1);
 	if (new_value)
 	{
 		ft_memcpy(new_value, target_env->value, len1);
 		ft_memcpy(new_value + len1, new_part, len2 + 1);
 	}
-	free(target_env->value);
+	shell_free(shell, target_env->value);
 	target_env->value = new_value;
 }
 
@@ -213,20 +213,20 @@ void	stretch_value(t_env *input_env, t_env *env_head, t_shell *shell)
 	target_env = find_already(input_env->key, env_head);
 	if (!target_env)
 	{
-		add_env_value(shell, input_env->key, dup_val(input_env->value));
+		add_env_value(shell, input_env->key, dup_val(input_env->value, shell));
 		return ;
 	}
 	if (input_env->value[0] == '\0')
 	{
 		if (target_env->value)
-			free(target_env->value);
-		target_env->value = dup_val(input_env->value);
+			shell_free(shell, target_env->value);
+		target_env->value = dup_val(input_env->value, shell);
 		return ;
 	}
 	if (target_env->value)
-		update_target_env_with_concat(target_env, input_env->value);
+		update_target_env_with_concat(target_env, input_env->value, shell);
 	else
-		target_env->value = dup_val(input_env->value);
+		target_env->value = dup_val(input_env->value, shell);
 }
 
 static void	process_export_value(t_env *input_env, t_env *env_head, char *str,
@@ -249,12 +249,12 @@ static void	process_export_value(t_env *input_env, t_env *env_head, char *str,
 		if (target_env)
 		{
 			if (target_env->value)
-				free(target_env->value);
-			target_env->value = dup_val(input_env->value);
+				shell_free(shell, target_env->value);
+			target_env->value = dup_val(input_env->value, shell);
 		}
 		else
 		{
-			add_env_value(shell, input_env->key, dup_val(input_env->value));
+			add_env_value(shell, input_env->key, dup_val(input_env->value, shell));
 		}
 	}
 }
