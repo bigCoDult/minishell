@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:42:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:04:51 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 07:51:30 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,10 +76,13 @@ int	builtin_exit(t_shell *shell, char **args)
 	{
 		arg = args[1];
 		len = ft_strlen(arg);
-		if (len > 20 || (len == 20 && arg[0] != '-' && ft_strcmp(arg, "9223372036854775807") > 0) ||
-			(len == 20 && arg[0] == '-' && ft_strcmp(arg, "-9223372036854775808") > 0))
+		if (len > 20 || (len == 20 && arg[0] != '-'
+				&& ft_strcmp(arg, "9223372036854775807") > 0)
+			|| (len == 20 && arg[0] == '-'
+				&& ft_strcmp(arg, "-9223372036854775808") > 0))
 		{
-			print_error("minishell: exit: %s: numeric argument required\n", arg);
+			print_error(
+				"minishell: exit: %s: numeric argument required\n", arg);
 			free_all_memory(shell);
 			free_env(shell);
 			exit(2);
@@ -91,7 +94,8 @@ int	builtin_exit(t_shell *shell, char **args)
 		{
 			if (!ft_isdigit(arg[i]))
 			{
-				print_error("minishell: exit: %s: numeric argument required\n", arg);
+				print_error(
+					"minishell: exit: %s: numeric argument required\n", arg);
 				free_all_memory(shell);
 				free_env(shell);
 				exit(2);
