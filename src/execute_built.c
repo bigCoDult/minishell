@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:42:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:04:51 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 08:11:41 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,52 +62,4 @@ int	builtin_env(t_shell *shell)
 		current = current->next;
 	}
 	return (0);
-}
-
-int	builtin_exit(t_shell *shell, char **args)
-{
-	int		exit_code;
-	int		i;
-	char	*arg;
-	size_t	len;
-
-	printf("exit\n");
-	if (args[1])
-	{
-		arg = args[1];
-		len = ft_strlen(arg);
-		if (len > 20 || (len == 20 && arg[0] != '-' && ft_strcmp(arg, "9223372036854775807") > 0) ||
-			(len == 20 && arg[0] == '-' && ft_strcmp(arg, "-9223372036854775808") > 0))
-		{
-			print_error("minishell: exit: %s: numeric argument required\n", arg);
-			free_all_memory(shell);
-			free_env(shell);
-			exit(2);
-		}
-		i = 0;
-		if (arg[i] == '-' || arg[i] == '+')
-			i++;
-		while (arg[i])
-		{
-			if (!ft_isdigit(arg[i]))
-			{
-				print_error("minishell: exit: %s: numeric argument required\n", arg);
-				free_all_memory(shell);
-				free_env(shell);
-				exit(2);
-			}
-			i++;
-		}
-		if (args[2])
-		{
-			print_error("minishell: exit: too many arguments\n");
-			return (1);
-		}
-		exit_code = ft_atoi(arg);
-	}
-	else
-		exit_code = shell->status.exit_code;
-	free_all_memory(shell);
-	free_env(shell);
-	exit(exit_code);
 }

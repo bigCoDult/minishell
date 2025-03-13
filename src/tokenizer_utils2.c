@@ -6,13 +6,13 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 05:58:23 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 05:00:20 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 07:56:32 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static void	update_quote_state(char *word, int *i, int *in_single_quote,
+void	update_quote_state(char *word, int *i, int *in_single_quote,
 						int *in_double_quote)
 {
 	if (word[*i] == '\'' && !(*in_double_quote))
@@ -52,15 +52,15 @@ static char	*extract_var_name_tok(t_shell *shell, char *word, int *i)
 	return (var_name);
 }
 
-static void	expand_env_var_to_res(t_shell *shell,
-		char *word, int *i, char *temp, int *j)
+void	expand_env_var_to_res(t_shell *shell,
+		char *word, char *temp, int indices[2])
 {
 	char	*var_name;
 	char	*var_value;
 	int		var_len;
 	char	status[16];
 
-	var_name = extract_var_name_tok(shell, word, i);
+	var_name = extract_var_name_tok(shell, word, &indices[0]);
 	if (ft_strcmp(var_name, "?") == 0)
 	{
 		ft_itoa_n(status, sizeof(status), shell->status.exit_code);
@@ -71,34 +71,10 @@ static void	expand_env_var_to_res(t_shell *shell,
 	if (var_value)
 	{
 		var_len = ft_strlen(var_value);
-		ft_strcpy(temp + *j, var_value);
-		*j += var_len;
+		ft_strcpy(temp + indices[1], var_value);
+		indices[1] += var_len;
 	}
 	shell_free(shell, var_name);
-}
-
-static void	process_word(t_shell *shell, char *word, char *temp, int *j)
-{
-	int	i;
-	int	in_single_quote;
-	int	in_double_quote;
-
-	i = 0;
-	in_single_quote = 0;
-	in_double_quote = 0;
-	while (word[i])
-	{
-		if ((word[i] == '\'' && !in_double_quote)
-			|| (word[i] == '"' && !in_single_quote))
-			update_quote_state(word, &i, &in_single_quote, &in_double_quote);
-		else if ((word[i] == '$') && !in_single_quote
-			&& (ft_isalnum(word[i + 1])
-				|| word[i + 1] == '_' || word[i + 1] == '?'))
-			expand_env_var_to_res(shell, word, &i, temp, j);
-		else
-			temp[(*j)++] = word[i++];
-	}
-	temp[*j] = '\0';
 }
 
 char	*finalize_word(t_shell *shell, char *word, int quote_state)

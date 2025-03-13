@@ -6,54 +6,11 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 13:53:23 by sanbaek           #+#    #+#             */
-/*   Updated: 2025/03/13 03:06:40 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 07:49:10 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-#define UPPER_ALPHA_RANGE_START	65
-#define UPPER_ALPHA_RANGE_END		90
-#define LOWER_ALPHA_RANGE_START	97
-#define LOWER_ALPHA_RANGE_END		122
-
-static int	ft_is_range(int c, int start, int end)
-{
-	return (c >= start && c <= end);
-}
-
-static int	ft_is_loweralpha(int c)
-{
-	return (ft_is_range(c, LOWER_ALPHA_RANGE_START, LOWER_ALPHA_RANGE_END));
-}
-
-static int	ft_is_upperalpha(int c)
-{
-	return (ft_is_range(c, UPPER_ALPHA_RANGE_START, UPPER_ALPHA_RANGE_END));
-}
-
-int	ft_isalpha(int c)
-{
-	return (ft_is_loweralpha(c) || ft_is_upperalpha(c));
-}
-
-int	is_valid_identifier(char *str)
-{
-	int	i;
-
-	i = 1;
-	if (!str || !*str)
-		return (0);
-	if (!ft_isalpha(str[0]) && str[0] != '_')
-		return (0);
-	while (str[i])
-	{
-		if (!ft_isalnum(str[i]) && str[i] != '_')
-			return (0);
-		i++;
-	}
-	return (1);
-}
 
 void	export_show(t_env *current)
 {
@@ -96,7 +53,7 @@ t_env	*set_input_env(char *str, t_shell *shell)
 	return (input_env);
 }
 
-static char	*dup_val(char *value, t_shell *shell)
+char	*dup_val(char *value, t_shell *shell)
 {
 	size_t	len;
 	char	*tmp;
@@ -106,24 +63,6 @@ static char	*dup_val(char *value, t_shell *shell)
 	if (tmp)
 		ft_memcpy(tmp, value, len + 1);
 	return (tmp);
-}
-
-static void	update_target_env_with_concat(t_env *target_env, char *new_part, t_shell *shell)
-{
-	size_t	len1;
-	size_t	len2;
-	char	*new_value;
-
-	len1 = ft_strlen(target_env->value);
-	len2 = ft_strlen(new_part);
-	new_value = shell_malloc(shell, len1 + len2 + 1);
-	if (new_value)
-	{
-		ft_memcpy(new_value, target_env->value, len1);
-		ft_memcpy(new_value + len1, new_part, len2 + 1);
-	}
-	shell_free(shell, target_env->value);
-	target_env->value = new_value;
 }
 
 void	stretch_value(t_env *input_env, t_env *env_head, t_shell *shell)
@@ -147,60 +86,6 @@ void	stretch_value(t_env *input_env, t_env *env_head, t_shell *shell)
 		update_target_env_with_concat(target_env, input_env->value, shell);
 	else
 		target_env->value = dup_val(input_env->value, shell);
-}
-
-static void	process_export_value(t_env *input_env, t_env *env_head, char *str,
-		t_shell *shell)
-{
-	t_env	*target_env;
-
-	target_env = find_already(input_env->key, env_head);
-	if (input_env->value == NULL)
-	{
-		if (!target_env)
-			add_env_value(shell, input_env->key, NULL);
-	}
-	else if (ft_strnstr(str, "+=", ft_strlen(str)))
-		stretch_value(input_env, env_head, shell);
-	else
-	{
-		if (target_env)
-		{
-			if (target_env->value)
-				shell_free(shell, target_env->value);
-			target_env->value = dup_val(input_env->value, shell);
-		}
-		else
-			add_env_value(shell, input_env->key, dup_val(input_env->value, shell));
-	}
-}
-
-static void	handle_export_values(t_tree *keyvalue_node, t_env *env_head,
-		t_shell *shell)
-{
-	t_env	*input_env;
-	char	*str;
-
-	while (keyvalue_node)
-	{
-		str = keyvalue_node->value;
-		input_env = set_input_env(str, shell);
-		if (!is_valid_identifier(input_env->key))
-		{
-			shell_free(shell, input_env->key);
-			if (input_env->value)
-				shell_free(shell, input_env->value);
-			shell_free(shell, input_env);
-			keyvalue_node = keyvalue_node->right_sibling;
-			continue ;
-		}
-		process_export_value(input_env, env_head, str, shell);
-		shell_free(shell, input_env->key);
-		if (input_env->value)
-			shell_free(shell, input_env->value);
-		shell_free(shell, input_env);
-		keyvalue_node = keyvalue_node->right_sibling;
-	}
 }
 
 int	builtin_export(t_shell *shell, char **args)

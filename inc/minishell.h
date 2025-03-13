@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:30:45 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 08:48:42 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,13 @@
 # include <stdarg.h>
 
 extern volatile sig_atomic_t	g_signal;
+
+typedef enum e_char_type
+{
+	QUOTE_CHAR,
+	ENV_VAR,
+	REGULAR_CHAR
+}	t_char_type;
 
 typedef struct s_token_state
 {
@@ -195,6 +202,9 @@ int				builtin_pwd(void);
 int				builtin_export(t_shell *shell, char **args);
 
 int				execute_external(t_shell *shell, t_command *cmd);
+int				handle_signal_termination(t_shell *shell, int status);
+
+void			execute_command_in_child(t_shell *shell, t_command *cmd);
 
 char			*create_temp_heredoc_file(t_shell *shell);
 t_heredoc_entry	*create_heredoc_entry(t_shell *shell, char *delimiter);
@@ -284,6 +294,20 @@ void			ft_itoa_simple(char *str, int n);
 
 char			*ft_strtok(char *str, const char *delim);
 
+int				ft_isalpha(int c);
+int				is_valid_identifier(char *str);
+void			update_target_env_with_concat(t_env *target_env,
+					char *new_part, t_shell *shell);
+void			process_export_value(t_env *input_env, t_env *env_head,
+					char *str, t_shell *shell);
+void			handle_export_values(t_tree *keyvalue_node, t_env *env_head,
+					t_shell *shell);
+
+t_env			*set_input_env(char *str, t_shell *shell);
+void			stretch_value(t_env *input_env, t_env *env_head,
+					t_shell *shell);
+char			*dup_val(char *value, t_shell *shell);
+
 void			*ft_memcpy(void *dest, const void *src, size_t count);
 char			*ft_strndup(const char *s, size_t n, t_shell *shell);
 char			*ft_strnstr(const char *big, const char *little, size_t len);
@@ -365,8 +389,6 @@ int				execute_builtin(t_shell *shell, t_command *cmd);
 char			*find_command_path(t_shell *shell, const char *cmd);
 char			*find_executable(t_shell *shell, const char *cmd);
 
-int				setup_redirections(t_shell *shell, t_redirection *redirs);
-
 t_redirection	*create_redirection(t_shell *shell, t_token *token);
 
 int				execute_simple_command(t_shell *shell, t_command *cmd);
@@ -390,7 +412,24 @@ void			write_str(int fd, const char *str);
 void			add_keyvalue(t_env *input_env, t_env *env_head);
 char			*get_env(t_env *head, char *key);
 t_env			*find_already(char *key, t_env *env_head);
-void			export_for_cd(char *key, char *value, t_env **env_head, t_shell *shell);
+void			export_for_cd(char *key, char *value, t_env **env_head,
+					t_shell *shell);
 
+void			update_quote_state(char *word, int *i, int *in_single_quote,
+					int *in_double_quote);
+void			expand_env_var_to_res(t_shell *shell,
+					char *word, char *temp, int indices[2]);
+void			process_word(t_shell *shell, char *word, char *temp, int *j);
+
+int				backup_original_fds(t_shell *shell);
+void			cleanup_backup_fds(t_shell *shell);
+int				open_output_file(t_redirection *redir);
+int				setup_redirections(t_shell *shell, t_redirection *redirs);
+
+int				handle_input_redirections(t_shell *shell,
+					t_redirection *redirs);
+
+int				handle_output_redirections(t_shell *shell,
+					t_redirection *redirs);
 
 #endif
