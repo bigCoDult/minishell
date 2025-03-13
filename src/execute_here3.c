@@ -6,44 +6,44 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:02:34 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 04:49:48 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 06:41:16 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	read_heredoc_content(t_shell *shell, char *delimiter, int fd)
+static void	handle_child_process(t_shell *shell, char *delimiter, int fd)
 {
-	pid_t			pid;
-	int				status;
-	int				original_g_signal;
 	struct termios	term;
 
-	status = 0;
-	original_g_signal = g_signal;
+	signal(SIGINT, heredoc_signal_handler);
+	if (tcgetattr(STDIN_FILENO, &term) == 0)
+	{
+		term.c_lflag |= ECHO;
+		term.c_lflag &= ~ECHOCTL;
+		tcsetattr(STDIN_FILENO, TCSANOW, &term);
+	}
+	process_heredoc_lines(shell, delimiter, fd);
+	exit(0);
+}
+
+static pid_t	setup_heredoc_process(t_shell *shell, int *original_g_signal)
+{
+	pid_t	pid;
+
+	(void)shell;
+	*original_g_signal = g_signal;
 	g_signal = 0;
 	setup_signals_heredoc();
 	pid = fork();
 	if (pid < 0)
-	{
 		perror("fork");
-		return (0);
-	}
-	if (pid == 0)
-	{
-		signal(SIGINT, heredoc_signal_handler);
-		if (tcgetattr(STDIN_FILENO, &term) == 0)
-		{
-			term.c_lflag |= ECHO;
-			term.c_lflag &= ~ECHOCTL;
-			tcsetattr(STDIN_FILENO, TCSANOW, &term);
-		}
-		process_heredoc_lines(shell, delimiter, fd);
-		exit(0);
-	}
-	waitpid(pid, &status, 0);
-	setup_signals_interactive();
-	close(fd);
+	return (pid);
+}
+
+static int	process_exit_status(t_shell *shell,
+	int status, int original_g_signal)
+{
 	if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
 	{
 		g_signal = SIGINT;
@@ -63,23 +63,22 @@ int	read_heredoc_content(t_shell *shell, char *delimiter, int fd)
 	return (WIFEXITED(status) && WEXITSTATUS(status) == 0);
 }
 
-int	setup_heredoc_read(t_shell *shell, t_heredoc_entry *entry, char *temp_file)
+int	read_heredoc_content(t_shell *shell, char *delimiter, int fd)
 {
-	int	fd;
+	pid_t	pid;
+	int		status;
+	int		original_g_signal;
 
-	fd = open(temp_file, O_RDONLY);
-	if (fd == -1)
-	{
-		unlink(temp_file);
-		shell_free(shell, temp_file);
-		return (1);
-	}
-	entry->fd = fd;
-	shell->heredoc.temp_file = temp_file;
-	entry->next = shell->heredoc.entries;
-	shell->heredoc.entries = entry;
-	shell->heredoc.count++;
-	return (0);
+	status = 0;
+	pid = setup_heredoc_process(shell, &original_g_signal);
+	if (pid < 0)
+		return (0);
+	if (pid == 0)
+		handle_child_process(shell, delimiter, fd);
+	waitpid(pid, &status, 0);
+	setup_signals_interactive();
+	close(fd);
+	return (process_exit_status(shell, status, original_g_signal));
 }
 
 int	handle_heredoc(t_shell *shell, char *delimiter)
@@ -102,18 +101,4 @@ int	handle_heredoc(t_shell *shell, char *delimiter)
 		return (1);
 	}
 	return (setup_heredoc_read(shell, entry, temp_file));
-}
-
-int	get_heredoc_fd(t_shell *shell, char *delimiter)
-{
-	t_heredoc_entry	*current;
-
-	current = shell->heredoc.entries;
-	while (current)
-	{
-		if (ft_strcmp(current->delimiter, delimiter) == 0)
-			return (current->fd);
-		current = current->next;
-	}
-	return (-1);
 }

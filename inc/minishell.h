@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:16:01 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 06:30:45 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -391,5 +391,6 @@ void			add_keyvalue(t_env *input_env, t_env *env_head);
 char			*get_env(t_env *head, char *key);
 t_env			*find_already(char *key, t_env *env_head);
 void			export_for_cd(char *key, char *value, t_env **env_head, t_shell *shell);
+
 
 #endif
