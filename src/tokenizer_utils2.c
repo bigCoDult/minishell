@@ -6,92 +6,113 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 05:58:23 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/12 13:10:06 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 05:00:20 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+static void	update_quote_state(char *word, int *i, int *in_single_quote,
+						int *in_double_quote)
+{
+	if (word[*i] == '\'' && !(*in_double_quote))
+	{
+		*in_single_quote = !(*in_single_quote);
+		(*i)++;
+	}
+	else if (word[*i] == '"' && !(*in_single_quote))
+	{
+		*in_double_quote = !(*in_double_quote);
+		(*i)++;
+	}
+	else
+		(*i)++;
+}
+
+static char	*extract_var_name_tok(t_shell *shell, char *word, int *i)
+{
+	int		var_start;
+	char	*var_name;
+
+	(*i)++;
+	var_start = *i;
+	while (word[*i] && (ft_isalnum(word[*i])
+			|| word[*i] == '_' || word[*i] == '?'))
+	{
+		if (word[*i] == '?')
+		{
+			(*i)++;
+			break ;
+		}
+		(*i)++;
+	}
+	var_name = shell_malloc(shell, *i - var_start + 1);
+	ft_strncpy(var_name, word + var_start, *i - var_start);
+	var_name[*i - var_start] = '\0';
+	return (var_name);
+}
+
+static void	expand_env_var_to_res(t_shell *shell,
+		char *word, int *i, char *temp, int *j)
+{
+	char	*var_name;
+	char	*var_value;
+	int		var_len;
+	char	status[16];
+
+	var_name = extract_var_name_tok(shell, word, i);
+	if (ft_strcmp(var_name, "?") == 0)
+	{
+		ft_itoa_n(status, sizeof(status), shell->status.exit_code);
+		var_value = status;
+	}
+	else
+		var_value = get_env_value(shell, var_name);
+	if (var_value)
+	{
+		var_len = ft_strlen(var_value);
+		ft_strcpy(temp + *j, var_value);
+		*j += var_len;
+	}
+	shell_free(shell, var_name);
+}
+
+static void	process_word(t_shell *shell, char *word, char *temp, int *j)
+{
+	int	i;
+	int	in_single_quote;
+	int	in_double_quote;
+
+	i = 0;
+	in_single_quote = 0;
+	in_double_quote = 0;
+	while (word[i])
+	{
+		if ((word[i] == '\'' && !in_double_quote)
+			|| (word[i] == '"' && !in_single_quote))
+			update_quote_state(word, &i, &in_single_quote, &in_double_quote);
+		else if ((word[i] == '$') && !in_single_quote
+			&& (ft_isalnum(word[i + 1])
+				|| word[i + 1] == '_' || word[i + 1] == '?'))
+			expand_env_var_to_res(shell, word, &i, temp, j);
+		else
+			temp[(*j)++] = word[i++];
+	}
+	temp[*j] = '\0';
+}
+
 char	*finalize_word(t_shell *shell, char *word, int quote_state)
 {
 	char	*result;
 	char	*temp;
-	int		i;
 	int		j;
-	int		in_single_quote;
-	int		in_double_quote;
 
 	(void)quote_state;
 	temp = shell_malloc(shell, strlen(word) * 2);
 	if (!temp)
 		return (NULL);
-	i = 0;
 	j = 0;
-	in_single_quote = 0;
-	in_double_quote = 0;
-
-	while (word[i])
-	{
-		if (word[i] == '\'' && !in_double_quote)
-		{
-			in_single_quote = !in_single_quote;
-			i++;
-		}
-		else if (word[i] == '"' && !in_single_quote)
-		{
-			in_double_quote = !in_double_quote;
-			i++;
-		}
-		else if ((word[i] == '$') && !in_single_quote && 
-				(ft_isalnum(word[i + 1]) || word[i + 1] == '_' || word[i + 1] == '?'))
-		{
-			i++;
-			// 환경변수 이름 추출
-			int var_start = i;
-			while (word[i] && (ft_isalnum(word[i]) || word[i] == '_' || word[i] == '?'))
-			{
-				if (word[i] == '?')
-				{
-					i++;
-					break;
-				}
-				i++;
-			}
-			
-			// 환경변수 이름 복사
-			char *var_name = shell_malloc(shell, i - var_start + 1);
-			ft_strncpy(var_name, word + var_start, i - var_start);
-			var_name[i - var_start] = '\0';
-			
-			// 값 가져오기
-			char *var_value;
-			if (ft_strcmp(var_name, "?") == 0)
-			{
-				char status[16];
-				ft_itoa_n(status, sizeof(status), shell->status.exit_code);
-				var_value = status;
-			}
-			else
-			{
-				var_value = get_env_value(shell, var_name);
-			}
-			
-			// 값 복사
-			if (var_value)
-			{
-				int var_len = ft_strlen(var_value);
-				ft_strcpy(temp + j, var_value);
-				j += var_len;
-			}
-			shell_free(shell, var_name);
-		}
-		else
-		{
-			temp[j++] = word[i++];
-		}
-	}
-	
-	temp[j] = '\0';
+	process_word(shell, word, temp, &j);
 	result = shell_strdup(shell, temp);
 	shell_free(shell, temp);
 	return (result);

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 04:10:50 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/13 05:01:51 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ int	get_word_length(char *input)
 			break ;
 		len++;
 	}
-
 	return (len);
 }
 
@@ -96,10 +95,10 @@ void	process_word_content(char *input, char *word, int len)
 
 	i = 0;
 	j = 0;
-
 	while (i < len)
 	{
-		if (input[i] == '$' && (input[i+1] == '\'' || input[i+1] == '"') && i+1 < len)
+		if (input[i] == '$' && (input[i + 1] == '\''
+				|| input[i + 1] == '"') && i + 1 < len)
 			i++;
 		word[j++] = input[i++];
 	}
