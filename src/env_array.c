@@ -28,6 +28,12 @@ static char	**allocate_env_array(t_shell *shell, int *count)
 	return (env_array);
 }
 
+static void	theres_value(char *env_array, char *value)
+{
+	env_array[ft_strlen(env_array)] = '=';
+	ft_strcpy(env_array + ft_strlen(env_array), value);
+}
+
 char	**get_env_array(t_shell *shell)
 {
 	char	**env_array;
@@ -47,8 +53,8 @@ char	**get_env_array(t_shell *shell)
 		if (!env_array[i])
 			return (NULL);
 		ft_strcpy(env_array[i], current->key);
-		ft_strcat(env_array[i], "=");
-		ft_strcat(env_array[i], current->value);
+		if (current->value)
+			theres_value(env_array[i], current->value);
 		i++;
 		current = current->next;
 	}
