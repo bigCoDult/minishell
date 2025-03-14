@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 03:33:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/05 13:32:43 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/14 14:52:20 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,4 @@ void	handle_single_quote(const char **str, int *in_single_quote)
 		*in_single_quote = !(*in_single_quote);
 		(*str)++;
 	}
-}
-
-void	copy_char(char **write_pos, const char **str)
-{
-	*(*write_pos)++ = *(*str)++;
 }

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:11:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 08:16:11 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/14 14:27:20 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ int	builtin_exit(t_shell *shell, char **args)
 		if (args[2])
 		{
 			print_error("minishell: exit: too many arguments\n");
+			shell->status.exit_code = 1;
 			return (1);
 		}
 		exit_code = ft_atoi(args[1]);

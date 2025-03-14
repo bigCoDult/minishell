@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:45:08 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 07:49:56 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/14 14:57:04 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,8 @@ void	handle_export_values(t_tree *keyvalue_node, t_env *env_head,
 		input_env = set_input_env(str, shell);
 		if (!is_valid_identifier(input_env->key))
 		{
+			print_error("minishell: export: `%s': not valid identifier\n", str);
+			shell->status.exit_code = 1;
 			shell_free(shell, input_env->key);
 			if (input_env->value)
 				shell_free(shell, input_env->value);
