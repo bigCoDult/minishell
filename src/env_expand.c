@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 13:29:38 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 13:40:52 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/14 14:52:56 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ char	*expand_env_var(t_shell *shell, const char *str)
 		if (*str && should_expand_var(str, in_single_quote))
 			expand_variable(shell, &write_pos, &str);
 		else if (*str)
-			copy_char(&write_pos, &str);
+			*write_pos++ = *str++;
 	}
 	*write_pos = '\0';
 	return (result);
