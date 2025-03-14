@@ -30,8 +30,8 @@ static char	**allocate_env_array(t_shell *shell, int *count)
 
 static void	theres_value(char *env_array, char *value)
 {
-	env_array[ft_strlen(env_array)] = '=';
-	ft_strcpy(env_array + ft_strlen(env_array), value);
+	ft_strcat(env_array, "=");
+	ft_strcat(env_array, value);
 }
 
 char	**get_env_array(t_shell *shell)
