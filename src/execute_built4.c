@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 21:02:50 by sanbaek           #+#    #+#             */
-/*   Updated: 2025/03/13 06:15:52 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/15 08:17:58 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,24 +73,21 @@ t_tree	*convert_args_to_node(char **args, t_tree *node)
 	int	i;
 
 	i = 0;
-	if (i == 0)
-	{
-		node[i].value = args[i];
-		if (args[i + 1])
-			node[i].left_child = &node[i + 1];
-		else
-			node[i].left_child = NULL;
-		node[i].right_sibling = NULL;
-		i++;
-	}
+	node[i].value = args[i];
+	node[i].right_sibling = NULL;
+	if (args[i + 1])
+		node[i].left_child = &node[i + 1];
+	else
+		node[i].left_child = NULL;
+	i++;
 	while (args[i])
 	{
 		node[i].value = args[i];
+		node[i].left_child = NULL;
 		if (args[i + 1])
 			node[i].right_sibling = &node[i + 1];
 		else
-			node[i].left_child = NULL;
-		node[i].right_sibling = NULL;
+			node[i].right_sibling = NULL;
 		i++;
 	}
 	return (&node[0]);
