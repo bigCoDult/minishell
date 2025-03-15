@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 13:53:23 by sanbaek           #+#    #+#             */
-/*   Updated: 2025/03/13 07:49:10 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/15 08:15:41 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,13 +43,20 @@ t_env	*set_input_env(char *str, t_shell *shell)
 	stretch_location = ft_strchr(str, '+');
 	input_env->next = NULL;
 	if (!equal_location)
+	{
 		input_env->value = NULL;
+		input_env->key = shell_strdup(shell, str);
+	}
 	else
+	{
 		input_env->value = shell_strdup(shell, equal_location + 1);
-	if (stretch_location && ((stretch_location + 1) == equal_location))
-		input_env->key = ft_strndup(str, stretch_location - str, shell);
-	else
-		input_env->key = ft_strndup(str, equal_location - str, shell);
+		if (equal_location == str)
+			input_env->key = shell_strdup(shell, "");
+		else if (stretch_location && ((stretch_location + 1) == equal_location))
+			input_env->key = ft_strndup(str, stretch_location - str, shell);
+		else
+			input_env->key = ft_strndup(str, equal_location - str, shell);
+	}
 	return (input_env);
 }
 

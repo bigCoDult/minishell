@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 08:48:42 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/15 08:25:45 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -431,5 +431,11 @@ int				handle_input_redirections(t_shell *shell,
 
 int				handle_output_redirections(t_shell *shell,
 					t_redirection *redirs);
+
+void			handle_file_not_found(va_list args);
+void			handle_permission_denied(va_list args);
+void			handle_command_not_found(va_list args);
+void			handle_export_error(va_list args);
+void			handle_custom_error(va_list args);
 
 #endif
