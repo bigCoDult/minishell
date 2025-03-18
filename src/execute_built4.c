@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_built4.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 21:02:50 by sanbaek           #+#    #+#             */
-/*   Updated: 2025/03/15 08:17:58 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 13:10:53 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ void	handle_cd_command(t_tree *node, t_env *env_head, t_shell *shell)
 	char	oldpwd[4096];
 	char	newpwd[4096];
 
+	ft_memset(oldpwd, 0, 4096);
+	ft_memset(newpwd, 0, 4096);
 	if (node == NULL)
 		return ;
 	getcwd(oldpwd, 4096);
