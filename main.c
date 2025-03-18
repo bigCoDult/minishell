@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 08:03:18 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 17:55:14 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,12 +49,39 @@ static void	minishell_loop(t_shell *shell)
 {
 	while (1)
 	{
-		g_signal = 0;
+		if (g_signal == 130 || g_signal == 131)
+		{
+			shell->status.exit_code = g_signal;
+			g_signal = 0;
+		}
+		
 		if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
 			restore_io(shell);
+		
+		if (g_signal == 130 || g_signal == 131)
+		{
+			shell->status.exit_code = g_signal;
+			g_signal = 0;
+		}
+		
 		shell->input_line = readline("MINISHELL$> ");
+		
+		if (g_signal == 130 || g_signal == 131)
+		{
+			shell->status.exit_code = g_signal;
+			g_signal = 0;
+		}
+		
 		if (!shell->input_line)
+		{
+			if (g_signal == 130 || g_signal == 131)
+			{
+				shell->status.exit_code = g_signal;
+				g_signal = 0;
+			}
 			break ;
+		}
+		
 		if (shell->input_line[0] != '\0')
 		{
 			add_history(shell->input_line);
@@ -66,6 +93,12 @@ static void	minishell_loop(t_shell *shell)
 		}
 		free(shell->input_line);
 		shell->input_line = NULL;
+		
+		if (g_signal == 130 || g_signal == 131)
+		{
+			shell->status.exit_code = g_signal;
+			g_signal = 0;
+		}
 	}
 }
 

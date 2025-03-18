@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/07 03:00:36 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 07:07:46 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 17:49:02 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	handle_null_line(t_shell *shell, int fd)
 	free_env(shell);
 	free_shell_malloc(shell);
 	close(fd);
-	if (g_signal == SIGINT)
+	if (g_signal == 130)
 		exit(130);
 	else
 		exit(0);

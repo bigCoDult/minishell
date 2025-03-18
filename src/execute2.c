@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:17:00 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 08:20:28 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 17:56:02 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,15 +59,61 @@ static int	execute_and_cleanup(t_shell *shell)
 int	execute_commands(t_shell *shell)
 {
 	int	stdout_backup;
+	int	result;
 
-	g_signal = 0;
+	// g_signal 값을 종료 코드로 설정 (여러 번 확인)
+	if (g_signal == 130 || g_signal == 131)
+	{
+		shell->status.exit_code = g_signal;
+		g_signal = 0;
+	}
+	
 	if (!shell->ast_root)
 		return (0);
+		
+	if (g_signal == 130 || g_signal == 131)
+	{
+		shell->status.exit_code = g_signal;
+		g_signal = 0;
+	}
+	
 	if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
 		restore_io(shell);
+		
+	if (g_signal == 130 || g_signal == 131)
+	{
+		shell->status.exit_code = g_signal;
+		g_signal = 0;
+	}
+	
 	if (setup_null_output(&stdout_backup))
 		return (1);
+		
+	if (g_signal == 130 || g_signal == 131)
+	{
+		shell->status.exit_code = g_signal;
+		g_signal = 0;
+		close(stdout_backup);
+		return (0);
+	}
+	
 	if (processing_heredocs(shell, stdout_backup))
 		return (1);
-	return (execute_and_cleanup(shell));
+		
+	if (g_signal == 130 || g_signal == 131)
+	{
+		shell->status.exit_code = g_signal;
+		g_signal = 0;
+	}
+	
+	result = execute_and_cleanup(shell);
+	
+	// 실행 완료 후에도 g_signal 확인
+	if (g_signal == 130 || g_signal == 131)
+	{
+		shell->status.exit_code = g_signal;
+		g_signal = 0;
+	}
+	
+	return (result);
 }

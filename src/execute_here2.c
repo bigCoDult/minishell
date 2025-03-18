@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_here2.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:01:47 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 18:18:44 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 17:48:52 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ t_heredoc_entry	*setup_heredoc_entry(t_shell *shell, char *delimiter
 
 void	check_heredoc_signal(int fd)
 {
-	if (g_signal == SIGINT)
+	if (g_signal == 130)
 	{
 		close(fd);
 		exit(130);
