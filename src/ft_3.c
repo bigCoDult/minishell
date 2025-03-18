@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_3.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 13:53:06 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:07:34 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 16:52:11 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@ int	ft_atoi(const char *str)
 	result = 0;
 	sign = 1;
 	i = 0;
-	// while (str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
-	while (isspace(str[i]))
+	while (ft_isspace(str[i]))
 		i++;
 	if (str[i] == '-' || str[i] == '+')
 	{
@@ -93,7 +92,6 @@ int	handle_special_cases(char *str, size_t size, int n)
 int	ft_isspace(int c)
 {
 	if (c == ' ' || c == '\t')
-		// || c == '\n' || c == '\v' || c == '\f' || c == '\r')
 		return (1);
 	return (0);
 }

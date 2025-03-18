@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_redir.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:15:26 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/12 13:07:15 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 16:51:34 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,7 @@ t_token	*create_word_token(t_shell *shell, char **input, t_token *token)
 	char	*word;
 	int		word_len;
 
-	// while (**input && **input == ' ')
-	while (**input && isspace(**input))
+	while (**input && ft_isspace(**input))
 		(*input)++;
 	word = handle_word(shell, *input, &word_len);
 	if (!word)

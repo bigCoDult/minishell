@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 05:01:51 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 16:52:00 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,6 @@ int	is_word_delimiter(char c, t_token_state state)
 {
 	if (!state.in_single_quote && !state.in_double_quote
 		&& (ft_isspace(c) || c == '|' || c == '<' || c == '>'))
-		// && (c == ' ' || c == '	' || c == '|' || c == '<' || c == '>'))
-		// && (c == '|' || c == '<' || c == '>'))
-		// && (c == ' ' || c == '|' || c == '<' || c == '>'))
 		return (1);
 	return (0);
 }
