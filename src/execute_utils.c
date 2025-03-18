@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:37:56 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/06 18:00:12 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 19:04:36 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,18 +25,19 @@ int	is_builtin(char *cmd_name)
 
 int	execute_builtin(t_shell *shell, t_command *cmd)
 {
+	shell->status.exit_code = 0;
 	if (!ft_strcmp(cmd->args[0], "echo"))
 		return (builtin_echo(cmd->args));
-	else if (!ft_strcmp(cmd->args[0], "cd"))
-		return (builtin_cd(shell, cmd->args));
 	else if (!ft_strcmp(cmd->args[0], "pwd"))
 		return (builtin_pwd());
-	else if (!ft_strcmp(cmd->args[0], "export"))
-		return (builtin_export(shell, cmd->args));
-	else if (!ft_strcmp(cmd->args[0], "unset"))
-		return (builtin_unset(shell, cmd->args));
 	else if (!ft_strcmp(cmd->args[0], "env"))
 		return (builtin_env(shell));
+	else if (!ft_strcmp(cmd->args[0], "unset"))
+		return (builtin_unset(shell, cmd->args));
+	else if (!ft_strcmp(cmd->args[0], "cd"))
+		return (builtin_cd(shell, cmd->args));
+	else if (!ft_strcmp(cmd->args[0], "export"))
+		return (builtin_export(shell, cmd->args));
 	else if (!ft_strcmp(cmd->args[0], "exit"))
 		return (builtin_exit(shell, cmd->args));
 	return (1);
