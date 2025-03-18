@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_built4.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 21:02:50 by sanbaek           #+#    #+#             */
-/*   Updated: 2025/03/18 13:10:53 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 18:51:57 by sanbaek          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,7 @@ static int	cd_env(t_env *env_head, char *var, char *error_msg, int print_cwd)
 	if (p == NULL || (print_cwd && chdir(p) != 0))
 	{
 		printf("%s\n", error_msg);
-		if (ft_strcmp(var, "OLDPWD") == 0)
-			return (0);
-		else
-			return (1);
+		return (1);
 	}
 	if (print_cwd)
 	{
@@ -33,13 +30,11 @@ static int	cd_env(t_env *env_head, char *var, char *error_msg, int print_cwd)
 	}
 	else
 		chdir(p);
-	return (1);
+	return (0);
 }
 
 static int	cd_special_path(t_tree *node, t_env *env_head)
 {
-	if (ft_strcmp(node->value, "cd") != 0)
-		return (0);
 	if (node->left_child == NULL || \
 		ft_strcmp(node->left_child->value, "~") == 0)
 		return (cd_env(env_head, "HOME", "cd: HOME not set", 0));
@@ -58,16 +53,23 @@ void	handle_cd_command(t_tree *node, t_env *env_head, t_shell *shell)
 	if (node == NULL)
 		return ;
 	getcwd(oldpwd, 4096);
-	if (cd_special_path(node, env_head))
-		;
+	if (node->left_child == NULL || !ft_strcmp(node->left_child->value, "~") || \
+		!ft_strcmp(node->left_child->value, "-"))
+	{
+		shell->status.exit_code = cd_special_path(node, env_head);
+		if (shell->status.exit_code == 1)
+			return ;
+	}
 	else if (chdir(node->left_child->value) != 0)
 	{
+		shell->status.exit_code = 1;
 		perror("cd");
 		return ;
 	}
 	getcwd(newpwd, 4096);
 	export_for_cd("OLDPWD", oldpwd, &shell->env, shell);
 	export_for_cd("PWD", newpwd, &shell->env, shell);
+	shell->status.exit_code = 0;
 }
 
 t_tree	*convert_args_to_node(char **args, t_tree *node)
@@ -108,6 +110,7 @@ int	builtin_cd(t_shell *shell, char **args)
 	if (count > 2)
 	{
 		printf("cd: too many arguments\n");
+		shell->status.exit_code = 1;
 		return (1);
 	}
 	convert_args_to_node(args, node);
