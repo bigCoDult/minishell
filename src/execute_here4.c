@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 05:57:25 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 05:57:30 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 08:02:35 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,20 @@ static void	restore_original_stdin(t_shell *shell)
 	}
 }
 
-static void	cleanup_temp_file(t_shell *shell)
+static void	cleanup_temp_files(t_shell *shell)
 {
-	if (shell->heredoc.temp_file)
+	t_heredoc_entry	*entry;
+
+	entry = shell->heredoc.entries;
+	while (entry)
 	{
-		unlink(shell->heredoc.temp_file);
-		free(shell->heredoc.temp_file);
-		shell->heredoc.temp_file = NULL;
+		if (entry->temp_file)
+		{
+			unlink(entry->temp_file);
+			shell_free(shell, entry->temp_file);
+			entry->temp_file = NULL;
+		}
+		entry = entry->next;
 	}
 }
 
@@ -54,5 +61,5 @@ void	cleanup_heredoc(t_shell *shell)
 {
 	close_heredoc_fds(shell);
 	restore_original_stdin(shell);
-	cleanup_temp_file(shell);
+	cleanup_temp_files(shell);
 }

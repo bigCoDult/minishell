@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 05:57:15 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 08:11:52 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,11 @@ void	free_heredoc_entries(t_shell *shell)
 		if (current->fd != -1)
 		{
 			close(current->fd);
+		}
+		if (current->temp_file)
+		{
+			unlink(current->temp_file);
+			shell_free(shell, current->temp_file);
 		}
 		shell_free(shell, current->delimiter);
 		shell_free(shell, current);
@@ -58,13 +63,33 @@ int	find_command_heredoc_fd(t_shell *shell, t_command *cmd)
 
 void	setup_command_heredoc(t_shell *shell, t_command *cmd)
 {
-	int	heredoc_fd;
+	int				heredoc_fd;
+	t_redirection	*redir;
+	t_heredoc_entry	*entry;
 
-	heredoc_fd = find_command_heredoc_fd(shell, cmd);
-	if (heredoc_fd != -1)
+	redir = cmd->redirs;
+	while (redir)
 	{
-		close(heredoc_fd);
-		heredoc_fd = open(shell->heredoc.temp_file, O_RDONLY);
-		dup2(heredoc_fd, STDIN_FILENO);
+		if (redir->type == REDIR_HEREDOC)
+		{
+			entry = shell->heredoc.entries;
+			while (entry)
+			{
+				if (ft_strcmp(entry->delimiter, redir->filename) == 0)
+				{
+					if (entry->fd != -1)
+						close(entry->fd);
+					heredoc_fd = open(entry->temp_file, O_RDONLY);
+					if (heredoc_fd != -1)
+					{
+						dup2(heredoc_fd, STDIN_FILENO);
+						close(heredoc_fd);
+					}
+					break ;
+				}
+				entry = entry->next;
+			}
+		}
+		redir = redir->next;
 	}
 }

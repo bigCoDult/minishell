@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:40:00 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:41:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 08:02:12 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	setup_heredoc_read(t_shell *shell, t_heredoc_entry *entry, char *temp_file)
 		return (1);
 	}
 	entry->fd = fd;
-	shell->heredoc.temp_file = temp_file;
+	entry->temp_file = temp_file;
 	entry->next = shell->heredoc.entries;
 	shell->heredoc.entries = entry;
 	shell->heredoc.count++;

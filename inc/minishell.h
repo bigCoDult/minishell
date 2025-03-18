@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/15 08:25:45 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 08:12:12 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,17 +124,17 @@ typedef struct s_env
 
 typedef struct s_heredoc_entry
 {
-	int						fd;
 	char					*delimiter;
+	char					*temp_file;
+	int						fd;
 	struct s_heredoc_entry	*next;
 }	t_heredoc_entry;
 
 typedef struct s_heredoc
 {
-	int				original_stdin;
-	char			*temp_file;
 	t_heredoc_entry	*entries;
 	int				count;
+	int				original_stdin;
 }	t_heredoc;
 
 typedef struct s_parser
