@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe6.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:44:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:45:34 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 19:23:57 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,12 @@ static char	*handle_direct_path(t_shell *shell, char *cmd_path)
 {
 	if (access(cmd_path, F_OK) != 0)
 	{
-		print_error("minishell: %s: No such file or directory\n", cmd_path);
+		printf("minishell: %s: No such file or directory\n", cmd_path);
 		free_exit(shell, 127);
 	}
 	else if (access(cmd_path, X_OK) != 0)
 	{
-		print_error("minishell: %s: Permission denied\n", cmd_path);
+		printf("minishell: %s: Permission denied\n", cmd_path);
 		free_exit(shell, 126);
 	}
 	return (cmd_path);
@@ -34,7 +34,7 @@ static char	*handle_path_search(t_shell *shell, char *cmd_name)
 	path = find_command_path(shell, cmd_name);
 	if (!path)
 	{
-		print_error("minishell: %s: command not found\n", cmd_name);
+		printf("minishell: %s: command not found\n", cmd_name);
 		free_exit(shell, 127);
 	}
 	return (path);
@@ -43,7 +43,7 @@ static char	*handle_path_search(t_shell *shell, char *cmd_name)
 static void	run_command(t_shell *shell, char *path, char **args)
 {
 	execve(path, args, get_env_array(shell));
-	print_error("minishell: %s: %s\n", args[0], strerror(errno));
+	printf("minishell: %s: %s\n", args[0], strerror(errno));
 	free_exit(shell, 127);
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_extern3.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:33:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 07:37:11 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 19:24:14 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,12 @@ static char	*handle_direct_path(t_shell *shell, char *cmd_path)
 {
 	if (access(cmd_path, F_OK) != 0)
 	{
-		print_error("minishell: %s: No such file or directory\n", cmd_path);
+		printf("minishell: %s: No such file or directory\n", cmd_path);
 		free_exit(shell, 127);
 	}
 	else if (access(cmd_path, X_OK) != 0)
 	{
-		print_error("minishell: %s: Permission denied\n", cmd_path);
+		printf("minishell: %s: Permission denied\n", cmd_path);
 		free_exit(shell, 126);
 	}
 	return (cmd_path);
@@ -36,7 +36,7 @@ static char	*handle_command_path(t_shell *shell, char *cmd_name, int heredoc_fd)
 	{
 		if (heredoc_fd != -1)
 			close(heredoc_fd);
-		print_error("minishell: %s: command not found\n", cmd_name);
+		printf("minishell: %s: command not found\n", cmd_name);
 		free_exit(shell, 127);
 	}
 	return (path);
@@ -89,6 +89,6 @@ void	execute_command_in_child(t_shell *shell, t_command *cmd)
 	path = find_executable_path(shell, cmd, heredoc_fd);
 	setup_io_redirections(shell, cmd, heredoc_fd);
 	execve(path, cmd->args, get_env_array(shell));
-	print_error("minishell: %s: %s\n", cmd->args[0], strerror(errno));
+	printf("minishell: %s: %s\n", cmd->args[0], strerror(errno));
 	free_exit(shell, 127);
 }

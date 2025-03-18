@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redir_utils4.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:47:31 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 08:59:54 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 19:20:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@ static int	process_single_redirection(t_redirection *current, int *last_fd)
 		*last_fd = open_output_file(current);
 		if (*last_fd == -1)
 		{
-			print_error("minishell: %s: Permission denied\n",
-				current->filename);
+			printf("minishell: %s: Permission denied\n", current->filename);
 			return (1);
 		}
 	}
