@@ -21,8 +21,8 @@ int	ft_atoi(const char *str)
 	result = 0;
 	sign = 1;
 	i = 0;
-	while (str[i] == ' ' || str[i] == '\t' || str[i] == '\n'
-		|| str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
+	// while (str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\v' || str[i] == '\f' || str[i] == '\r')
+	while (isspace(str[i]))
 		i++;
 	if (str[i] == '-' || str[i] == '+')
 	{
@@ -92,8 +92,8 @@ int	handle_special_cases(char *str, size_t size, int n)
 
 int	ft_isspace(int c)
 {
-	if (c == ' ' || c == '\t'
-		|| c == '\n' || c == '\v' || c == '\f' || c == '\r')
+	if (c == ' ' || c == '\t')
+		// || c == '\n' || c == '\v' || c == '\f' || c == '\r')
 		return (1);
 	return (0);
 }

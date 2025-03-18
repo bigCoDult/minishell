@@ -37,7 +37,8 @@ t_token	*create_word_token(t_shell *shell, char **input, t_token *token)
 	char	*word;
 	int		word_len;
 
-	while (**input && **input == ' ')
+	// while (**input && **input == ' ')
+	while (**input && isspace(**input))
 		(*input)++;
 	word = handle_word(shell, *input, &word_len);
 	if (!word)
