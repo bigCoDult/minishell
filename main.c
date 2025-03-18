@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 08:25:36 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 08:03:18 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ static void	init_shell(t_shell *shell, char **envp)
 	shell->heredoc.original_stdin = -1;
 	shell->heredoc.entries = NULL;
 	shell->heredoc.count = 0;
-	shell->heredoc.temp_file = NULL;
 	shell->original_stdout = -1;
 	shell->original_stderr = -1;
 }
