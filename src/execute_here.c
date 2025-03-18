@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_here.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 08:11:52 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 18:34:40 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,9 +61,30 @@ int	find_command_heredoc_fd(t_shell *shell, t_command *cmd)
 	return (-1);
 }
 
+static void	setup_com_sub(t_redirection *redir, t_heredoc_entry *entry)
+{
+	int	heredoc_fd;
+
+	while (entry)
+	{
+		if (ft_strcmp(entry->delimiter, redir->filename) == 0)
+		{
+			if (entry->fd != -1)
+				close(entry->fd);
+			heredoc_fd = open(entry->temp_file, O_RDONLY);
+			if (heredoc_fd != -1)
+			{
+				dup2(heredoc_fd, STDIN_FILENO);
+				close(heredoc_fd);
+			}
+			break ;
+		}
+		entry = entry->next;
+	}
+}
+
 void	setup_command_heredoc(t_shell *shell, t_command *cmd)
 {
-	int				heredoc_fd;
 	t_redirection	*redir;
 	t_heredoc_entry	*entry;
 
@@ -73,22 +94,7 @@ void	setup_command_heredoc(t_shell *shell, t_command *cmd)
 		if (redir->type == REDIR_HEREDOC)
 		{
 			entry = shell->heredoc.entries;
-			while (entry)
-			{
-				if (ft_strcmp(entry->delimiter, redir->filename) == 0)
-				{
-					if (entry->fd != -1)
-						close(entry->fd);
-					heredoc_fd = open(entry->temp_file, O_RDONLY);
-					if (heredoc_fd != -1)
-					{
-						dup2(heredoc_fd, STDIN_FILENO);
-						close(heredoc_fd);
-					}
-					break ;
-				}
-				entry = entry->next;
-			}
+			setup_com_sub(redir, entry);
 		}
 		redir = redir->next;
 	}
