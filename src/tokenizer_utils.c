@@ -37,7 +37,10 @@ int	handle_quote_character(char c, t_token_state *state, int *dollar_sign)
 int	is_word_delimiter(char c, t_token_state state)
 {
 	if (!state.in_single_quote && !state.in_double_quote
-		&& (ft_isspace(c) || c == '|' || c == '<' || c == '>'))
+		// && (ft_isspace(c) || c == '|' || c == '<' || c == '>'))
+		// && (c == ' ' || c == '	' || c == '|' || c == '<' || c == '>'))
+		&& (c == ' ' || c == '|' || c == '<' || c == '>'))
+		// && (c == '|' || c == '<' || c == '>'))
 		return (1);
 	return (0);
 }
