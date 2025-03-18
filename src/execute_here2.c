@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_here2.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 15:01:47 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 08:01:56 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 18:18:44 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,10 @@
 
 char	*create_temp_heredoc_file(t_shell *shell)
 {
-	static int	count;
+	static int	count = 0;
 	char		*filename;
 	char		num[32];
 
-	count = 0;
 	ft_itoa_simple(num, count++);
 	filename = shell_malloc(shell, ft_strlen("/tmp/heredoc_")
 			+ ft_strlen(num) + 1);
