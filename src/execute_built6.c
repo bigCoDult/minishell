@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_built6.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:11:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/14 14:27:20 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 19:24:27 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static int	check_arg_length(t_shell *shell, char *arg)
 		|| (len == 20 && arg[0] == '-'
 			&& ft_strcmp(arg, "-9223372036854775808") > 0))
 	{
-		print_error("minishell: exit: %s: numeric argument required\n", arg);
+		printf("minishell: exit: %s: numeric argument required\n", arg);
 		handle_builtin_exit(shell, 2);
 		return (1);
 	}
@@ -47,7 +47,7 @@ static int	check_numeric_arg(t_shell *shell, char *arg)
 	{
 		if (!ft_isdigit(arg[i]))
 		{
-			print_error(
+			printf(
 				"minishell: exit: %s: numeric argument required\n", arg);
 			handle_builtin_exit(shell, 2);
 			return (1);
@@ -69,7 +69,7 @@ int	builtin_exit(t_shell *shell, char **args)
 			return (1);
 		if (args[2])
 		{
-			print_error("minishell: exit: too many arguments\n");
+			printf("minishell: exit: too many arguments\n");
 			shell->status.exit_code = 1;
 			return (1);
 		}

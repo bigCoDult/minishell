@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 08:12:12 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 19:25:02 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,10 +404,6 @@ void			free_non_heredoc_memory(t_shell *shell);
 
 t_tree			*convert_args_to_node(char **args, t_tree *node);
 t_env			*find_already(char *key, t_env *env_head);
-
-void			print_error(const char *format, ...);
-
-void			write_str(int fd, const char *str);
 
 void			add_keyvalue(t_env *input_env, t_env *env_head);
 char			*get_env(t_env *head, char *key);

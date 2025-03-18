@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redir_utils3.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:46:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 09:02:52 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 19:24:42 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ static int	process_single_input(t_redirection *current, int *last_fd)
 		*last_fd = open(current->filename, O_RDONLY);
 		if (*last_fd == -1)
 		{
-			print_error("minishell: %s: No such file or directory\n",
-				current->filename);
+			printf(
+				"minishell: %s: No such file or directory\n", current->filename);
 			return (1);
 		}
 	}
