@@ -3,26 +3,51 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe5.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:28:37 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:50:44 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 18:32:54 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	setup_right_command_io(t_shell *shell, t_command *cmd)
+static void	setup_right_sub(t_redirection *redir, t_heredoc_entry *entry)
 {
 	int	heredoc_fd;
 
-	heredoc_fd = find_command_heredoc_fd(shell, cmd);
-	if (heredoc_fd != -1)
+	while (entry)
 	{
-		close(heredoc_fd);
-		heredoc_fd = open(shell->heredoc.temp_file, O_RDONLY);
-		dup2(heredoc_fd, STDIN_FILENO);
-		close(heredoc_fd);
+		if (ft_strcmp(entry->delimiter, redir->filename) == 0)
+		{
+			if (entry->fd != -1)
+				close(entry->fd);
+			heredoc_fd = open(entry->temp_file, O_RDONLY);
+			if (heredoc_fd != -1)
+			{
+				dup2(heredoc_fd, STDIN_FILENO);
+				close(heredoc_fd);
+			}
+			break ;
+		}
+		entry = entry->next;
+	}
+}
+
+void	setup_right_command_io(t_shell *shell, t_command *cmd)
+{
+	t_redirection	*redir;
+	t_heredoc_entry	*entry;
+
+	redir = cmd->redirs;
+	while (redir)
+	{
+		if (redir->type == REDIR_HEREDOC)
+		{
+			entry = shell->heredoc.entries;
+			setup_right_sub(redir, entry);
+		}
+		redir = redir->next;
 	}
 	if (setup_redirections(shell, cmd->redirs) != 0)
 		free_exit(shell, 1);

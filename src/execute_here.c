@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_here.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/07 13:13:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 05:57:15 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/18 18:34:40 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,11 @@ void	free_heredoc_entries(t_shell *shell)
 		if (current->fd != -1)
 		{
 			close(current->fd);
+		}
+		if (current->temp_file)
+		{
+			unlink(current->temp_file);
+			shell_free(shell, current->temp_file);
 		}
 		shell_free(shell, current->delimiter);
 		shell_free(shell, current);
@@ -56,15 +61,41 @@ int	find_command_heredoc_fd(t_shell *shell, t_command *cmd)
 	return (-1);
 }
 
-void	setup_command_heredoc(t_shell *shell, t_command *cmd)
+static void	setup_com_sub(t_redirection *redir, t_heredoc_entry *entry)
 {
 	int	heredoc_fd;
 
-	heredoc_fd = find_command_heredoc_fd(shell, cmd);
-	if (heredoc_fd != -1)
+	while (entry)
 	{
-		close(heredoc_fd);
-		heredoc_fd = open(shell->heredoc.temp_file, O_RDONLY);
-		dup2(heredoc_fd, STDIN_FILENO);
+		if (ft_strcmp(entry->delimiter, redir->filename) == 0)
+		{
+			if (entry->fd != -1)
+				close(entry->fd);
+			heredoc_fd = open(entry->temp_file, O_RDONLY);
+			if (heredoc_fd != -1)
+			{
+				dup2(heredoc_fd, STDIN_FILENO);
+				close(heredoc_fd);
+			}
+			break ;
+		}
+		entry = entry->next;
+	}
+}
+
+void	setup_command_heredoc(t_shell *shell, t_command *cmd)
+{
+	t_redirection	*redir;
+	t_heredoc_entry	*entry;
+
+	redir = cmd->redirs;
+	while (redir)
+	{
+		if (redir->type == REDIR_HEREDOC)
+		{
+			entry = shell->heredoc.entries;
+			setup_com_sub(redir, entry);
+		}
+		redir = redir->next;
 	}
 }
