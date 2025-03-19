@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:33:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 10:49:10 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 13:00:53 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,9 @@ static void	setup_io_redirections(t_shell *shell,
 	t_command *cmd, int heredoc_fd)
 {
 	int	original_stdout;
+	int	has_input_redirection;
 
+	has_input_redirection = 0;
 	original_stdout = dup(STDOUT_FILENO);
 	if (original_stdout == -1)
 	{
@@ -66,20 +68,38 @@ static void	setup_io_redirections(t_shell *shell,
 		perror("dup");
 		free_exit(shell, 1);
 	}
+
+	// 입력 리다이렉션 여부 확인
+	t_redirection *current = cmd->redirs;
+	while (current)
+	{
+		if (current->type == REDIR_IN)
+		{
+			has_input_redirection = 1;
+			break;
+		}
+		current = current->next;
+	}
+
+	// 히어독이 있지만 입력 리다이렉션이 없는 경우에만 히어독 적용
+	if (heredoc_fd != -1 && !has_input_redirection)
+	{
+		dup2(heredoc_fd, STDIN_FILENO);
+		close(heredoc_fd);
+	}
+	else if (heredoc_fd != -1)
+	{
+		// 입력 리다이렉션이 있으면 히어독 FD는 더 이상 필요 없음
+		close(heredoc_fd);
+	}
+
 	if (cmd->redirs && setup_redirections(shell, cmd->redirs) != 0)
 	{
-		if (heredoc_fd != -1)
-			close(heredoc_fd);
 		dup2(original_stdout, STDOUT_FILENO);
 		close(original_stdout);
 		free_exit(shell, 1);
 	}
 	close(original_stdout);
-	if (heredoc_fd != -1)
-	{
-		dup2(heredoc_fd, STDIN_FILENO);
-		close(heredoc_fd);
-	}
 }
 
 void	execute_command_in_child(t_shell *shell, t_command *cmd)

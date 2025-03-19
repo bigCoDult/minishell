@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redir_utils3.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:46:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 19:24:42 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 13:01:27 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,13 @@ int	handle_input_redirections(t_shell *shell, t_redirection *redirs)
 	current = redirs;
 	while (current)
 	{
-		if (process_single_input(current, &last_fd))
+		if (current->type == REDIR_IN)
 		{
-			restore_io(shell);
-			return (1);
+			if (process_single_input(current, &last_fd))
+			{
+				restore_io(shell);
+				return (1);
+			}
 		}
 		current = current->next;
 	}
