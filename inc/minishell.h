@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 19:25:02 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 10:48:36 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,6 +242,8 @@ char			*find_executable(t_shell *shell, const char *cmd);
 char			*search_command_in_paths(t_shell *shell,
 					const char *cmd, char **paths);
 char			*find_command_path(t_shell *shell, const char *cmd);
+char			*handle_direct_path(t_shell *shell, char *cmd_path);
+char			*handle_path_search(t_shell *shell, char *cmd_name);
 
 int				handle_heredocs_recursive(t_shell *shell, t_ast_node *node);
 void			setup_pipe(t_shell *shell, int pipefd[2],

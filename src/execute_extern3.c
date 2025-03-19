@@ -6,13 +6,13 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:33:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 05:20:11 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 10:49:10 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static char	*handle_direct_path(t_shell *shell, char *cmd_path)
+static char	*handle_direct_paths(t_shell *shell, char *cmd_path)
 {
 	if (access(cmd_path, F_OK) != 0)
 	{
@@ -48,7 +48,7 @@ static char	*find_executable_path(t_shell *shell,
 	t_command *cmd, int heredoc_fd)
 {
 	if (ft_strchr(cmd->args[0], '/'))
-		return (handle_direct_path(shell, cmd->args[0]));
+		return (handle_direct_paths(shell, cmd->args[0]));
 	else
 		return (handle_command_path(shell, cmd->args[0], heredoc_fd));
 }

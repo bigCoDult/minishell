@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:28:37 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 10:24:49 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 10:56:51 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,12 @@ void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 			free_exit(shell, ret);
 		}
 		else if (node->left->cmd->args && node->left->cmd->args[0])
+		{
+			// 명령어가 존재하지만 빌트인이 아닌 경우
+			// 명령어 존재 여부 검증은 execute_ast에서 이미 수행했으므로,
+			// 여기서는 에러 메시지 출력 없이 바로 실행 시도
 			execute_external_command(shell, node->left->cmd);
+		}
 		else
 			free_exit(shell, 0);
 	}
