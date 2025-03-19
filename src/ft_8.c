@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_8.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:45:08 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 19:23:21 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 09:53:34 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,11 +77,10 @@ void	process_export_value(t_env *input_env, t_env *env_head, char *str,
 		{
 			if (target_env->value)
 				shell_free(shell, target_env->value);
-			target_env->value = dup_val(input_env->value, shell);
+			target_env->value = shell_strdup(shell, input_env->value);
 		}
 		else
-			add_env_value(shell, input_env->key,
-				dup_val(input_env->value, shell));
+			add_env_value(shell, input_env->key, input_env->value);
 	}
 }
 

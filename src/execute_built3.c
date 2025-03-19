@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 13:53:23 by sanbaek           #+#    #+#             */
-/*   Updated: 2025/03/15 08:15:41 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 09:59:51 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,20 +79,20 @@ void	stretch_value(t_env *input_env, t_env *env_head, t_shell *shell)
 	target_env = find_already(input_env->key, env_head);
 	if (!target_env)
 	{
-		add_env_value(shell, input_env->key, dup_val(input_env->value, shell));
+		add_env_value(shell, input_env->key, input_env->value);
 		return ;
 	}
 	if (input_env->value[0] == '\0')
 	{
 		if (target_env->value)
 			shell_free(shell, target_env->value);
-		target_env->value = dup_val(input_env->value, shell);
+		target_env->value = shell_strdup(shell, input_env->value);
 		return ;
 	}
 	if (target_env->value)
 		update_target_env_with_concat(target_env, input_env->value, shell);
 	else
-		target_env->value = dup_val(input_env->value, shell);
+		target_env->value = shell_strdup(shell, input_env->value);
 }
 
 int	builtin_export(t_shell *shell, char **args)

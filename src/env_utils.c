@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 13:27:33 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/05 13:28:00 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 10:07:38 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,18 +36,18 @@ void	add_env_value(t_shell *shell, const char *key, const char *value)
 {
 	t_env	*new_node;
 
-	new_node = malloc(sizeof(t_env));
+	new_node = shell_malloc(shell, sizeof(t_env));
 	if (!new_node)
 		return ;
-	new_node->key = ft_strdup(key);
+	new_node->key = shell_strdup(shell, key);
 	if (value)
-		new_node->value = ft_strdup(value);
+		new_node->value = shell_strdup(shell, value);
 	else
 		new_node->value = NULL;
 	new_node->next = NULL;
 	if (!new_node->key)
 	{
-		free(new_node);
+		shell_free(shell, new_node);
 		return ;
 	}
 	new_node->next = shell->env;
@@ -67,11 +67,11 @@ void	set_env_value(t_shell *shell, const char *key, const char *value)
 		{
 			if (current->value)
 			{
-				free(current->value);
+				shell_free(shell, current->value);
 				current->value = NULL;
 			}
 			if (value)
-				current->value = ft_strdup(value);
+				current->value = shell_strdup(shell, value);
 			return ;
 		}
 		current = current->next;
@@ -83,12 +83,11 @@ t_env	*create_env_node(t_shell *shell, char *key, char *value)
 {
 	t_env	*new_node;
 
-	(void)shell;
-	new_node = malloc(sizeof(t_env));
+	new_node = shell_malloc(shell, sizeof(t_env));
 	if (!new_node)
 		return (NULL);
-	new_node->key = ft_strdup(key);
-	new_node->value = ft_strdup(value);
+	new_node->key = shell_strdup(shell, key);
+	new_node->value = shell_strdup(shell, value);
 	new_node->next = NULL;
 	return (new_node);
 }
