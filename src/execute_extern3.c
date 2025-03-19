@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_extern3.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:33:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 19:24:14 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 05:20:11 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,9 @@ static char	*handle_command_path(t_shell *shell, char *cmd_name, int heredoc_fd)
 	{
 		if (heredoc_fd != -1)
 			close(heredoc_fd);
-		printf("minishell: %s: command not found\n", cmd_name);
+		write(STDERR_FILENO, "minishell: ", 11);
+		write(STDERR_FILENO, cmd_name, ft_strlen(cmd_name));
+		write(STDERR_FILENO, ": command not found\n", 20);
 		free_exit(shell, 127);
 	}
 	return (path);
