@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 10:51:15 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 16:40:35 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,18 +51,12 @@ int	process_heredocs(t_shell *shell, t_redirection *redirs)
 
 int	process_redirection(t_shell *shell, t_redirection *redirs)
 {
-	t_redirection	*redir;
-
-	redir = redirs;
-	while (redir)
-	{
-		if (redir->type != REDIR_HEREDOC)
-		{
-			if (setup_redirections(shell, redir) != 0)
-				return (1);
-		}
-		redir = redir->next;
-	}
+	if (!redirs)
+		return (0);
+	
+	if (setup_redirections(shell, redirs) != 0)
+		return (1);
+	
 	return (0);
 }
 
@@ -82,7 +76,7 @@ static void	verify_command(t_shell *shell, t_command *cmd)
 	if (ft_strchr(cmd->args[0], '/'))
 	{
 		if (access(cmd->args[0], F_OK) != 0)
-			printf("minishell: %s: No such file or directory\n", cmd->args[0]);
+			printf("minishell: %s: Nos such file or directory\n", cmd->args[0]);
 		else if (access(cmd->args[0], X_OK) != 0)
 			printf("minishell: %s: Permission denied\n", cmd->args[0]);
 		return;
