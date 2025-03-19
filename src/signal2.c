@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 19:09:47 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 17:54:59 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 11:00:02 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	interactive_signal_handler(int signo)
 	}
 	else if (signo == SIGQUIT)
 	{
-		g_signal = 131;
+		g_signal = 0;
 		rl_on_new_line();
 		rl_redisplay();
 	}
