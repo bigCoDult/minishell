@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_redir.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:15:26 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 16:51:34 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 12:43:24 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,18 @@ t_token	*create_word_token(t_shell *shell, char **input, t_token *token)
 
 	while (**input && ft_isspace(**input))
 		(*input)++;
+		
+	// 파일명이 없는 경우(입력의 끝이거나 다른 리다이렉션이나 파이프)
+	if (!**input || **input == '|' || **input == '<' || **input == '>')
+	{
+		// 에러 메시지 출력
+		printf("minishell: syntax error near unexpected token `%c'\n", 
+			**input ? **input : '\n');
+		shell->status.exit_code = 258;  // 구문 오류 표준 종료 코드
+		shell_free(shell, token);
+		return (NULL);
+	}
+	
 	word = handle_word(shell, *input, &word_len);
 	if (!word)
 	{
