@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:36:06 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 08:48:20 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 16:42:02 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,11 @@ int	open_output_file(t_redirection *redir)
 
 int	setup_redirections(t_shell *shell, t_redirection *redirs)
 {
+	t_redirection	*current;
+	int				input_fd;
+	int				output_fd;
+	int				heredoc_fd;
+
 	if (!redirs)
 		return (0);
 	if (backup_original_fds(shell))
@@ -66,9 +71,63 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		cleanup_backup_fds(shell);
 		return (1);
 	}
-	if (handle_input_redirections(shell, redirs))
-		return (1);
-	if (handle_output_redirections(shell, redirs))
-		return (1);
+
+	current = redirs;
+	while (current)
+	{
+		if (current->type == REDIR_IN)
+		{
+			input_fd = open(current->filename, O_RDONLY);
+			if (input_fd == -1)
+			{
+				write(2, "minishell: ", 11);
+				write(2, current->filename, ft_strlen(current->filename));
+				write(2, ": No such file or directory\n", 28);
+				restore_io(shell);
+				return (1);
+			}
+			if (dup2(input_fd, STDIN_FILENO) == -1)
+			{
+				close(input_fd);
+				restore_io(shell);
+				return (1);
+			}
+			close(input_fd);
+		}
+		else if (current->type == REDIR_OUT || current->type == REDIR_APPEND)
+		{
+			output_fd = open_output_file(current);
+			if (output_fd == -1)
+			{
+				printf("minishell: %s: Permission denied\n", current->filename);
+				restore_io(shell);
+				return (1);
+			}
+			if (dup2(output_fd, STDOUT_FILENO) == -1)
+			{
+				close(output_fd);
+				restore_io(shell);
+				return (1);
+			}
+			close(output_fd);
+		}
+		else if (current->type == REDIR_HEREDOC)
+		{
+			heredoc_fd = get_heredoc_fd(shell, current->filename);
+			if (heredoc_fd == -1)
+			{
+				restore_io(shell);
+				return (1);
+			}
+			if (dup2(heredoc_fd, STDIN_FILENO) == -1)
+			{
+				close(heredoc_fd);
+				restore_io(shell);
+				return (1);
+			}
+			close(heredoc_fd);
+		}
+		current = current->next;
+	}
 	return (0);
 }
