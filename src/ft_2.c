@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 12:41:01 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/12 14:19:39 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 10:22:57 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,13 @@
 
 int	ft_strcmp(const char *s1, const char *s2)
 {
+	if (!s1 && !s2)
+		return (0);
+	if (!s1)
+		return (-1);
+	if (!s2)
+		return (1);
+		
 	while (*s1 && (*s1 == *s2))
 	{
 		s1++;

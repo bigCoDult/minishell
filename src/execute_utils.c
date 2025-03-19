@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sanbaek <sanbaek@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:37:56 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 19:04:36 by sanbaek          ###   ########.fr       */
+/*   Updated: 2025/03/19 10:24:30 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 
 int	is_builtin(char *cmd_name)
 {
+	if (!cmd_name)
+		return (0);
+		
 	return (!ft_strcmp(cmd_name, "echo")
 		|| !ft_strcmp(cmd_name, "cd")
 		|| !ft_strcmp(cmd_name, "pwd")
@@ -26,6 +29,10 @@ int	is_builtin(char *cmd_name)
 int	execute_builtin(t_shell *shell, t_command *cmd)
 {
 	shell->status.exit_code = 0;
+	
+	if (!cmd || !cmd->args || !cmd->args[0])
+		return (0);
+		
 	if (!ft_strcmp(cmd->args[0], "echo"))
 		return (builtin_echo(cmd->args));
 	else if (!ft_strcmp(cmd->args[0], "pwd"))

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:44:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 05:19:12 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 10:24:49 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,13 @@ void	execute_external_command(t_shell *shell, t_command *cmd)
 {
 	char	*path;
 
+	if (!cmd || !cmd->args || !cmd->args[0])
+	{
+		// 명령어가 없는 경우
+		free_exit(shell, 0);
+		return;
+	}
+	
 	if (ft_strchr(cmd->args[0], '/'))
 		path = handle_direct_path(shell, cmd->args[0]);
 	else

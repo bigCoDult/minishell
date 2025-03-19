@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe5.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:28:37 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 18:32:54 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 10:24:49 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,13 +68,15 @@ void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 	if (node->left->type == AST_COMMAND)
 	{
 		setup_left_command_io(shell, node->left->cmd);
-		if (is_builtin(node->left->cmd->args[0]))
+		if (node->left->cmd->args && node->left->cmd->args[0] && is_builtin(node->left->cmd->args[0]))
 		{
 			ret = execute_builtin(shell, node->left->cmd);
 			free_exit(shell, ret);
 		}
-		else
+		else if (node->left->cmd->args && node->left->cmd->args[0])
 			execute_external_command(shell, node->left->cmd);
+		else
+			free_exit(shell, 0);
 	}
 	write(STDERR_FILENO, "minishell: left command error\n", 30);
 	free_exit(shell, 1);
