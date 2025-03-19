@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:42:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 08:11:41 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 11:40:06 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,9 @@ void	remove_env_var(t_shell *shell, const char *key)
 	t_env	*current;
 	t_env	*prev;
 
+	if (!shell || !key || !shell->env)
+		return;
+		
 	current = shell->env;
 	prev = NULL;
 	while (current)
@@ -27,10 +30,14 @@ void	remove_env_var(t_shell *shell, const char *key)
 				prev->next = current->next;
 			else
 				shell->env = current->next;
-			free(current->key);
-			free(current->value);
-			free(current);
-			break ;
+				
+			// shell_free 함수로 메모리 해제
+			if (current->key)
+				shell_free(shell, current->key);
+			if (current->value)
+				shell_free(shell, current->value);
+			shell_free(shell, current);
+			return;
 		}
 		prev = current;
 		current = current->next;

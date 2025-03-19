@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_built6.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:11:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 19:24:27 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/19 11:21:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,13 @@ static int	check_arg_length(t_shell *shell, char *arg)
 	size_t	len;
 
 	len = ft_strlen(arg);
-	if (len > 20 || (len == 20 && arg[0] != '-'
+	if (len > 20 || (len == 19 && arg[0] != '-'
 			&& ft_strcmp(arg, "9223372036854775807") > 0)
 		|| (len == 20 && arg[0] == '-'
 			&& ft_strcmp(arg, "-9223372036854775808") > 0))
 	{
 		printf("minishell: exit: %s: numeric argument required\n", arg);
-		handle_builtin_exit(shell, 2);
+		handle_builtin_exit(shell, 255);
 		return (1);
 	}
 	return (0);
@@ -49,7 +49,7 @@ static int	check_numeric_arg(t_shell *shell, char *arg)
 		{
 			printf(
 				"minishell: exit: %s: numeric argument required\n", arg);
-			handle_builtin_exit(shell, 2);
+			handle_builtin_exit(shell, 255);
 			return (1);
 		}
 		i++;
