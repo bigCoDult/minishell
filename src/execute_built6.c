@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_built6.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:11:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 11:21:13 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 17:22:06 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static int	check_arg_length(t_shell *shell, char *arg)
 			&& ft_strcmp(arg, "-9223372036854775808") > 0))
 	{
 		printf("minishell: exit: %s: numeric argument required\n", arg);
-		handle_builtin_exit(shell, 255);
+		handle_builtin_exit(shell, 2);
 		return (1);
 	}
 	return (0);
@@ -49,7 +49,7 @@ static int	check_numeric_arg(t_shell *shell, char *arg)
 		{
 			printf(
 				"minishell: exit: %s: numeric argument required\n", arg);
-			handle_builtin_exit(shell, 255);
+			handle_builtin_exit(shell, 2);
 			return (1);
 		}
 		i++;
