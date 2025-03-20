@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 06:11:09 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 06:44:41 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -433,4 +433,6 @@ int				handle_output_redirections(t_shell *shell,
 void			exit_setup(t_shell *shell);
 void			exit_loop(t_shell *shell);
 
+int				process_single_input(t_redirection *current,
+					int *last_fd, t_shell *shell);
 #endif
