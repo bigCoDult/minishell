@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_3.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 13:53:06 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/18 16:52:11 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 10:48:00 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ int	handle_special_cases(char *str, size_t size, int n)
 
 int	ft_isspace(int c)
 {
-	if (c == ' ' || c == '\t')
+	if (c == ' ' || c == '\t' || c == '\n')
 		return (1);
 	return (0);
 }
