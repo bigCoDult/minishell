@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   memory_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 13:37:51 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 10:18:38 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 14:29:52 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,11 @@ void	free_command_memory(t_shell *shell)
 
 	if (!shell || !shell->memory)
 		return ;
-		
 	current = shell->memory;
 	prev = NULL;
 	while (current)
 	{
 		next = current->next;
-		// 환경 변수 메모리는 보존
 		if (!is_env_memory(shell, current->addr))
 		{
 			if (current->addr)
@@ -49,10 +47,8 @@ static int	is_heredoc_memory(t_shell *shell, void *addr)
 
 	if (!shell || !addr)
 		return (0);
-		
 	if (!shell->heredoc.entries)
 		return (0);
-		
 	entry = shell->heredoc.entries;
 	if (addr == entry
 		|| (addr >= (void *)entry
@@ -82,13 +78,11 @@ void	free_non_heredoc_memory(t_shell *shell)
 
 	if (!shell || !shell->memory)
 		return ;
-		
 	current = shell->memory;
 	prev = NULL;
 	while (current)
 	{
 		next = current->next;
-		// heredoc 메모리와 환경 변수 메모리는 보존
 		if (!is_heredoc_memory(shell, current->addr)
 			&& !is_env_memory(shell, current->addr))
 			free_memory_node(shell, current, prev, next);

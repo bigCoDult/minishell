@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redir_utils2.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:36:06 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 04:02:57 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 14:28:42 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int	open_output_file(t_redirection *redir)
 int	setup_redirections(t_shell *shell, t_redirection *redirs)
 {
 	int	has_input_error;
-	
+
 	if (!redirs)
 		return (0);
 	if (backup_original_fds(shell))
@@ -68,14 +68,8 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		cleanup_backup_fds(shell);
 		return (1);
 	}
-	
-	// 먼저 출력 리다이렉션 처리 (파일 생성)
 	if (handle_output_redirections(shell, redirs))
 		return (1);
-	
-	// 히어독 및 입력 리다이렉션을 처리
 	has_input_error = handle_input_redirections(shell, redirs);
-	
-	// 입력 리다이렉션 오류가 있으면 오류 반환
 	return (has_input_error);
 }

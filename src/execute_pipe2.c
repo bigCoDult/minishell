@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe2.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 04:32:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 05:14:19 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 14:38:13 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,75 +74,56 @@ static int	wait_for_children(pid_t pid1, pid_t pid2)
 
 int	execute_pipe(t_shell *shell, t_ast_node *node)
 {
-	int		pipefd[2];
-	pid_t	pid1;
-	pid_t	pid2;
-	int		status1;
-	int		check_redir_result;
-	int		left_failed = 0;
-	int		stderr_backup;
+	int				pipefd[2];
+	pid_t			pid1;
+	pid_t			pid2;
+	int				status1;
+	int				check_redir_result;
+	int				left_failed;
+	int				stderr_backup;
+	int				dev_null;
+	int				file_fd;
+	t_redirection	*redir;
 
+	left_failed = 0;
 	if (!node || !node->left || !node->right)
 		return (1);
-	
-	// 표준 에러 백업
 	stderr_backup = dup(STDERR_FILENO);
 	if (stderr_backup == -1)
 	{
 		perror("dup");
 		return (1);
 	}
-		
-	// 왼쪽 명령어의 리다이렉션만 먼저 확인 (오류 메시지 숨김)
 	if (node->left->type == AST_COMMAND && node->left->cmd->redirs)
 	{
-		// 자식 프로세스를 생성하여 리다이렉션만 테스트
 		check_redir_result = fork();
 		if (check_redir_result == 0)
 		{
-			// 표준 에러를 /dev/null로 리다이렉션
-			int dev_null = open("/dev/null", O_WRONLY);
+			dev_null = open("/dev/null", O_WRONLY);
 			if (dev_null != -1)
 			{
 				dup2(dev_null, STDERR_FILENO);
 				close(dev_null);
 			}
-			
-			// 자식 프로세스에서는 리다이렉션 설정만 테스트
 			if (setup_redirections(shell, node->left->cmd->redirs) != 0)
-			{
-				// 리다이렉션 설정 실패 시 종료
 				free_exit(shell, 1);
-			}
-			// 리다이렉션 성공 시 정상 종료
 			free_exit(shell, 0);
 		}
-		
-		// 부모 프로세스에서는 자식의 결과를 기다림
 		waitpid(check_redir_result, &status1, 0);
-		
-		// 리다이렉션 오류가 있으면 왼쪽 명령어는 실행하지 않음
 		if (WIFEXITED(status1) && WEXITSTATUS(status1) != 0)
-		{
 			left_failed = 1;
-		}
 	}
-	
-	// 오른쪽 명령어의 리다이렉션도 확인
 	if (node->right->type == AST_COMMAND && node->right->cmd->redirs)
 	{
-		// 자식 프로세스를 생성하여 리다이렉션만 테스트
 		check_redir_result = fork();
 		if (check_redir_result == 0)
 		{
-			// 입력 리다이렉션만 테스트 (출력 파일 생성 방지)
-			t_redirection *redir = node->right->cmd->redirs;
+			redir = node->right->cmd->redirs;
 			while (redir)
 			{
-				// 일반 입력 리다이렉션만 검사, heredoc은 건너뜀
 				if (redir->type == REDIR_IN)
 				{
-					int file_fd = open(redir->filename, O_RDONLY);
+					file_fd = open(redir->filename, O_RDONLY);
 					if (file_fd == -1)
 					{
 						write(STDERR_FILENO, "minishell: ", 11);
@@ -158,11 +139,8 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 		}
 		waitpid(check_redir_result, NULL, 0);
 	}
-	
-	// 왼쪽 명령어가 실패했으면 오류 메시지 출력
 	if (left_failed)
 	{
-		// 실제 명령을 실행하여 오류 메시지만 출력
 		check_redir_result = fork();
 		if (check_redir_result == 0)
 		{
@@ -170,19 +148,14 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 			free_exit(shell, 1);
 		}
 		waitpid(check_redir_result, NULL, 0);
-		
-		// 파이프 실행하지 않고 종료
 		close(stderr_backup);
 		return (1);
 	}
-	
-	// 파이프 생성 및 명령 실행
 	if (setup_pipe_in(pipefd))
 	{
 		close(stderr_backup);
 		return (1);
 	}
-	
 	pid1 = execute_left_child(shell, node, pipefd);
 	if (pid1 == -1)
 	{
@@ -191,7 +164,6 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 		close(stderr_backup);
 		return (1);
 	}
-	
 	pid2 = execute_right_child(shell, node, pipefd, pid1);
 	if (pid2 == -1)
 	{
@@ -200,10 +172,8 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 		close(stderr_backup);
 		return (1);
 	}
-	
 	close(pipefd[0]);
 	close(pipefd[1]);
 	close(stderr_backup);
-	
 	return (wait_for_children(pid1, pid2));
 }

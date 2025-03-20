@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_extern3.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:33:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 04:07:30 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 14:33:45 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ static void	setup_io_redirections(t_shell *shell,
 	int				original_stdout;
 	int				redir_status;
 
-	// 표준 출력 백업
 	original_stdout = dup(STDOUT_FILENO);
 	if (original_stdout == -1)
 	{
@@ -68,12 +67,8 @@ static void	setup_io_redirections(t_shell *shell,
 		perror("dup");
 		free_exit(shell, 1);
 	}
-
-	// heredoc_fd는 더 이상 필요 없음 - setup_redirections에서 리다이렉션 처리
 	if (heredoc_fd != -1)
 		close(heredoc_fd);
-		
-	// 모든 리다이렉션 처리 (히어독 및 일반 리다이렉션 포함)
 	if (cmd->redirs)
 	{
 		redir_status = setup_redirections(shell, cmd->redirs);
@@ -81,12 +76,9 @@ static void	setup_io_redirections(t_shell *shell,
 		{
 			dup2(original_stdout, STDOUT_FILENO);
 			close(original_stdout);
-			// 입력 리다이렉션 오류로 명령어를 실행하지 않고 종료
 			free_exit(shell, 1);
 		}
 	}
-
-	// 백업 파일 디스크립터 닫기
 	close(original_stdout);
 }
 
@@ -102,4 +94,3 @@ void	execute_command_in_child(t_shell *shell, t_command *cmd)
 	printf("minishell: %s: %s\n", cmd->args[0], strerror(errno));
 	free_exit(shell, 127);
 }
-
