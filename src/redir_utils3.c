@@ -6,14 +6,16 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:46:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 13:01:27 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 03:38:28 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	process_single_input(t_redirection *current, int *last_fd)
+static int	process_single_input(t_redirection *current, int *last_fd, t_shell *shell)
 {
+	t_heredoc_entry	*entry;
+
 	if (current->type == REDIR_IN)
 	{
 		if (*last_fd != -1)
@@ -25,6 +27,33 @@ static int	process_single_input(t_redirection *current, int *last_fd)
 				"minishell: %s: No such file or directory\n", current->filename);
 			return (1);
 		}
+	}
+	else if (current->type == REDIR_HEREDOC)
+	{
+		if (*last_fd != -1)
+			close(*last_fd);
+			
+		// 히어독 엔트리 찾기
+		entry = shell->heredoc.entries;
+		while (entry)
+		{
+			if (ft_strcmp(entry->delimiter, current->filename) == 0)
+			{
+				// 임시 파일을 열어서 last_fd에 할당
+				*last_fd = open(entry->temp_file, O_RDONLY);
+				if (*last_fd == -1)
+				{
+					printf("minishell: Failed to open heredoc file\n");
+					return (1);
+				}
+				return (0);
+			}
+			entry = entry->next;
+		}
+		
+		// 히어독 엔트리를 찾지 못한 경우
+		printf("minishell: Heredoc not found for %s\n", current->filename);
+		return (1);
 	}
 	return (0);
 }
@@ -53,9 +82,10 @@ int	handle_input_redirections(t_shell *shell, t_redirection *redirs)
 	current = redirs;
 	while (current)
 	{
-		if (current->type == REDIR_IN)
+		// 입력 리다이렉션과 히어독만 처리
+		if (current->type == REDIR_IN || current->type == REDIR_HEREDOC)
 		{
-			if (process_single_input(current, &last_fd))
+			if (process_single_input(current, &last_fd, shell))
 			{
 				restore_io(shell);
 				return (1);
