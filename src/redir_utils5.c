@@ -6,17 +6,39 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 06:44:08 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 06:44:51 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 06:54:59 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	process_single_input(t_redirection *current,
-	int *last_fd, t_shell *shell)
+static int	find_and_open_heredoc(
+	t_heredoc_entry *entries, const char *delimiter, int *last_fd)
 {
 	t_heredoc_entry	*entry;
 
+	entry = entries;
+	while (entry)
+	{
+		if (ft_strcmp(entry->delimiter, delimiter) == 0)
+		{
+			*last_fd = open(entry->temp_file, O_RDONLY);
+			if (*last_fd == -1)
+			{
+				printf("minishell: Failed to open heredoc file\n");
+				return (1);
+			}
+			return (0);
+		}
+		entry = entry->next;
+	}
+	printf("minishell: Heredoc not found for %s\n", delimiter);
+	return (1);
+}
+
+int	process_single_input(t_redirection *current,
+	int *last_fd, t_shell *shell)
+{
 	if (current->type == REDIR_IN)
 	{
 		if (*last_fd != -1)
@@ -35,23 +57,8 @@ int	process_single_input(t_redirection *current,
 	{
 		if (*last_fd != -1)
 			close(*last_fd);
-		entry = shell->heredoc.entries;
-		while (entry)
-		{
-			if (ft_strcmp(entry->delimiter, current->filename) == 0)
-			{
-				*last_fd = open(entry->temp_file, O_RDONLY);
-				if (*last_fd == -1)
-				{
-					printf("minishell: Failed to open heredoc file\n");
-					return (1);
-				}
-				return (0);
-			}
-			entry = entry->next;
-		}
-		printf("minishell: Heredoc not found for %s\n", current->filename);
-		return (1);
+		return (find_and_open_heredoc(
+				shell->heredoc.entries, current->filename, last_fd));
 	}
 	return (0);
 }
