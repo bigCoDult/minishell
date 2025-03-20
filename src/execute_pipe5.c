@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:28:37 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 04:02:57 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 04:25:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,16 +56,12 @@ void	setup_right_command_io(t_shell *shell, t_command *cmd)
 void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 {
 	int	ret;
-	int	redir_status;
 
 	close(pipefd[0]);
 	
 	if (node->left->type == AST_COMMAND)
 	{
-		// 먼저 리다이렉션 설정 - 파일만 생성/열고 오류 여부는 체크
-		redir_status = setup_redirections(shell, node->left->cmd->redirs);
-		
-		// 그 다음 파이프 설정 
+		// 파이프 설정
 		if (dup2(pipefd[1], STDOUT_FILENO) == -1)
 		{
 			perror("dup2 error in left command");
@@ -74,10 +70,13 @@ void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 		}
 		close(pipefd[1]);
 		
-		// 입력 리다이렉션 오류가 있으면 명령어 실행하지 않음
-		if (redir_status != 0)
+		// 리다이렉션 설정
+		if (setup_redirections(shell, node->left->cmd->redirs) != 0)
+		{
+			// 리다이렉션 실패 시 파이프는 닫고 종료
 			free_exit(shell, 1);
-			
+		}
+		
 		if (node->left->cmd->args && node->left->cmd->args[0] && is_builtin(node->left->cmd->args[0]))
 		{
 			ret = execute_builtin(shell, node->left->cmd);
