@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 05:53:44 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 18:01:59 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 21:25:36 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ static int	check_input_validity(t_shell *shell, char **input, t_token *token)
 		else
 			printf(
 				"minishell: syntax error near unexpected token `%c'\n", '\n');
-		shell->status.exit_code = 1;
+		shell->status.exit_code = 2;
 		shell_free(shell, token);
 		return (1);
 	}

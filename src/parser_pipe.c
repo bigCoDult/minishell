@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/05 01:43:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 18:03:05 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 21:23:09 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ static int	handle_pipe_error(t_shell *shell, t_token **tokens)
 	{
 		write(STDERR_FILENO,
 			"minishell: syntax error near unexpected token '|'\n", 51);
-		shell->status.exit_code = 1;
+		shell->status.exit_code = 2;
 		return (1);
 	}
 	return (0);

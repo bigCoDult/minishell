@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 05:08:31 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 18:03:21 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 21:23:16 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@ static int	handle_error_in_tokens(t_shell *shell, t_token *last_token)
 	{
 		write(STDERR_FILENO,
 			"minishell: syntax error near unexpected token '|'\n", 51);
-		shell->status.exit_code = 1;
+		shell->status.exit_code = 2;
 		return (1);
 	}
 	else if (last_token->type == TOKEN_REDIR)
 	{
 		write(STDERR_FILENO,
 			"minishell: syntax error near unexpected token `newline'\n", 56);
-		shell->status.exit_code = 1;
+		shell->status.exit_code = 2;
 		return (1);
 	}
 	return (0);
