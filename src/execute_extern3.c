@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:33:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 16:36:35 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 03:38:28 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,9 @@ static char	*find_executable_path(t_shell *shell,
 static void	setup_io_redirections(t_shell *shell,
 	t_command *cmd, int heredoc_fd)
 {
-	int	original_stdout;
-	int	has_input_redirection;
+	int				original_stdout;
 
-	has_input_redirection = 0;
+	// 표준 출력 백업
 	original_stdout = dup(STDOUT_FILENO);
 	if (original_stdout == -1)
 	{
@@ -69,36 +68,19 @@ static void	setup_io_redirections(t_shell *shell,
 		free_exit(shell, 1);
 	}
 
-	// 입력 리다이렉션 여부 확인
-	t_redirection *current = cmd->redirs;
-	while (current)
-	{
-		if (current->type == REDIR_IN)
-		{
-			has_input_redirection = 1;
-			break;
-		}
-		current = current->next;
-	}
-
-	// 히어독이 있지만 입력 리다이렉션이 없는 경우에만 히어독 적용
-	if (heredoc_fd != -1 && !has_input_redirection)
-	{
-		dup2(heredoc_fd, STDIN_FILENO);
+	// heredoc_fd는 더 이상 필요 없음 - setup_redirections에서 리다이렉션 처리
+	if (heredoc_fd != -1)
 		close(heredoc_fd);
-	}
-	else if (heredoc_fd != -1)
-	{
-		// 입력 리다이렉션이 있으면 히어독 FD는 더 이상 필요 없음
-		close(heredoc_fd);
-	}
-
+		
+	// 모든 리다이렉션 처리 (히어독 및 일반 리다이렉션 포함)
 	if (cmd->redirs && setup_redirections(shell, cmd->redirs) != 0)
 	{
 		dup2(original_stdout, STDOUT_FILENO);
 		close(original_stdout);
 		free_exit(shell, 1);
 	}
+
+	// 백업 파일 디스크립터 닫기
 	close(original_stdout);
 }
 
@@ -114,3 +96,4 @@ void	execute_command_in_child(t_shell *shell, t_command *cmd)
 	printf("minishell: %s: %s\n", cmd->args[0], strerror(errno));
 	free_exit(shell, 127);
 }
+
