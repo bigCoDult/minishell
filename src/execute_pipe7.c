@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:50:52 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 10:56:51 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 04:02:57 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,6 @@ static void	handle_pipe_node(t_shell *shell, t_ast_node *node)
 static void	handle_command_node(t_shell *shell, t_ast_node *node)
 {
 	int	ret;
-
-	setup_right_command_io(shell, node->cmd);
 	
 	// 명령어가 없는 경우 처리
 	if (!node->cmd->args || !node->cmd->args[0])
@@ -65,12 +63,31 @@ static void	handle_command_node(t_shell *shell, t_ast_node *node)
 
 void	execute_right_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 {
-	if (setup_pipe_stdin(pipefd))
-		free_exit(shell, 1);
+	int	redir_status = 0;
+	
 	if (node->right->type == AST_PIPE)
+	{
+		// 파이프 설정 먼저
+		if (setup_pipe_stdin(pipefd))
+			free_exit(shell, 1);
 		handle_pipe_node(shell, node->right);
+	}
 	else if (node->right->type == AST_COMMAND)
+	{
+		// 먼저 리다이렉션 설정 - 파일만 생성/열고 오류 여부는 체크
+		if (node->right->cmd->redirs)
+			redir_status = setup_redirections(shell, node->right->cmd->redirs);
+		
+		// 그 다음 파이프 설정
+		if (setup_pipe_stdin(pipefd))
+			free_exit(shell, 1);
+		
+		// 입력 리다이렉션 오류가 있으면 명령어 실행하지 않음
+		if (redir_status != 0)
+			free_exit(shell, 1);
+		
 		handle_command_node(shell, node->right);
+	}
 	write(STDERR_FILENO, "minishell: right command error\n", 31);
 	free_exit(shell, 1);
 }

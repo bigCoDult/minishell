@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:36:06 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 03:51:59 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 04:02:57 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,7 @@ int	open_output_file(t_redirection *redir)
 
 int	setup_redirections(t_shell *shell, t_redirection *redirs)
 {
-	int input_error;
-	int output_error;
+	int	has_input_error;
 	
 	if (!redirs)
 		return (0);
@@ -70,15 +69,13 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		return (1);
 	}
 	
-	// 히어독 및 입력 리다이렉션을 함께 처리
-	input_error = handle_input_redirections(shell, redirs);
-	
-	// 출력 리다이렉션 처리
-	output_error = handle_output_redirections(shell, redirs);
-	
-	// 둘 다 오류가 있는 경우에만 오류 반환
-	if (input_error && output_error)
+	// 먼저 출력 리다이렉션 처리 (파일 생성)
+	if (handle_output_redirections(shell, redirs))
 		return (1);
-		
-	return (0);
+	
+	// 히어독 및 입력 리다이렉션을 처리
+	has_input_error = handle_input_redirections(shell, redirs);
+	
+	// 입력 리다이렉션 오류가 있으면 오류 반환
+	return (has_input_error);
 }

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 03:48:24 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 04:02:15 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,17 @@
 int	execute_simple_command(t_shell *shell, t_command *cmd)
 {
 	int	ret;
+	int redir_status;
 
 	if (!cmd || !cmd->args || !cmd->args[0])
 		return (0);
 	if (is_builtin(cmd->args[0]))
 	{
-		if (setup_redirections(shell, cmd->redirs) != 0)
-			return (1);
+		// 리다이렉션 설정
+		redir_status = setup_redirections(shell, cmd->redirs);
+		if (redir_status != 0)
+			return (1); // 입력 리다이렉션 오류로 명령어 실행 중단
+			
 		ret = execute_builtin(shell, cmd);
 		restore_io(shell);
 		if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)

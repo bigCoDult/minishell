@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:47:31 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 03:51:59 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 04:00:18 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ static int	process_single_redirection(t_redirection *current, int *last_fd)
 		if (*last_fd == -1)
 		{
 			printf("minishell: %s: Permission denied\n", current->filename);
-			return (0);
+			return (1);
 		}
 	}
 	return (0);
@@ -47,16 +47,18 @@ int	handle_output_redirections(t_shell *shell, t_redirection *redirs)
 {
 	t_redirection	*current;
 	int				last_fd;
-	int				error_occurred;
 
 	last_fd = -1;
-	error_occurred = 0;
 	current = redirs;
 	while (current)
 	{
 		if (process_single_redirection(current, &last_fd))
 		{
-			error_occurred = 1;
+			// 오류 발생 시 즉시 복원하고 오류 반환
+			if (last_fd != -1)
+				close(last_fd);
+			restore_io(shell);
+			return (1);
 		}
 		current = current->next;
 	}
@@ -65,6 +67,5 @@ int	handle_output_redirections(t_shell *shell, t_redirection *redirs)
 	if (last_fd != -1)
 		return (setup_final_output(last_fd, shell));
 	
-	// 에러가 있었으면 에러 코드 반환
-	return (error_occurred);
+	return (0);
 }
