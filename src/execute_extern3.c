@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:33:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 03:38:28 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 04:07:30 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ static void	setup_io_redirections(t_shell *shell,
 	t_command *cmd, int heredoc_fd)
 {
 	int				original_stdout;
+	int				redir_status;
 
 	// 표준 출력 백업
 	original_stdout = dup(STDOUT_FILENO);
@@ -73,11 +74,16 @@ static void	setup_io_redirections(t_shell *shell,
 		close(heredoc_fd);
 		
 	// 모든 리다이렉션 처리 (히어독 및 일반 리다이렉션 포함)
-	if (cmd->redirs && setup_redirections(shell, cmd->redirs) != 0)
+	if (cmd->redirs)
 	{
-		dup2(original_stdout, STDOUT_FILENO);
-		close(original_stdout);
-		free_exit(shell, 1);
+		redir_status = setup_redirections(shell, cmd->redirs);
+		if (redir_status != 0)
+		{
+			dup2(original_stdout, STDOUT_FILENO);
+			close(original_stdout);
+			// 입력 리다이렉션 오류로 명령어를 실행하지 않고 종료
+			free_exit(shell, 1);
+		}
 	}
 
 	// 백업 파일 디스크립터 닫기
