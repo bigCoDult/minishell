@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 07:14:33 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 07:22:01 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 07:25:05 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,34 +92,4 @@ void	print_left_error(t_shell *shell, t_ast_node *node)
 		free_exit(shell, 1);
 	}
 	waitpid(check_redir_result, NULL, 0);
-}
-
-int	execute_pipe(t_shell *shell, t_ast_node *node)
-{
-	int	left_failed;
-	int	stderr_backup;
-	int	result;
-
-	if (!node || !node->left || !node->right)
-		return (1);
-	stderr_backup = dup(STDERR_FILENO);
-	if (stderr_backup == -1)
-	{
-		perror("dup");
-		return (1);
-	}
-	left_failed = 0;
-	if (node->left->type == AST_COMMAND && node->left->cmd->redirs)
-		left_failed = check_left_redirections(shell, node);
-	if (node->right->type == AST_COMMAND && node->right->cmd->redirs)
-		check_right_redirections(shell, node);
-	if (left_failed)
-	{
-		print_left_error(shell, node);
-		close(stderr_backup);
-		return (1);
-	}
-	result = setup_pipe_and_execute(shell, node, stderr_backup);
-	close(stderr_backup);
-	return (result);
 }
