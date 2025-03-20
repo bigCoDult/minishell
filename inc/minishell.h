@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 10:48:36 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 05:55:03 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -435,5 +435,10 @@ void			handle_permission_denied(va_list args);
 void			handle_command_not_found(va_list args);
 void			handle_export_error(va_list args);
 void			handle_custom_error(va_list args);
+
+void			exit_setup(t_shell *shell);
+void			exit_loop(t_shell *shell);
+
+t_token			*handle_redir_token(t_shell *shell, char **input, t_token *token);
 
 #endif
