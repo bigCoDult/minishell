@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 04:32:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 06:34:35 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 04:25:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,17 +77,64 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 	int		pipefd[2];
 	pid_t	pid1;
 	pid_t	pid2;
+	int		status1;
+	int		check_redir_result;
 
 	if (!node || !node->left || !node->right)
 		return (1);
+		
+	// 왼쪽 명령어의 리다이렉션만 먼저 확인
+	if (node->left->type == AST_COMMAND && node->left->cmd->redirs)
+	{
+		// 자식 프로세스를 생성하여 리다이렉션만 테스트
+		check_redir_result = fork();
+		if (check_redir_result == 0)
+		{
+			// 자식 프로세스에서는 리다이렉션 설정만 테스트
+			if (setup_redirections(shell, node->left->cmd->redirs) != 0)
+			{
+				// 리다이렉션 설정 실패 시 종료
+				free_exit(shell, 1);
+			}
+			// 리다이렉션 성공 시 정상 종료
+			free_exit(shell, 0);
+		}
+		
+		// 부모 프로세스에서는 자식의 결과를 기다림
+		waitpid(check_redir_result, &status1, 0);
+		
+		// 리다이렉션 오류가 있으면 파이프 실행 중단
+		if (WIFEXITED(status1) && WEXITSTATUS(status1) != 0)
+		{
+			// 실제 명령을 실행하여 오류 메시지만 출력
+			check_redir_result = fork();
+			if (check_redir_result == 0)
+			{
+				setup_redirections(shell, node->left->cmd->redirs);
+				free_exit(shell, 1);
+			}
+			waitpid(check_redir_result, NULL, 0);
+			return (1);
+		}
+	}
+	
+	// 파이프 생성 및 명령 실행
 	if (setup_pipe_in(pipefd))
 		return (1);
 	pid1 = execute_left_child(shell, node, pipefd);
 	if (pid1 == -1)
+	{
+		close(pipefd[0]);
+		close(pipefd[1]);
 		return (1);
+	}
 	pid2 = execute_right_child(shell, node, pipefd, pid1);
 	if (pid2 == -1)
+	{
+		close(pipefd[0]);
+		close(pipefd[1]);
 		return (1);
+	}
 	close(pipefd[0]);
 	close(pipefd[1]);
 	return (wait_for_children(pid1, pid2));
