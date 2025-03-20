@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redir_utils2.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:36:06 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 14:28:42 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 15:03:24 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,9 @@ int	open_output_file(t_redirection *redir)
 
 int	setup_redirections(t_shell *shell, t_redirection *redirs)
 {
-	int	has_input_error;
+	int				has_input_error;
+	int				file_fd;
+	t_redirection	*current;
 
 	if (!redirs)
 		return (0);
@@ -68,8 +70,40 @@ int	setup_redirections(t_shell *shell, t_redirection *redirs)
 		cleanup_backup_fds(shell);
 		return (1);
 	}
+	if (shell->status.in_pipe == 0)
+	{
+		current = redirs;
+		while (current)
+		{
+			if (current->type == REDIR_IN)
+			{
+				file_fd = open(current->filename, O_RDONLY);
+				if (file_fd == -1)
+				{
+					write(STDERR_FILENO, "minishell: ", 11);
+					write(STDERR_FILENO,
+						current->filename, ft_strlen(current->filename));
+					write(STDERR_FILENO, ": No such file or directory\n", 28);
+					shell->status.exit_code = 1;
+					cleanup_backup_fds(shell);
+					return (1);
+				}
+				close(file_fd);
+			}
+			current = current->next;
+		}
+	}
 	if (handle_output_redirections(shell, redirs))
+	{
+		cleanup_backup_fds(shell);
 		return (1);
+	}
 	has_input_error = handle_input_redirections(shell, redirs);
-	return (has_input_error);
+	if (has_input_error)
+	{
+		restore_io(shell);
+		cleanup_backup_fds(shell);
+		return (1);
+	}
+	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 07:20:56 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 15:00:22 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,8 @@ typedef struct s_redirection
 typedef struct s_status
 {
 	int	exit_code;
+	int	right_input_error;
+	int	in_pipe;
 }	t_status;
 
 typedef enum e_ast_type
@@ -271,6 +273,7 @@ int				process_heredocs(t_shell *shell, t_redirection *redirs);
 int				process_redirection(t_shell *shell, t_redirection *redirs);
 int				execute_ast(t_shell *shell, t_ast_node *node);
 int				execute_commands(t_shell *shell);
+int				execute_commands_main(t_shell *shell);
 
 char			*ft_strchr(const char *str, int c);
 int				ft_strlen(const char *str);

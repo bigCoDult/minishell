@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 07:24:56 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 07:28:56 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 15:01:04 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 
 	if (check_nodes_validity(node))
 		return (1);
+	shell->status.in_pipe = 1;
 	stderr_backup = setup_stderr_backup();
 	if (stderr_backup == -1)
 		return (1);
@@ -65,5 +66,6 @@ int	execute_pipe(t_shell *shell, t_ast_node *node)
 		return (1);
 	result = setup_pipe_and_execute(shell, node, stderr_backup);
 	close(stderr_backup);
+	shell->status.in_pipe = 0;
 	return (result);
 }

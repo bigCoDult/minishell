@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:08:20 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 06:12:24 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 15:00:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,4 +58,15 @@ int	process_redirection(t_shell *shell, t_redirection *redirs)
 	if (setup_redirections(shell, redirs) != 0)
 		return (1);
 	return (0);
+}
+
+int	execute_commands(t_shell *shell)
+{
+	int	result;
+
+	result = 0;
+	shell->status.in_pipe = 0;
+	if (shell->ast_root)
+		result = execute_ast(shell, shell->ast_root);
+	return (result);
 }

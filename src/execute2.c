@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:17:00 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 06:14:17 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 15:00:39 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ static int	execute_and_cleanup(t_shell *shell)
 	return (result);
 }
 
-int	execute_commands(t_shell *shell)
+int	execute_commands_main(t_shell *shell)
 {
 	int	stdout_backup;
 	int	result;
@@ -64,6 +64,7 @@ int	execute_commands(t_shell *shell)
 	exit_setup(shell);
 	if (!shell->ast_root)
 		return (0);
+	shell->status.in_pipe = 0;
 	exit_setup(shell);
 	if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
 		restore_io(shell);
