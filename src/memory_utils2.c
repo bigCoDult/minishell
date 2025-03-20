@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   memory_utils2.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 04:34:29 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/19 10:18:38 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 14:29:32 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,9 @@ void	*shell_malloc(t_shell *shell, size_t size)
 
 	if (!shell || size == 0)
 		return (NULL);
-		
 	ptr = malloc(size);
 	if (!ptr)
 		return (NULL);
-		
 	new_node = malloc(sizeof(t_memory));
 	if (!new_node)
 	{
@@ -60,5 +58,4 @@ void	shell_free(t_shell *shell, void *ptr)
 		prev = current;
 		current = current->next;
 	}
-	// 이미 추적 목록에 없는 메모리일 수 있음 - 직접 해제하지 않음
 }

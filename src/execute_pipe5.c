@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe5.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:28:37 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 04:25:50 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 14:32:23 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,10 +58,8 @@ void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 	int	ret;
 
 	close(pipefd[0]);
-	
 	if (node->left->type == AST_COMMAND)
 	{
-		// 파이프 설정
 		if (dup2(pipefd[1], STDOUT_FILENO) == -1)
 		{
 			perror("dup2 error in left command");
@@ -69,26 +67,16 @@ void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 			free_exit(shell, 1);
 		}
 		close(pipefd[1]);
-		
-		// 리다이렉션 설정
 		if (setup_redirections(shell, node->left->cmd->redirs) != 0)
-		{
-			// 리다이렉션 실패 시 파이프는 닫고 종료
 			free_exit(shell, 1);
-		}
-		
-		if (node->left->cmd->args && node->left->cmd->args[0] && is_builtin(node->left->cmd->args[0]))
+		if (node->left->cmd->args
+			&& node->left->cmd->args[0] && is_builtin(node->left->cmd->args[0]))
 		{
 			ret = execute_builtin(shell, node->left->cmd);
 			free_exit(shell, ret);
 		}
 		else if (node->left->cmd->args && node->left->cmd->args[0])
-		{
-			// 명령어가 존재하지만 빌트인이 아닌 경우
-			// 명령어 존재 여부 검증은 execute_ast에서 이미 수행했으므로,
-			// 여기서는 에러 메시지 출력 없이 바로 실행 시도
 			execute_external_command(shell, node->left->cmd);
-		}
 		else
 			free_exit(shell, 0);
 	}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redir_utils4.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:47:31 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 04:00:18 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 14:27:22 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ int	handle_output_redirections(t_shell *shell, t_redirection *redirs)
 	{
 		if (process_single_redirection(current, &last_fd))
 		{
-			// 오류 발생 시 즉시 복원하고 오류 반환
 			if (last_fd != -1)
 				close(last_fd);
 			restore_io(shell);
@@ -62,10 +61,7 @@ int	handle_output_redirections(t_shell *shell, t_redirection *redirs)
 		}
 		current = current->next;
 	}
-	
-	// 최종적으로 파일 디스크립터가 설정되었으면 설정
 	if (last_fd != -1)
 		return (setup_final_output(last_fd, shell));
-	
 	return (0);
 }
