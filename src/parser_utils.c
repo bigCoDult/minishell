@@ -3,25 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   parser_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 05:08:31 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 14:29:18 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 06:33:58 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	validate_tokens(t_shell *shell)
+static int	handle_error_in_tokens(t_shell *shell, t_token *last_token)
 {
-	t_token	*current;
-	t_token	*last_token;
-
-	if (!shell->tokens)
-		return (0);
-	last_token = shell->tokens;
-	while (last_token->next)
-		last_token = last_token->next;
 	if (last_token->type == TOKEN_PIPE)
 	{
 		write(STDERR_FILENO,
@@ -36,18 +28,40 @@ int	validate_tokens(t_shell *shell)
 		shell->status.exit_code = 2;
 		return (1);
 	}
+	return (0);
+}
+
+static int	handle_error_in_tokens_2(t_shell *shell, t_token *current)
+{
+	if (current->next->type != TOKEN_WORD)
+	{
+		printf("minishell: syntax error near unexpected token `%s'\n",
+			current->next->value);
+		shell->status.exit_code = 2;
+		return (1);
+	}
+	return (0);
+}
+
+int	validate_tokens(t_shell *shell)
+{
+	t_token	*current;
+	t_token	*last_token;
+
+	if (!shell->tokens)
+		return (0);
+	last_token = shell->tokens;
+	while (last_token->next)
+		last_token = last_token->next;
+	if (handle_error_in_tokens(shell, last_token))
+		return (1);
 	current = shell->tokens;
 	while (current && current->next)
 	{
 		if (current->type == TOKEN_REDIR)
 		{
-			if (current->next->type != TOKEN_WORD)
-			{
-				printf("minishell: syntax error near unexpected token `%s'\n",
-					current->next->value);
-				shell->status.exit_code = 2;
+			if (handle_error_in_tokens_2(shell, current))
 				return (1);
-			}
 		}
 		current = current->next;
 	}

@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 06:11:09 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 07:20:56 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -432,5 +432,23 @@ int				handle_output_redirections(t_shell *shell,
 
 void			exit_setup(t_shell *shell);
 void			exit_loop(t_shell *shell);
+
+int				process_single_input(t_redirection *current,
+					int *last_fd, t_shell *shell);
+
+int				setup_pipe_in(int pipefd[2]);
+pid_t			execute_left_child(t_shell *shell,
+					t_ast_node *node, int pipefd[2]);
+pid_t			execute_right_child(t_shell *shell, t_ast_node *node,
+					int pipefd[2], pid_t pid1);
+int				wait_for_children(pid_t pid1, pid_t pid2);
+
+int				redirect_to_dev_null(void);
+int				check_left_redirections(t_shell *shell, t_ast_node *node);
+void			check_input_file(t_redirection *redir);
+void			check_right_redirections(t_shell *shell, t_ast_node *node);
+void			print_left_error(t_shell *shell, t_ast_node *node);
+int				setup_pipe_and_execute(t_shell *shell, t_ast_node *node,
+					int stderr_backup);
 
 #endif

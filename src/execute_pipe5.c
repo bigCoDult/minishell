@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_pipe5.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 06:28:37 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 14:32:23 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 06:24:15 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,16 @@ void	setup_right_command_io(t_shell *shell, t_command *cmd)
 		free_exit(shell, 1);
 }
 
+static void	handle_error_in_left(t_shell *shell, int pipefd[2])
+{
+	if (dup2(pipefd[1], STDOUT_FILENO) == -1)
+	{
+		perror("dup2 error in left command");
+		close(pipefd[1]);
+		free_exit(shell, 1);
+	}
+}
+
 void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 {
 	int	ret;
@@ -60,12 +70,7 @@ void	execute_left_command(t_shell *shell, t_ast_node *node, int pipefd[2])
 	close(pipefd[0]);
 	if (node->left->type == AST_COMMAND)
 	{
-		if (dup2(pipefd[1], STDOUT_FILENO) == -1)
-		{
-			perror("dup2 error in left command");
-			close(pipefd[1]);
-			free_exit(shell, 1);
-		}
+		handle_error_in_left(shell, pipefd);
 		close(pipefd[1]);
 		if (setup_redirections(shell, node->left->cmd->redirs) != 0)
 			free_exit(shell, 1);
