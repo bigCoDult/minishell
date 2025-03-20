@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redir_utils5.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 06:44:08 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 06:54:59 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 17:57:33 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ int	process_single_input(t_redirection *current,
 			write(STDERR_FILENO,
 				current->filename, ft_strlen(current->filename));
 			write(STDERR_FILENO, ": No such file or directory\n", 28);
+			shell->status.exit_code = 1;
 			return (1);
 		}
 	}
