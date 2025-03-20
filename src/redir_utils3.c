@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:46:17 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 03:38:28 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 03:51:59 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static int	process_single_input(t_redirection *current, int *last_fd, t_shell *s
 		{
 			printf(
 				"minishell: %s: No such file or directory\n", current->filename);
-			return (1);
+			return (0);
 		}
 	}
 	else if (current->type == REDIR_HEREDOC)
@@ -44,7 +44,7 @@ static int	process_single_input(t_redirection *current, int *last_fd, t_shell *s
 				if (*last_fd == -1)
 				{
 					printf("minishell: Failed to open heredoc file\n");
-					return (1);
+					return (0);
 				}
 				return (0);
 			}
@@ -53,7 +53,7 @@ static int	process_single_input(t_redirection *current, int *last_fd, t_shell *s
 		
 		// 히어독 엔트리를 찾지 못한 경우
 		printf("minishell: Heredoc not found for %s\n", current->filename);
-		return (1);
+		return (0);
 	}
 	return (0);
 }
@@ -77,8 +77,10 @@ int	handle_input_redirections(t_shell *shell, t_redirection *redirs)
 {
 	t_redirection	*current;
 	int				last_fd;
+	int				error_occurred;
 
 	last_fd = -1;
+	error_occurred = 0;
 	current = redirs;
 	while (current)
 	{
@@ -87,11 +89,16 @@ int	handle_input_redirections(t_shell *shell, t_redirection *redirs)
 		{
 			if (process_single_input(current, &last_fd, shell))
 			{
-				restore_io(shell);
-				return (1);
+				error_occurred = 1;
 			}
 		}
 		current = current->next;
 	}
-	return (setup_final_input(last_fd, shell));
+	
+	// 최종적으로 파일 디스크립터가 설정되었으면 설정
+	if (last_fd != -1)
+		return (setup_final_input(last_fd, shell));
+	
+	// 에러가 있었으면 에러 코드 반환
+	return (error_occurred);
 }
