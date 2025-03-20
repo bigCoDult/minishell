@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute2.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:17:00 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 14:34:29 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 06:14:17 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,25 +61,13 @@ int	execute_commands(t_shell *shell)
 	int	stdout_backup;
 	int	result;
 
-	if (g_signal == 130 || g_signal == 131)
-	{
-		shell->status.exit_code = g_signal;
-		g_signal = 0;
-	}
+	exit_setup(shell);
 	if (!shell->ast_root)
 		return (0);
-	if (g_signal == 130 || g_signal == 131)
-	{
-		shell->status.exit_code = g_signal;
-		g_signal = 0;
-	}
+	exit_setup(shell);
 	if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
 		restore_io(shell);
-	if (g_signal == 130 || g_signal == 131)
-	{
-		shell->status.exit_code = g_signal;
-		g_signal = 0;
-	}
+	exit_setup(shell);
 	if (setup_null_output(&stdout_backup))
 		return (1);
 	if (g_signal == 130 || g_signal == 131)
@@ -91,16 +79,8 @@ int	execute_commands(t_shell *shell)
 	}
 	if (processing_heredocs(shell, stdout_backup))
 		return (1);
-	if (g_signal == 130 || g_signal == 131)
-	{
-		shell->status.exit_code = g_signal;
-		g_signal = 0;
-	}
+	exit_setup(shell);
 	result = execute_and_cleanup(shell);
-	if (g_signal == 130 || g_signal == 131)
-	{
-		shell->status.exit_code = g_signal;
-		g_signal = 0;
-	}
+	exit_setup(shell);
 	return (result);
 }
