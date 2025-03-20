@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer2.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/06 06:05:33 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/13 02:51:34 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 18:03:17 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ static int	handle_first_pipe_token(t_shell *shell)
 {
 	write(STDERR_FILENO,
 		"minishell: syntax error near unexpected token '|'\n", 51);
-	shell->status.exit_code = 2;
+	shell->status.exit_code = 1;
 	return (1);
 }
 
