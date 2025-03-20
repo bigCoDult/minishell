@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:05 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 14:24:08 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 05:51:00 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,31 +49,15 @@ static void	minishell_loop(t_shell *shell)
 {
 	while (1)
 	{
-		if (g_signal == 130 || g_signal == 131)
-		{
-			shell->status.exit_code = g_signal;
-			g_signal = 0;
-		}
+		exit_setup(shell);
 		if (shell->heredoc.original_stdin != -1 || shell->original_stdout != -1)
 			restore_io(shell);
-		if (g_signal == 130 || g_signal == 131)
-		{
-			shell->status.exit_code = g_signal;
-			g_signal = 0;
-		}
+		exit_setup(shell);
 		shell->input_line = readline("MINISHELL$> ");
-		if (g_signal == 130 || g_signal == 131)
-		{
-			shell->status.exit_code = g_signal;
-			g_signal = 0;
-		}
+		exit_setup(shell);
 		if (!shell->input_line)
 		{
-			if (g_signal == 130 || g_signal == 131)
-			{
-				shell->status.exit_code = g_signal;
-				g_signal = 0;
-			}
+			exit_setup(shell);
 			break ;
 		}
 		if (shell->input_line[0] != '\0')
@@ -85,13 +69,7 @@ static void	minishell_loop(t_shell *shell)
 				free_command_memory(shell);
 			}
 		}
-		free(shell->input_line);
-		shell->input_line = NULL;
-		if (g_signal == 130 || g_signal == 131)
-		{
-			shell->status.exit_code = g_signal;
-			g_signal = 0;
-		}
+		exit_loop(shell);
 	}
 }
 
