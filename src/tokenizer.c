@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 04:07:22 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/10 02:16:33 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 20:28:57 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,9 @@ int	handle_word_token(t_shell *shell, char **input)
 
 char	*skip_spaces(char *input)
 {
-	while (*input && ft_isspace(*input))
+	while (*input
+		&& (ft_isspace(*input)
+			|| *input == '(' || *input == ')' || *input == ';'))
 		input++;
 	return (input);
 }

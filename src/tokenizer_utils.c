@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/04 06:04:30 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 20:20:28 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/20 20:31:11 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ int	handle_quote_character(char c, t_token_state *state, int *dollar_sign)
 int	is_word_delimiter(char c, t_token_state state)
 {
 	if (!state.in_single_quote && !state.in_double_quote
-		&& (ft_isspace(c) || c == '|' || c == '<' || c == '>'))
+		&& (ft_isspace(c) || c == '|'
+			|| c == '<' || c == '>' || c == ';' || c == ')' || c == '('))
 		return (1);
 	return (0);
 }
