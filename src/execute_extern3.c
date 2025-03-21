@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_extern3.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 07:33:39 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 14:33:45 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/21 01:11:29 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,11 @@ void	execute_command_in_child(t_shell *shell, t_command *cmd)
 	path = find_executable_path(shell, cmd, heredoc_fd);
 	setup_io_redirections(shell, cmd, heredoc_fd);
 	execve(path, cmd->args, get_env_array(shell));
-	printf("minishell: %s: %s\n", cmd->args[0], strerror(errno));
-	free_exit(shell, 127);
+	if (errno == EACCES)
+		free_exit(shell, 126);
+	else
+	{
+		printf("minishell: %s: %s\n", cmd->args[0], strerror(errno));
+		free_exit(shell, 127);
+	}
 }

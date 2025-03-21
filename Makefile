@@ -73,6 +73,7 @@ SRC = $(SRC_DIR)/env_array.c \
 		$(SRC_DIR)/redir_utils3.c \
 		$(SRC_DIR)/redir_utils4.c \
 		$(SRC_DIR)/redir_utils5.c \
+		$(SRC_DIR)/redir_utils6.c \
 		$(SRC_DIR)/restore.c \
 		$(SRC_DIR)/signal.c \
 		$(SRC_DIR)/signal2.c \
