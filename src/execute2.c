@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 08:17:00 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 15:00:39 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/21 00:07:50 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,9 +73,7 @@ int	execute_commands_main(t_shell *shell)
 		return (1);
 	if (g_signal == 130 || g_signal == 131)
 	{
-		shell->status.exit_code = g_signal;
-		g_signal = 0;
-		close(stdout_backup);
+		exit_setup2(shell, stdout_backup);
 		return (0);
 	}
 	if (processing_heredocs(shell, stdout_backup))

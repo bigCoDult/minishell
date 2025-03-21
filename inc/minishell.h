@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/03 23:21:40 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 15:00:22 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/21 00:08:00 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -453,5 +453,7 @@ void			check_right_redirections(t_shell *shell, t_ast_node *node);
 void			print_left_error(t_shell *shell, t_ast_node *node);
 int				setup_pipe_and_execute(t_shell *shell, t_ast_node *node,
 					int stderr_backup);
+
+void			exit_setup2(t_shell *shell, int stdout_backup);
 
 #endif

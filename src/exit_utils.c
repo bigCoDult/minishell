@@ -6,7 +6,7 @@
 /*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 05:47:23 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 05:52:52 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/21 00:07:39 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,4 +26,11 @@ void	exit_loop(t_shell *shell)
 	free(shell->input_line);
 	shell->input_line = NULL;
 	exit_setup(shell);
+}
+
+void	exit_setup2(t_shell *shell, int stdout_backup)
+{
+	shell->status.exit_code = g_signal;
+	g_signal = 0;
+	close(stdout_backup);
 }
