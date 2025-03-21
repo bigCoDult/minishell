@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer_redir2.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yutsong <yutsong@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yutsong <yutsong@student.42gyeongsan.kr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/20 05:53:44 by yutsong           #+#    #+#             */
-/*   Updated: 2025/03/20 21:25:36 by yutsong          ###   ########.fr       */
+/*   Updated: 2025/03/21 00:47:08 by yutsong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ static int	check_input_validity(t_shell *shell, char **input, t_token *token)
 				**input);
 		else
 			printf(
-				"minishell: syntax error near unexpected token `%c'\n", '\n');
+				"minishell: syntax error near unexpected token `newline'\n");
 		shell->status.exit_code = 2;
 		shell_free(shell, token);
 		return (1);
